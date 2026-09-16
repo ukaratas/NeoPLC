@@ -220,6 +220,29 @@ Gereksinimler:
 - Fan arıza tespiti (tacho girişi) — fan durursa yükler kısıtlanmalı
 - **Fan'ın kendisi 24V/VBUS_RAW'dan beslenmeli**, +5V_SYS'ten değil
 
+### 3.6 Mekanik paradigma: kutu-içinde-kutu → gerçek blade
+
+Draft'ta her node kendi plastik muhafazasında, host'un önüne takılan kapalı bir
+kutu. Yani "kutuya kutular bağlanıyor".
+
+**Bu, içinde kızakları olan gerçek bir mini blade şasisine çevrildi** · D-60.
+
+Dört gerekçe — ayrıntı [04 §1](04-backplane-mekanik.md#1-mekanik-mimari-blade-mi-kutu-içinde-kutu-mu):
+
+| # | Gerekçe |
+|---|---------|
+| 1 | **Termal** — plastik muhafaza her node'un etrafına yalıtım katmanı koyuyor (~0.2 W/mK). Blade'de PCB doğrudan hava kanalında. §3.5'teki termal problemi asıl çözen şey bu |
+| 2 | **Maliyet** — muhafaza başına $2–5, 8 node'da $16–40. K1'in kaçınmamızı söylediği türden |
+| 3 | **Titreşim (K5)** — kızak PCB'yi 110 mm boyunca iki kenarından destekliyor; kutu içinde 4 vidayla tutulan PCB'nin rezonans frekansı çok daha düşük |
+| 4 | **Hizalama** — kart kenarı konnektörünün ihtiyacı olan giriş açısı ve yükseklik garantisini kızak veriyor |
+
+Draft'ın **kilit mandalı, kızak rayı ve önden tak-kilitle** yaklaşımı aynen
+korunuyor — sadece node'un etrafındaki kutu kalkıyor.
+
+**Fan ihtiyacı da düşüyor:** blade'de ısı doğrudan havaya geçtiği için gereken
+debi 1.6 CFM'e iniyor (40 mm fanın %30 devri, ~0.2 W).
+[04 §6.2](04-backplane-mekanik.md#62-gereken-hava-debisi-hesap)
+
 ---
 
 ## 4. Draft'ın doğrudan benimsenen kalemleri
@@ -228,7 +251,7 @@ Bunlar tartışmasız — draft zaten doğru çözmüş:
 
 | Kalem | Not |
 |-------|-----|
-| **3 kademeli pin stagger** | GND uzun → Power orta → Signal kısa. [04 §3.1](04-backplane-mekanik.md#31-mate-sırasının-mantığı) ile birebir uyumlu. Draft'ta PRESENT/DETECT için 4. kademe yok — eklenmesi öneriliyor |
+| **3 kademeli pin stagger** | GND uzun → Power orta → Signal kısa. [04 §5.1](04-backplane-mekanik.md#51-mate-sırasının-mantığı) ile birebir uyumlu. Draft'ta PRESENT/DETECT için 4. kademe yok — eklenmesi öneriliyor |
 | **Mekanik kilit mandalı** | K5 (titreşim) için zorunlu, draft'ta zaten var |
 | **Kızak rayı + yan kılavuz** | Önden tak-kilitle-kullan; servis gereksinimini karşılıyor |
 | **DETECT / FAULT / RST / BST hatları** | Mimarideki PRESENT# / FAULT# / MOD_RST# / BOOT# ile birebir örtüşüyor — bağımsız olarak aynı sonuca varılmış |
@@ -241,7 +264,7 @@ Bunlar tartışmasız — draft zaten doğru çözmüş:
 
 | Doküman | Gerekçe |
 |---------|---------|
-| [04](04-backplane-mekanik.md) | Slot adımı 22.5 → 17.5 mm; node ölçüleri; kilit mandalı |
+| [04](04-backplane-mekanik.md) | ✅ **Baştan yazıldı** — blade mimarisi, 17.5 mm, kızak sistemi, hava akışı |
 | [09](09-node-aileleri.md) | Klemens/kanal sayısı 17.5 mm'ye göre; iki sıra klemens |
 | [11](11-cikis-node-topolojileri.md) | **Termal hesap düzeltilmeli** (§3.5); kanal sayıları revize |
 | [10](10-enerji-butcesi.md) | Fan enerji kalemi eklenmeli (D-57) |

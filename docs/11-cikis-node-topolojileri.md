@@ -134,7 +134,7 @@ Bu bir tercih değil, fiziksel zorunluluk:
 
 | Gerekçe | Detay |
 |---------|-------|
-| **Creepage / clearance** | 230V AC ile SELV (12–48V) arasında takviyeli izolasyon için ≥5.5 mm creepage. 22.5 mm'lik bir 1U node'da lojik + izolasyon + çok kanal yan yana sığmıyor |
+| **Creepage / clearance** | 230V AC ile SELV (12–48V) arasında takviyeli izolasyon için ≥5.5 mm creepage. **17.5 mm'lik bir 1U node'da** lojik + izolasyon + çok kanal yan yana sığmıyor |
 | **Güvenlik** | Şebeke ve SELV'in aynı kartta bulunması tüm kartı şebeke sınıfına sokuyor |
 | **Klemens** | Farklı akım sınıfı, farklı adım (7.5 / 10 mm), yanlış bağlantıyı önlemek için farklı renk ve kodlama |
 | **Arıza modu** | Şebeke tarafı arızası SELV tarafına geçmemeli |

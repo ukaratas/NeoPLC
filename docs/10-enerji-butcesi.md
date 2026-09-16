@@ -369,7 +369,7 @@ bir mekanik gereksinim.
 | Ağır bileşenlerin yorulması | Elektrolitik kapasitör, indüktör, magjack için ek mekanik destek veya düşük profilli parça tercihi |
 | Klemens gevşemesi | Push-in yaylı klemens tercih edilmeli ([09 §4](09-node-aileleri.md#4-saha-bağlantısı)) — vidalı klemens titreşimde gevşer |
 
-Bu, [04](04-backplane-mekanik.md)'teki mekanik standardı etkiliyor: **node
+Bu, [04 §1](04-backplane-mekanik.md#1-mekanik-mimari-blade-mi-kutu-içinde-kutu-mu)'teki mekanik standardı etkiliyor: **node
 tutma mekanizması pinout kadar bağlayıcı bir standart.**
 
 ---

@@ -203,7 +203,7 @@ bulk eklenecek.
 | **1U** | **200 mA (1.0 W)** | 500 mA |
 | **2U** | **400 mA (2.0 W)** | 500 mA |
 
-2U node tek konnektörden ([04 §4](04-backplane-mekanik.md#4-2u-node-stratejisi))
+2U node tek konnektörden ([04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi))
 400mA çekiyor. 2 adet +5V_SYS kart kenarı kontağı üzerinden 400mA — 2.54mm
 kontak akım kapasitesinin çok altında, sorun yok.
 

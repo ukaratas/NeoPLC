@@ -54,7 +54,7 @@ etkiler. Çekirdek, ilk node'la birlikte donduruluyor.
 | Pasifler, LED, soft-start | ~$0.30 |
 | **Çekirdek toplamı** | **~$1.25** |
 
-Kart kenarı konnektörü **$0** ([04 §2](04-backplane-mekanik.md#2-konnektör-seçimi)) —
+Kart kenarı konnektörü **$0** ([04 §4](04-backplane-mekanik.md#4-konnektör-seçimi)) —
 bu, çekirdek maliyetinin neden bu kadar düşük kalabildiğinin ana sebebi.
 
 ---
@@ -117,26 +117,30 @@ verilecek.
 
 ### ⚪ D-38 — Henüz ele alınmadı
 
-22.5 mm ön yüz genişliğinde kaç kutup sığdığı, kanal sayısını doğrudan
+**17.5 mm** ön yüz genişliğinde kaç kutup sığdığı, kanal sayısını doğrudan
 sınırlıyor. Bu yüzden klemens seçimi bir mekanik karar değil, **kanal sayısı
 kararıdır.**
 
-| Seçenek | Adım | 22.5 mm'de | Not |
+| Seçenek | Adım | 17.5 mm'de | Not |
 |---------|------|-----------|-----|
-| Push-in yaylı klemens | 3.5 mm | ~6 kutup/sıra | Alet gerektirmez, endüstriyel standart |
-| Vidalı klemens | 3.81 / 5.0 mm | ~5 / ~4 kutup/sıra | Yaygın, ucuz |
-| Çıkarılabilir (pluggable) | 3.5 / 3.81 mm | ~6 / ~5 kutup/sıra | Servis kolaylığı, daha pahalı |
+| Push-in yaylı klemens | 3.5 mm | **5 kutup/sıra** | Alet gerektirmez, endüstriyel standart |
+| Vidalı klemens | 3.81 / 5.0 mm | 4 / 3 kutup/sıra | Yaygın, ucuz |
+| Çıkarılabilir (pluggable) | 3.5 / 3.81 mm | 5 / 4 kutup/sıra | Servis kolaylığı, daha pahalı |
 
 > ⚠️ **Titreşim (K5) vidalı klemensi eliyor.** Karavan hareketli bir araç;
 > vidalı klemens titreşim altında gevşer ve gevşeyen bir klemens yüksek akımda
 > ısınma ve yangın riskidir. **Push-in yaylı veya çıkarılabilir yaylı klemens
 > zorunlu.** ([10 §9.3](10-enerji-butcesi.md#93-titreşim))
 
-İki sıra kullanılırsa kutup sayısı ikiye katlanır (~12), ama ön yüz derinliği
-artar.
+**Çözüldü:** Çıkış node'ları 4 kanal olarak kararlaştırıldı (D-52).
 
-**8 kanal + ortak dönüş = 9 kutup** gerektiriyor → iki sıra veya grup ortak
-dönüş gerekli. Bu, D-28 ile birlikte kararlaştırılacak.
+```
+4 çıkış + 1 ortak dönüş = 5 kutup
+5 × 3.5 mm push-in      = 17.5 mm     ✓ tam oturuyor
+```
+
+Tek sıra yeterli — iki sıraya gerek yok. Ayrıntı:
+[11 §5.3](11-cikis-node-topolojileri.md#53-klemens-yerleşimi-kontrolü)
 
 ---
 
@@ -182,9 +186,9 @@ varyanttır**:
 | Kalem | 1U | 2U |
 |-------|----|----|
 | Ortak çekirdek | Aynı | **Aynı** |
-| Backplane konnektörü | 1 adet (sol slot) | **1 adet (sol slot)** — [04 §4](04-backplane-mekanik.md#4-2u-node-stratejisi) |
+| Backplane konnektörü | 1 adet (sol slot) | **1 adet (sol slot)** — [04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi) |
 | +5V_SYS bütçesi | 200 mA | 400 mA |
-| Ön yüz genişliği | 22.5 mm | 45 mm |
+| Ön yüz genişliği | 17.5 mm | 35 mm |
 | Kanal sayısı | Baz | Tipik 2× |
 | Descriptor `form_factor` | 1U | 2U |
 

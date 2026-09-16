@@ -214,7 +214,7 @@ Maliyet: ~$0.20 × 8 = **$1.60** host başına.
 vermiyor ve arıza bildirimi yok. $1.15 fark için üç işlevi birden kaybetmek
 mantıklı değil.
 
-Bu karar [04 §5](04-backplane-mekanik.md#5-hot-plug-değerlendirmesi)'teki
+Bu karar [04 §8](04-backplane-mekanik.md#8-hot-plug-değerlendirmesi)'teki
 hot-plug maliyetini de karşılıyor — load switch zaten gerekliydi.
 
 ---

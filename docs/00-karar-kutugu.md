@@ -11,8 +11,8 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | Durum | Adet |
 |-------|------|
-| 🟢 Kabul edildi | 11 |
-| 🟡 Öneri hazır, onay bekliyor | 38 |
+| 🟢 Kabul edildi | 13 |
+| 🟡 Öneri hazır, onay bekliyor | 43 |
 | 🔴 Dışarıdan bilgi gerekiyor | 1 |
 | ⚪ Henüz ele alınmadı | 3 |
 
@@ -32,6 +32,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | **D-56** | **Terminoloji: Host / Node** — tüm dokümanlarda uygulandı | Kullanıcı onayı |
 | **D-05** | **Host 2 katman** — üç gerekçe de ortadan kalktı | Türetilmiş |
 | **D-58** | **Slot adımı 17.5 mm** (2U = 35 mm) | Çalışma draftı Rev 0.1 |
+| **D-60** | **Gerçek blade mimarisi** — şasi + kızak, kutu-içinde-kutu terk edildi | Kullanıcı |
 
 ---
 
@@ -82,11 +83,16 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-14 | Konnektör tipi | PCB kart kenarı (gold finger), 2.54mm, çift sıra, 26 pin | 🟡 | [04 §2](04-backplane-mekanik.md#2-konnektör-seçimi) |
-| D-15 | 1U mekanik adım | 22.5 mm, 2U = 45 mm | 🟡 | [04 §1](04-backplane-mekanik.md#1-mekanik-standart) |
-| D-16 | 2U mating stratejisi | Sadece sol slot konnektörüne oturur | 🟡 | [04 §4](04-backplane-mekanik.md#4-2u-node-stratejisi) |
-| D-32 | Backplane pinout | 26 pin, 4 kademeli mate sırası | 🟡 | [04 §3](04-backplane-mekanik.md#3-pinout) |
-| D-24 | Hot-plug | Donanım yetenekli tasarla, v1'de garanti verme | 🟡 | [04 §5](04-backplane-mekanik.md#5-hot-plug-değerlendirmesi) |
+| D-14 | Konnektör tipi | PCB kart kenarı (gold finger), 2.54mm, çift sıra, 26 pin | 🟡 | [04 §4](04-backplane-mekanik.md#4-konnektör-seçimi) |
+| **D-60** | **Mekanik paradigma** | **Gerçek blade** — şasi + kızak, çıplak PCB. Kutu-içinde-kutu terk edildi | 🟢 | [04 §1](04-backplane-mekanik.md#1-mekanik-mimari-blade-mi-kutu-içinde-kutu-mu) |
+| **D-61** | **1U bileşen yüksekliği** | **14.4 mm bütçe** — latching röleler ≤12 mm olmalı, doğrulanacak | 🟡 | [04 §2.1](04-backplane-mekanik.md#21-bileşen-yüksekliği-bütçesi-kritik-kısıt) |
+| D-62 | Şasi malzemesi | Prototip: 3D baskı + Al kızak · Seri: **Al ekstrüzyon** (rijitlik + EMI + ısı yolu) | 🟡 | [04 §3.2](04-backplane-mekanik.md#32-şasi-malzemesi) |
+| D-63 | Boş slot kör kapağı | **Zorunlu** — hava akışı kısa devre olmasın | 🟡 | [04 §3.4](04-backplane-mekanik.md#34-boş-slotlar) |
+| D-64 | AC node şebeke bariyeri | Klipsli plastik kapak (tam kutu değil) | 🟡 | [04 §1.1](04-backplane-mekanik.md#11-bladein-bedeli-ve-karşılığı) |
+| D-15 | 1U mekanik adım | **17.5 mm, 2U = 35 mm** (D-58 ile birleşti) | 🟢 | [04 §2](04-backplane-mekanik.md#2-slot-ve-node-ölçüleri) |
+| D-16 | 2U mating stratejisi | Sadece sol slot konnektörüne oturur | 🟡 | [04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi) |
+| D-32 | Backplane pinout | 26 pin, 4 kademeli mate sırası | 🟡 | [04 §5](04-backplane-mekanik.md#5-pinout) |
+| D-24 | Hot-plug | Donanım yetenekli tasarla, v1'de garanti verme | 🟡 | [04 §8](04-backplane-mekanik.md#8-hot-plug-değerlendirmesi) |
 | D-45 | **Titreşim dayanımı** | Node tutucu mandal/vida zorunlu — konnektör tek başına tutmaz | 🟡 | [10 §9.3](10-enerji-butcesi.md#93-titreşim) |
 
 ### Dahili haberleşme
@@ -181,3 +187,8 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | 2026-09-16 | **D-31** | 2A → **1.5A** | Ethernet çıkınca host tepe yükü 380 → 290 mA düştü |
 | 2026-09-16 | **D-05** | 🟡 → 🟢 **2 katman** | D-06, D-47 ve D-31 üç gerekçeyi de ortadan kaldırdı. Brief'in 2 katman tercihine dönüldü |
 | 2026-09-16 | D-29 | 200 → 150 mA/slot, toplam 1.2 A | D-31 ile uyum |
+| 2026-09-16 | **D-60** | Yeni — **gerçek blade mimarisi** | Kutu-içinde-kutu her node'un etrafına plastik yalıtım koyuyordu. Blade'de PCB doğrudan hava kanalında: termal çözülüyor, node başına $2–5 muhafaza maliyeti kalkıyor, kızak PCB'yi titreşime karşı 110 mm boyunca destekliyor |
+| 2026-09-16 | D-15 | 22.5 → 17.5 mm, D-58 ile birleşti | Tek karar olarak izlenecek |
+| 2026-09-16 | D-57 | Fan bütçesi 0.5–1.5 W → **~0.2 W** | Gerçek debi ihtiyacı 1.6 CFM çıktı; blade mimarisi debiyi düşürdü |
+| 2026-09-16 | D-61..D-64 | Yeni — blade mekaniğinin getirdikleri | Bileşen yüksekliği, şasi malzemesi, kör kapak, AC bariyeri |
+| 2026-09-16 | 04 | **Baştan yazıldı** | Blade mimarisi + 17.5 mm + hava akışı bölümü eklendi |

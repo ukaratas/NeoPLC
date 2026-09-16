@@ -91,7 +91,7 @@ USART'ları **donanımsal DE kontrolü** sunuyor, yazılım gecikmesi devre dı�
 ### Karar: yarım dupleks 2 tel
 
 **Ancak pinout'ta tam dupleks için 2 pin rezerve ediliyor**
-([04 §3](04-backplane-mekanik.md#3-pinout), pin 15–16). Pinout geri dönülemez
+([04 §5](04-backplane-mekanik.md#5-pinout), pin 15–16). Pinout geri dönülemez
 olduğu için bu rezervasyon şimdi yapılmalı — maliyeti sıfır, atlanmasının
 maliyeti tüm node ailesi.
 

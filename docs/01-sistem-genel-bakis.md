@@ -101,9 +101,9 @@ yeniden tasarlanır. Bu yüzden ilk şema çizilmeden önce kilitlenmeleri gerek
 
 | Kalem | Doküman | Neden geri dönülemez |
 |-------|---------|----------------------|
-| Mekanik slot yapısı, 1U/2U | [04](04-backplane-mekanik.md) | Kutu, backplane ve tüm node PCB'leri bağlı |
-| Backplane pinout | [04](04-backplane-mekanik.md) | Üretilmiş her node uyumsuz hale gelir |
-| Konnektör ve mate sırası | [04](04-backplane-mekanik.md) | Hot-plug yeteneği sonradan eklenemez |
+| Mekanik slot yapısı, 1U/2U | [04 §2](04-backplane-mekanik.md#2-slot-ve-node-ölçüleri) | Kutu, backplane ve tüm node PCB'leri bağlı |
+| Backplane pinout | [04 §5](04-backplane-mekanik.md#5-pinout) | Üretilmiş her node uyumsuz hale gelir |
+| Konnektör ve mate sırası | [04 §4](04-backplane-mekanik.md#4-konnektör-seçimi) | Hot-plug yeteneği sonradan eklenemez |
 | Güç dağıtımı ve rail tanımı | [03](03-guc-mimarisi.md) | Node regülatör tasarımı bağlı |
 | Dahili protokol ve fiziksel katman | [05](05-dahili-bus.md) | Sahadaki node'ların firmware'i bağlı |
 | Slot adresleme | [06](06-slot-yonetimi.md) | Saha servis prosedürü bağlı |
