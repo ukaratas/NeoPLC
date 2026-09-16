@@ -24,7 +24,7 @@ gelecekteki tüm üyelerini bağlar.
 | 01 | [Sistem Genel Bakış](01-sistem-genel-bakis.md) | Kapsam, kısıtlar, blok diyagram, node aileleri | 🟡 Taslak |
 | 02 | [Host Mimarisi](02-host-mimarisi.md) | MCU seçimi, Ethernet/RS-485/WiFi, Modbus, GPIO bütçesi | 🟡 Taslak |
 | 03 | [Güç Mimarisi](03-guc-mimarisi.md) | 12–48V ön kat, rail topolojisi, güç bütçesi, termal | 🟡 Taslak |
-| 04 | [Backplane ve Mekanik](04-backplane-mekanik.md) | **Blade mimarisi**, şasi + kızak, 17.5 mm slot, konnektör, pinout, hava akışı | 🟡 Taslak |
+| 04 | [Backplane ve Mekanik](04-backplane-mekanik.md) | Blade mimarisi, şasi + kızak, 17.5 mm slot, **12 pin konnektör**, hava akışı | 🟡 Taslak |
 | 05 | [Dahili Bus](05-dahili-bus.md) | Fiziksel katman kararı, protokol spesifikasyonu, zamanlama | 🟡 Taslak |
 | 06 | [Slot Yönetimi](06-slot-yonetimi.md) | Adresleme, discovery, presence/fault/reset, güç zorlaması | 🟡 Taslak |
 | 07 | [Firmware Update](07-firmware-update.md) | Bootloader, güncelleme akışı, kurtarma | 🟡 Taslak |

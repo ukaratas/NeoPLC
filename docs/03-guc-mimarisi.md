@@ -80,19 +80,31 @@ Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → Ters polarite + O
 | Sadece +5V dağıt | 8 × ~$0.15 | Tek anahtarlama kaynağı | Röle ve analog çıkış node'ları saha gerilimi bulamaz |
 | **İkili rail** | Çoğu node'da ~$0.15 | Tek ana kaynak | **Esnek ve ucuz** |
 
-### Karar: ikili rail
+### Karar: tek ray — sadece +5V · D-08 (revize)
 
 | Rail | Gerilim | Kaynak | Kullanım |
 |------|---------|--------|----------|
-| **+5V_SYS** | 5V ±%3 | Host'ta tek verimli senkron buck | Node lojiği. Node 5V→3.3V için ucuz LDO/buck kullanır. |
-| **VBUS_RAW** | 12–48V (ham) | Giriş koruma katı çıkışı | Sadece ihtiyacı olan node: röle bobini, analog çıkış compliance gerilimi, izole DC-DC primeri |
+| **+5V** | 5V ±%3 | Host'ta tek verimli geniş girişli senkron buck | **Tüm node'lar.** Node 5V→3.3V için ucuz LDO/buck kullanır |
 
-**Neden bu doğru:** Node'ların ezici çoğunluğu sadece lojik besleme istiyor.
-Onlara ham 48V verip her birine geniş girişli buck koydurmak, K1'in tam tersi —
-maliyeti sekiz kez ödemek. Tek iyi dönüştürücüyü host'ta bir kez yapıyoruz.
+> **VBUS_RAW (12–48 V) dağıtımı kaldırıldı.** İlk taslakta backplane'e ham
+> giriş gerilimi de dağıtılıyordu. Uçtan uca sorgulandığında tek gerçek
+> müşterisinin henüz tasarlanmamış bir node tipi (analog çıkış 0–10 V
+> compliance) olduğu görüldü. O node'a ~$0.30'luk lokal boost koymak, sekiz
+> slota iki pin + backplane boyunca yüksek gerilim dağıtmaktan ucuz ve güvenli.
+> Gerekçelerin tamamı:
+> [04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-kaldırılanların-gerekçesi)
 
-VBUS_RAW yine de her slota gidiyor çünkü **pinout geri dönülemez** — ihtiyaç
-duyan node tipi için sonradan eklenemez.
+**Tek ray olmasının kazançları:**
+
+| Kazanç | Detay |
+|--------|-------|
+| 2 backplane pini | 26 → 12 pin sadeleşmesinin parçası |
+| **Backplane tamamen SELV** | Yüksek gerilim yok — izolasyon ve creepage derdi yok |
+| Node güç katı basitleşti | Tek giriş, 5V→3.3V tek regülatör |
+| Host güç katı basitleşti | VBUS_RAW dağıtımı, sigortalaması ve slot limiti ortadan kalktı |
+
+**Bağımlı doğrulama:** Latching röleler **5 V bobinli** olacak — standart
+katalog ürünü, ama D-61 (alçak profil) ile birlikte teyit edilecek.
 
 ---
 
@@ -187,24 +199,28 @@ bulk eklenecek.
 
 ## 4. Güç bütçesi
 
-### 4.1 Slot başına (+5V_SYS)
+### 4.1 Slot başına (+5V)
 
 | Node tipi | Tipik | Maksimum |
 |------------|-------|----------|
 | Dijital giriş (8 kanal) | 30 mA | 80 mA |
 | Dijital çıkış (8 kanal) | 50 mA | 120 mA |
 | Analog giriş (4 kanal, 16-bit) | 60 mA | 150 mA |
-| Röle çıkış (bobin VBUS_RAW'dan) | 40 mA | 100 mA |
+| Röle çıkış (5 V latching bobin, darbeli) | 15 mA | 40 mA tepe |
 
-### Tahsis
+### Tahsis · D-29
 
-| Slot | +5V_SYS | VBUS_RAW |
-|------|---------|----------|
-| **1U** | **200 mA (1.0 W)** | 500 mA |
-| **2U** | **400 mA (2.0 W)** | 500 mA |
+| Slot | +5V |
+|------|-----|
+| **1U** | **150 mA (0.75 W)** |
+| **2U** | **300 mA (1.5 W)** |
+
+Röle bobini darbesi (~160 mA tepe, 20 ms) bu limiti kısa süre aşabilir — node
+üzerinde lokal tampon kapasitör zorunlu
+([11 §7.2](11-cikis-node-topolojileri.md#72-darbe-yönetimi-kritik-tasarım-notu)).
 
 2U node tek konnektörden ([04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi))
-400mA çekiyor. 2 adet +5V_SYS kart kenarı kontağı üzerinden 400mA — 2.54mm
+400mA çekiyor. 2 adet +5V kart kenarı kontağı üzerinden 400mA — 2.54mm
 kontak akım kapasitesinin çok altında, sorun yok.
 
 ### 4.2 Host kartı
@@ -224,7 +240,7 @@ kontak akım kapasitesinin çok altında, sorun yok.
 8 slot × 1.0 W (maksimum)          =   8.0 W
 Host (tepe)                      =   3.0 W
                                       ───────
-+5V_SYS yükü (en kötü durum)       =  11.0 W   →  5V @ 2.2 A
++5V yükü (en kötü durum)       =  11.0 W   →  5V @ 2.2 A
 
 Tasarım noktası                    =  5V @ 3.0 A (15 W)
 Headroom                           =  %36
@@ -235,10 +251,9 @@ Giriş gücü @ %88 verim             =  17.0 W
     @ 48 V  →  0.35 A
 
 Giriş sigortası                    =  2.5 A yavaş atan
-VBUS_RAW toplam limiti             =  2 A (slot başına 500 mA)
 ```
 
-**Not:** Gerçekçi karışık konfigürasyonda +5V_SYS yükü ~5–6W olacak. 15W tasarım
+**Not:** Gerçekçi karışık konfigürasyonda +5V yükü ~5–6W olacak. 15W tasarım
 noktası, tüm slotların aynı anda maksimum çektiği teorik en kötü durumu
 karşılıyor.
 
@@ -249,7 +264,7 @@ beyan ettiği tüketimi içeriyor; host, bütçe aşılıyorsa node'un reset'ini
 bırakmıyor.
 
 Ayrıntı: [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) ve
-[05 §7](05-dahili-bus.md).
+[05 §7](05-dahili-bus.md#7-fonksiyon-kodları).
 
 ---
 

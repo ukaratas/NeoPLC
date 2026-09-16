@@ -6,32 +6,57 @@ Adresleme, discovery, presence/fault/reset mantığı ve güç bütçesi zorlama
 
 ## 1. Slot adresleme
 
+### Karar: host adres atar — ADDR pinleri yok · D-17 (revize)
+
 | Yöntem | Pin | Değerlendirme |
 |--------|-----|---------------|
-| **4-bit coğrafi (backplane'de sabit)** | 4 | **Slot no = fiziksel konum.** Teknisyenin gördüğü şeyle aynı. Yazılımsız, gürültüye bağışık, node değişiminde korunur. VME / CompactPCI / PXI'nin yaptığı. |
-| Analog: slot başına direnç + node'da ADC | 1 | 3 pin tasarruf, ama %1 direnç toleransı + ADC doğruluğu + gürültü riski |
-| Enumerasyon (unique ID ile) | 0 | **Fiziksel konum bilgisi yok.** "3 numaralı slottaki node arızalı" denemez. Saha servisi için kabul edilemez. |
+| Coğrafi (backplane'de sabit ADDR pinleri) | **4** | Stateless ve anında, ama node'un konumunu bilmesini gerektiriyor |
+| **Host atamalı, RST# ile izole enumerasyon** | **0** | **Seçilen** — node konumdan habersiz kalıyor |
+| Enumerasyon, seçici mekanizma olmadan | 0 | Çakışma riski — birden fazla node aynı anda cevap verir |
 
-### Karar: 4-bit coğrafi adresleme
+**Anahtar gözlem:** Host'ta zaten **slot başına MOD_RST#** var. Bu, çakışmasız
+enumerasyon için gereken seçici mekanizmanın ta kendisi — ayrıca adres pini
+gerekmiyor.
+
+### 1.1 Enumerasyon akışı
 
 ```
-Slot 0 :  ADDR3=açık  ADDR2=açık  ADDR1=açık  ADDR0=açık    → 0000
-Slot 1 :  ADDR3=açık  ADDR2=açık  ADDR1=açık  ADDR0=GND     → 0001
-Slot 2 :  ADDR3=açık  ADDR2=açık  ADDR1=GND   ADDR0=açık    → 0010
-  ...
-Slot 7 :  ADDR3=açık  ADDR2=GND   ADDR1=GND   ADDR0=GND     → 0111
-
-Node tarafı: her ADDR hattında 10k pull-up → açık = 1, GND = 0
+1. Host tüm node'ları reset'te tutar        (MOD_RST# varsayılan aktif — §6)
+2. Slot N'in RST#'ini bırakır               → bus'ta TEK node uyanık
+3. Host 0x7E (adressiz) adresine IDENTIFY gönderir
+4. Node descriptor'ını döner (UID dahil)
+5. Host 0x0E SET_ADDRESS ile kısa adres = N atar
+6. Sıradaki slota geçer
 ```
 
-**Neden 4 bit, 3 değil:** 8U için 3 bit yeterli olurdu. 4. bit, 16 slota kadar
-genişleme başlığı bırakıyor. Maliyeti 1 backplane pini + 1 direnç — pinout geri
-dönülemez olduğu için şimdi alınması gereken bir sigorta.
+**Çakışma imkânsız**, çünkü adım 2–5 boyunca yalnızca bir node uyanık.
 
-**Analog yöntemin elenme sebebi:** Kart kenarı konnektöründe pin bol. Dijital ve
-gürültüye bağışık olmak, 3 pin tasarrufundan kat kat değerli.
+```
+Açılış süresi = 8 × (node boot ~30 ms + handshake ~5 ms)  ≈  300 ms
+```
 
----
+### 1.2 Neden node'un konumu bilmemesi daha iyi
+
+| | Coğrafi | Host atamalı |
+|---|---|---|
+| Node firmware'i | ADDR pinlerini okumalı | **Konum kavramı hiç yok** |
+| Aynı node farklı slotta | Adresi değişir | Davranışı birebir aynı |
+| Backplane | Slot başına 4 sabit bağlantı | Yok |
+| Pin maliyeti | **4 pin** | **0** |
+
+Host zaten hangi slotta ne olduğunu biliyor — bilmesi gereken taraf o. Node'un
+kendi konumunu bilmesinin hiçbir işlevsel karşılığı yoktu.
+
+### 1.3 Kaybedilen ve telafisi
+
+| Kayıp | Telafi |
+|-------|--------|
+| Anında adres (enumerasyon yok) | ~300 ms açılış — kabul edilebilir |
+| Node reset olursa adresini kaybeder | Node "adressiz" bayrağıyla cevap verir; host o slotu RST# ile izole edip yeniden atar |
+| Host reset olursa tüm adresler gider | Host zaten baştan enumerasyon yapıyor |
+
+**Adres ataması RAM'de tutulur, kalıcı yazılmaz** — böylece bir node başka bir
+sisteme takıldığında eski adresi taşımaz.
 
 ## 2. Naif tasarımın problemi
 
@@ -64,83 +89,79 @@ takıldığı anda host haberdar oluyor.
 
 Maliyet: 2 GPIO (I²C) + 1 GPIO (INT#) = **3 GPIO, 16 sinyal.**
 
-#### Katman 2 — FAULT# → ortak wired-OR
+#### Katman 2 — FAULT# ve BOOT# hatları tamamen kaldırıldı
 
-8 ayrı fault hattı yerine **tek ortak open-drain hat.** Ayrıntı §4.
+İlk taslakta ortak wired-OR FAULT# ve ortak BOOT# hatları vardı. İkisi de
+gereksiz çıktı:
 
-Maliyet: **1 GPIO, 8 slotun arıza bildirimi.**
-
-#### Katman 3 — BOOT# → ortak hat + reset zamanlaması
-
-8 ayrı boot hattı yerine **tek ortak hat.** Ayrıntı §5.
-
-Maliyet: **0 ek GPIO** (PCA9555'in yedek pininden sürülür), 7 backplane hattı
-tasarrufu.
+- **FAULT#** → arızalar poll ile toplanıyor (§4)
+- **BOOT#** → bootloader penceresi ile çözülüyor (§5)
 
 ### Sonuç
 
-| | Naif | Üç katmanlı |
+| | Naif | Şimdiki |
 |---|---|---|
-| MCU GPIO | 32 | **4** |
+| MCU GPIO | 32 | **3** (I²C + INT#) |
 | Backplane hattı / slot | 4 | **2** (PRESENT#, MOD_RST#) |
-| Ortak backplane hattı | 0 | 2 (FAULT#, BOOT#) |
+| Ortak backplane hattı | 0 | **0** |
+
+PCA9555 tek başına 8 presence girişi + 8 reset çıkışını taşıyor; başka hiçbir
+slot sinyali kalmadı.
 
 ---
 
-## 4. FAULT# hattı
+## 4. Arıza bildirimi
 
-### Karar: ortak open-drain wired-OR + protokolle sorgu
-
-```
-Node 0 ──┐
-Node 1 ──┤
-   ...    ├── FAULT#  ──10k pull-up──  +3V3
-Node 7 ──┘      │
-                 └──→ Host GPIO (kesme, düşen kenar)
-```
-
-**Akış:**
-
-1. Herhangi bir node arıza tespit eder → FAULT#'u GND'ye çeker
-2. Host kesme alır — **polling gecikmesi yok**
-3. Host tarama döngüsü sonunda `GET_DIAG` ile kaynağı arar
-4. Arıza giderilince node hattı bırakır
-
-**Neden bu tasarım doğru:** Katı host-node polling'in tek zayıflığı olay
-gecikmesidir ([05 §5](05-dahili-bus.md#5-trafik-modeli)). Bir donanım hattı bunu
-çözüyor — multi-host bus'ın karmaşıklığına girmeden event-driven davranış elde
-ediliyor.
-
-8 pin yerine 1 pin, üstelik daha hızlı.
-
----
-
-## 5. BOOT# stratejisi
-
-### Karar: ortak BOOT# + hedef slotun RST# bırakılması
-
-Naif yaklaşım slot başına BOOT# hattı ister (8 pin). Bunun yerine:
+### Karar: donanım hattı yok, poll ile · D-20 (revize)
 
 ```
-1. Host BOOT#'u düşürür                    (ortak hat, tüm slotlara gider)
-2. Host SADECE hedef slotun MOD_RST#'ini bırakır
-3. O node reset'ten çıkarken BOOT#'u örnekler → bootloader'a girer
-4. Diğer node'lar etkilenmez — reset'lerine dokunulmadı
-5. Host BOOT#'u bırakır
+Node arızayı tespit eder  →  kendi kanalını KORUR (µs mertebesinde)
+                          →  arıza bayrağını LATCH'LER
+Host bir sonraki taramada okur  →  en fazla 100 ms gecikme (10 Hz)
 ```
 
-**7 pin ve 7 backplane hattı tasarrufu.** Seçicilik BOOT# hattından değil,
-reset zamanlamasından geliyor.
+**Neden FAULT# donanım hattı kaldırıldı:**
 
-### 5.1 Neden donanım kaçışı gerekli
+| Gerekçe | Detay |
+|---------|-------|
+| Gecikme önemsiz | 10 Hz taramada en fazla 100 ms. Kayıt ve uyarı için fazlasıyla yeterli |
+| **Gerçek zamanlı koruma zaten node'un işi** | Kısa devre için 100 ms de çok geç — node µs'ler içinde kendi kanalını kapatmak zorunda. Host'un rolü haber almak, müdahale etmek değil |
+| **Wired-OR'un bir arıza modu vardı** | Hattı düşük tutan tek arızalı node, diğer tüm node'ların arızasını maskeliyordu. Bu mod da ortadan kalktı |
 
-Bootloader'a girmenin normal yolu protokol komutudur (`0x7F RESET` + bayrak).
-Ama app tamamen kilitlenip bus'ı meşgul ederse protokol çalışmaz.
+> **Zorunlu:** Node arıza durumunu **latch'lemeli**. İki poll arasında oluşan ve
+> kendiliğinden geçen bir olay kaybolmamalı. `GET_STATUS` okunduğunda bayrak
+> temizlenir.
 
-BOOT# hattı bu durumda **tek kurtarma yolu.** Node'u sökmeden, cihazı açmadan,
-SWD gerektirmeden kurtarma sağlıyor. Ayrıntı: [07 §4](07-firmware-update.md#4-kurtarma).
+### 4.1 S2'de gecikme
 
----
+Bekleme durumunda tarama 1 Hz'e iner → arıza gecikmesi 1 saniyeye çıkar. Kabul
+edilebilir: S2'de zaten aktif yük yok ([10 §4](10-enerji-butcesi.md#4-güç-durumları)).
+
+## 5. Bootloader'a giriş
+
+### Karar: donanım hattı yok, bootloader penceresi · D-19 (revize)
+
+```
+1. Host o slotun MOD_RST#'ini çeker      →  uygulama durur
+2. RST# bırakılır                        →  bootloader çalışıyor, uygulama HENÜZ değil
+3. Bootloader ~30 ms bus'ı dinler
+4. Host "bootloader'da kal" çerçevesi gönderir
+5. Gelmezse bootloader uygulamaya atlar
+```
+
+**Kilitlenmiş uygulama bu pencerede çalışmıyor**, dolayısıyla engel olamaz —
+BOOT# hattının çözdüğü problem, per-slot RST# ile zaten çözülmüş durumda.
+
+Bus'ı meşgul eden başka bir node varsa host onu da RST# ile susturabilir. Yani
+host her koşulda hedef node ile baş başa kalabiliyor.
+
+| | BOOT# hattı | Bootloader penceresi |
+|---|---|---|
+| Backplane pini | 1 (ortak) | **0** |
+| Kilitlenmiş app'ten kurtarma | ✓ | ✓ |
+| Bedeli | 1 pin | Her açılışta ~30 ms |
+
+Açılışlar nadir; 30 ms bedel pratikte görünmez.
 
 ## 6. Reset varsayılan durumu
 
@@ -227,7 +248,10 @@ hot-plug maliyetini de karşılıyor — load switch zaten gerekliydi.
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. PCA9555 INT#  →  presence bitmap değişti                 │
 ├─────────────────────────────────────────────────────────────┤
-│ 2. IDENTIFY(slot N)  →  32 byte descriptor                  │
+│ 1b. Slot N'in RST#'i bırakılır → bus'ta tek node uyanık      │
+│     IDENTIFY(0x7E) → descriptor · SET_ADDRESS(N)            │
+├─────────────────────────────────────────────────────────────┤
+│ 2. IDENTIFY(N)  →  32 byte descriptor doğrulama             │
 ├─────────────────────────────────────────────────────────────┤
 │ 3. Doğrulama:                                               │
 │      · CRC                                                  │
@@ -289,7 +313,7 @@ Slot'un MOD_RST#'i tekrar aktif edilir (bir sonraki node için hazır)
         └────┬─────┘                        │
              │ ENABLE                       │
              ▼                              │
-        ┌──────────┐    FAULT# / timeout    │
+        ┌──────────┐    arıza / timeout     │
         │  ACTIVE  │ ──────────────┐        │
         └──────────┘               ▼        │
                               ┌────────┐    │

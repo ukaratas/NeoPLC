@@ -300,14 +300,15 @@ dizi. Node MCU'sunda GPIO yakmıyor, maliyeti düşük.
 ### 7.2 Darbe yönetimi — kritik tasarım notu
 
 ```
-Bobin darbesi:  12V × 30 mA × 20 ms  =  7.2 mJ / geçiş
+Bobin darbesi:  5V × 40 mA × 20 ms  =  4.0 mJ / geçiş
+                (5 V bobinli latching röle — tek ray kararı, D-08)
 
-8 kanal AYNI ANDA anahtarlanırsa:
-    8 × 30 mA  =  240 mA anlık
-    Slot VBUS_RAW limiti  =  500 mA   ([03 §4](03-guc-mimarisi.md#4-güç-bütçesi))
+4 kanal AYNI ANDA anahtarlanırsa:
+    4 × 40 mA  =  160 mA anlık
+    Slot +5V limiti       =  150 mA   ([03 §4](03-guc-mimarisi.md#4-güç-bütçesi))
 ```
 
-Sığıyor, **ama** aynı anda ateşleme rail'de dip yaratır ve komşu slotları
+Limiti kısa süre aşıyor — **lokal tampon kapasitör zorunlu.** Ayrıca aynı anda ateşleme rail'de dip yaratır ve komşu slotları
 etkileyebilir.
 
 **Kural: röle darbeleri sıralanmalı (staggered), asla eşzamanlı ateşlenmemeli.**

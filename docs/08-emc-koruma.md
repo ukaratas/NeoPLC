@@ -227,7 +227,7 @@ sinyal geçişi ground'u bölüyor.
 ```
 L1  Sinyal + bileşenler
 L2  GND düzlemi          ← kesintisiz, bölünmez
-L3  Güç düzlemleri       (+3V3, +5V_SYS, VBUS_RAW bölgeleri)
+L3  Güç düzlemleri       (+3V3, +5V, VIN bölgeleri)
 L4  Sinyal + güç dökümü
 ```
 

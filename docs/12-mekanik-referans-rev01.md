@@ -69,9 +69,9 @@ Mate kademesi: **Uzun pin = GND · Orta pin = Power · Kısa pin = Signal** (3 k
 | 1 | Slot adımı | **17.50 mm** | 22.50 mm | **Draft kazanıyor** — §3.1 |
 | 2 | Dahili haberleşme | **I²C** (SDA/SCL/INT) | RS-485 diferansiyel | **Mimari kazanıyor** — §3.2 |
 | 3 | Besleme girişi | 24V DC | 12–48V | **Brief kazanıyor** (sonraki karar) |
-| 4 | Backplane rail | 24V + 5V + 3.3V | VBUS_RAW + 5V | **Tartışmalı** — §3.3 |
-| 5 | Slot adresi | 3 bit (ID0–2) | 4 bit | **Mimari öneriliyor** — §3.4 |
-| 6 | SYNC hattı | Yok | Var | **Mimari öneriliyor** |
+| 4 | Backplane rail | 24V + 5V + 3.3V | **Sadece 5V** | **Mimari kazandı** — tek ray, D-08 |
+| 5 | Slot adresi | 3 bit (ID0–2) | **Adres pini yok** | **İkisi de elendi** — host adres atıyor, D-17 |
+| 6 | SYNC hattı | Yok | **Broadcast çerçeve** | **Draft haklıydı** — pin gerekmiyor, D-21 |
 | 7 | Node derinliği | 110 mm | 90 mm (varsayım) | **Draft kazanıyor** — gerçek ölçü |
 | 8 | Node yüksekliği | 80 mm | 100 mm (varsayım) | **Draft kazanıyor** — gerçek ölçü |
 | 9 | Mekanik kilit | **Var** | D-45'te sonradan eklendi | **Draft kazanıyor** — zaten çözülmüş |
@@ -142,7 +142,7 @@ arıza izolasyonu.
 
 ### 3.3 Backplane rail sayısı: 3.3V tartışmalı
 
-Draft 24V + 5V + 3.3V dağıtıyor; mimari VBUS_RAW + 5V öneriyor.
+Draft 24V + 5V + 3.3V dağıtıyor. **Sonuç: sadece 5V** — üç rail de ikiye, sonra tek raya indi (D-08).
 
 | | Draft (3 rail) | Mimari (2 rail) |
 |---|---|---|
@@ -218,7 +218,7 @@ Gereksinimler:
 - Host'ta sıcaklık sensörü (en az 1, tercihen backplane ortası)
 - Fan PWM kontrolü (ESP32 GPIO)
 - Fan arıza tespiti (tacho girişi) — fan durursa yükler kısıtlanmalı
-- **Fan'ın kendisi 24V/VBUS_RAW'dan beslenmeli**, +5V_SYS'ten değil
+- **Fan host üzerinde, VIN'den beslenmeli** — backplane +5V rayından değil
 
 ### 3.6 Mekanik paradigma: kutu-içinde-kutu → gerçek blade
 
@@ -253,10 +253,10 @@ Bunlar tartışmasız — draft zaten doğru çözmüş:
 
 | Kalem | Not |
 |-------|-----|
-| **3 kademeli pin stagger** | GND uzun → Power orta → Signal kısa. [04 §5.1](04-backplane-mekanik.md#51-mate-sırasının-mantığı) ile birebir uyumlu. Draft'ta PRESENT/DETECT için 4. kademe yok — eklenmesi öneriliyor |
+| **3 kademeli pin stagger** | GND uzun → Power orta → Signal kısa. [04 §5.1](04-backplane-mekanik.md#51-mate-sırası) ile birebir uyumlu. Draft'ta PRESENT/DETECT için 4. kademe yok — eklenmesi öneriliyor |
 | **Mekanik kilit mandalı** | K5 (titreşim) için zorunlu, draft'ta zaten var |
 | **Kızak rayı + yan kılavuz** | Önden tak-kilitle-kullan; servis gereksinimini karşılıyor |
-| **DETECT / FAULT / RST / BST hatları** | Mimarideki PRESENT# / FAULT# / MOD_RST# / BOOT# ile birebir örtüşüyor — bağımsız olarak aynı sonuca varılmış |
+| **DETECT / RST hatları** | Mimarideki PRESENT# / MOD_RST# ile birebir örtüşüyor. Draft'taki FAULT ve BST hatları ise sonradan elendi (D-20, D-19) — draft bu ikisinde fazla pin öngörmüş |
 | **Node ölçüleri** | 17.5 / 35 × 80 × 110 mm — varsayım yerine gerçek ölçü |
 | **3D baskı + alüminyum hibrit** | Prototip için doğru; alüminyum ray ayrıca ısı yolu olabilir (§3.5) |
 

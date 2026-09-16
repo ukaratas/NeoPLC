@@ -336,10 +336,10 @@ Bu üçü endüstriyel varsayımda yoktu, batarya sisteminde zorunlu.
 
 ### 9.1 Batarya izleme
 
-Host, VBUS_RAW gerilimini ölçmeli.
+Host, **giriş gerilimini (VIN)** ölçmeli.
 
 ```
-VBUS_RAW ──[ direnç böleni ]──→ ESP32 ADC
+VIN (12–48 V) ──[ direnç böleni ]──→ ESP32 ADC
 ```
 
 Maliyet: 2 direnç + 1 kapasitör. Sağladıkları:
@@ -390,7 +390,7 @@ Enerji bütçesi donanım kararı olduğu kadar firmware kararıdır.
 | Gereksinim | Açıklama |
 |------------|----------|
 | Durum makinesi | S0–S3 geçişleri, zaman aşımları kullanıcı tarafından ayarlanabilir |
-| Ölçüm | Gerçek tüketim VBUS_RAW akımından ölçülebilmeli (opsiyonel shunt) |
+| Ölçüm | Gerçek tüketim VIN akımından ölçülebilmeli (opsiyonel shunt) |
 | Raporlama | Modbus register'larında durum + tahmini batarya ömrü |
 | Node uyku koordinasyonu | Host, tarama hızı değişimini node'lara bildirmeli |
 | Güvenli geçiş | S3'e geçmeden önce çıkışlar tanımlı duruma alınmalı |

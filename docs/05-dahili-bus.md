@@ -69,9 +69,9 @@ Dürüstlük gereği değerlendirildi:
 doğarsa yükseltme yolu olarak korunuyor — **backplane'deki A/B çifti CAN'e de
 uygun, sadece transceiver değişir.** Pinout bu yüzden geleceğe dayanıklı.
 
-Ayrıca event-driven ihtiyacının önemli kısmı donanım FAULT# hattıyla zaten
-karşılanıyor ([06 §4](06-slot-yonetimi.md#4-fault-hattı)) — CAN'in bu
-avantajının pratik değeri azalıyor.
+Ayrıca event-driven ihtiyacı pratikte zayıf: node kendi gerçek zamanlı
+korumasını yapıyor, host'un öğrenmesi 100 ms gecikebilir — CAN'in bu
+avantajının bu uygulamada karşılığı yok.
 
 ---
 
@@ -192,11 +192,16 @@ Baud hızı konfigüre edilebilir olacak — saha koşullarına göre düşürü
 | Host sırayla slot 0..7 tarar | Tarama süresi sabit ve öngörülebilir |
 | Node yanıt süresi ≤ 500 µs | Aşılırsa host devam eder, gecikme birikmez |
 | Host timeout 2 ms | Kaybolan node taramayı kilitlemiyor |
-| **Olaylar bus'ta değil, FAULT# hattında** | Polling gecikmesi olmadan olay bildirimi, multi-host karmaşıklığı olmadan |
+| **Arızalar poll ile toplanır** | Node arızayı **latch'ler**, host bir sonraki taramada okur — en fazla 100 ms gecikme |
 
-FAULT# tasarımı bu modelin kilit noktası: katı polling'in tek dezavantajı olan
-"olay gecikmesi", bir donanım hattıyla çözülüyor. Ayrıntı:
-[06 §4](06-slot-yonetimi.md#4-fault-hattı).
+**FAULT# donanım hattı kaldırıldı.** Gerekçe: 10 Hz taramada olay gecikmesi en
+fazla 100 ms, ve gerçek zamanlı koruma zaten node'un kendi işi (kısa devre için
+100 ms de çok geç). Ek kazanç: wired-OR hattın bir arıza modu vardı — hattı
+düşük tutan tek arızalı node diğerlerinin arızasını maskeliyordu; o mod da
+ortadan kalktı. Tam gerekçe:
+[04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-kaldırılanların-gerekçesi)
+
+> **Node arızayı latch'lemeli** — iki poll arasında oluşan olay kaybolmamalı.
 
 ---
 
@@ -215,8 +220,8 @@ FAULT# tasarımı bu modelin kilit noktası: katı polling'in tek dezavantajı o
 | Alan | Açıklama |
 |------|----------|
 | SYNC | 0x55 — alternating bit paterni, senkronizasyon ve baud doğrulama için ideal |
-| ADDR | bit7 = yön (0 = host isteği, 1 = node yanıtı) · bit6..0 = slot adresi |
-| | 0x00 = broadcast · 0x7F = rezerve |
+| ADDR | bit7 = yön (0 = host isteği, 1 = node yanıtı) · bit6..0 = adres |
+| | 0x00 = broadcast · **0x7E = adressiz node** (enumerasyon) · 0x7F = rezerve |
 | FUNC | İşlem kodu (§7) |
 | LEN | Payload uzunluğu |
 | CRC16 | CRC-16/MODBUS — kanıtlanmış, tablosuz da hesaplanabilir |
@@ -246,6 +251,10 @@ Modbus RTU çerçeveleri **3.5 karakterlik sessizlikle** ayırır. Bu:
 | 0x06 | READ_CONFIG | Konfigürasyon oku |
 | 0x07 | WRITE_CONFIG | Konfigürasyon yaz |
 | 0x08 | GET_DIAG | Detaylı arıza bilgisi |
+| **0x0E** | **SET_ADDRESS** | **Adressiz node'a kısa adres ata** (enumerasyon) |
+| **0x0F** | **SYNC (broadcast)** | **Tüm node'lar aynı anda latch/apply** — SYNC pini yerine |
+| **0x0E** | **SET_ADDRESS** | **Adressiz node'a kısa adres ata** — enumerasyon ([06 §1](06-slot-yonetimi.md#1-slot-adresleme)) |
+| **0x0F** | **SYNC (broadcast)** | **Tüm node'lar aynı anda latch/apply** — SYNC pini yerine |
 | 0x10 | ENABLE | Node'u çalıştır |
 | 0x11 | DISABLE | Node'u durdur (çıkışlar güvenli duruma) |
 | 0x20–0x2F | Firmware update | ERASE / WRITE_BLOCK / VERIFY / ACTIVATE — [07](07-firmware-update.md) |
@@ -301,35 +310,34 @@ Host:
 | Node yanıt vermedi | Timeout, hata sayacı artar, tarama devam eder |
 | 3 ardışık timeout | Node "kayıp" işaretlenir, Modbus durum bitine yansır |
 | CRC hatası | Yanıt atılır, sayaç artar, bir sonraki döngüde tekrar denenir |
-| FAULT# düştü | Tarama döngüsü sonunda GET_DIAG ile kaynak aranır |
+| Node arıza bayrağı bildirdi | Tarama döngüsü sonunda GET_DIAG ile ayrıntı alınır |
 | PRESENT# değişti | PCA9555 INT# → discovery tetiklenir |
 | Tarama hızı değişti | Host broadcast ile bildirir; node'lar uyku pencerelerini ayarlar |
 
 ---
 
-## 9. SYNC stroboskobu
+## 9. SYNC — donanım pini değil, broadcast çerçeve
 
-### Karar: var · D-21 · maliyet 1 pin
+### Karar: 0x0F SYNC broadcast · D-21 (revize)
 
-Host darbe verir → **tüm node'lar girişlerini aynı anda latch'ler, çıkışlarını
-aynı anda uygular.**
+Host bir broadcast çerçeve gönderir → **tüm node'lar girişlerini aynı anda
+latch'ler, çıkışlarını aynı anda uygular.**
 
-**Neden önemli:** SYNC olmadan, slot 0'ın girişi ile slot 7'nin girişi arasında
-bir tam tarama süresi (4.8 ms) fark olur. Bir PLC için bu, ilişkili sinyallerin
-tutarsız görünmesi demek — örneğin bir enkoder ve limit switch farklı
-node'lardaysa.
+**Neden ayrı bir pin gerekmiyor:** Bus zaten broadcast. Bir çerçeve tüm
+node'lara aynı anda ulaşıyor.
 
-SYNC ile tüm proses imajı **tek bir zaman anına** ait oluyor. 1 pin karşılığında
-gerçek bir kalite farkı.
+```
+Donanım strobe eşzamanlılığı   ~ns
+Broadcast çerçeve              ~µs    (çerçeve alım jitter'ı)
+Karavan yüklerinin ihtiyacı    ~ms
+```
 
-### 9.1 Neden tek uçlu olması sorun değil
+µs ile ns arasındaki fark bu uygulamada ölçülemez. **1 pin yerine 1 fonksiyon
+kodu** — SYNC pini pinout'tan kaldırıldı
+([04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-kaldırılanların-gerekçesi)).
 
-§1.1'de TTL'in tek uçlu olmasını eleştirdik — SYNC de tek uçlu. Çelişki değil:
+### 9.1 Neden hâlâ değerli
 
-| | Veri bus'ı | SYNC |
-|---|---|---|
-| Hız | 500 kbaud sürekli | Tarama başına tek darbe |
-| Hassasiyet | Her bit doğru olmalı | Birkaç yüz ns jitter önemsiz |
-| Hata sonucu | Bozuk veri | Ölçülemez seviyede skew |
-
-Yavaş kenar + Schmitt trigger girişi + pull-up ile open-drain sürüş yeterli.
+SYNC olmadan slot 1'in girişi ile slot 8'in girişi arasında bir tam tarama
+süresi (4.8 ms) fark olur. Broadcast SYNC ile tüm proses imajı **tek bir zaman
+anına** ait oluyor — maliyeti sıfır.

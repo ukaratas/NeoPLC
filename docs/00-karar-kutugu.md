@@ -11,8 +11,8 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | Durum | Adet |
 |-------|------|
-| 🟢 Kabul edildi | 15 |
-| 🟡 Öneri hazır, onay bekliyor | 43 |
+| 🟢 Kabul edildi | 22 |
+| 🟡 Öneri hazır, onay bekliyor | 36 |
 | 🔴 Dışarıdan bilgi gerekiyor | 1 |
 | ⚪ Henüz ele alınmadı | 4 |
 
@@ -35,6 +35,10 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | **D-60** | **Gerçek blade mimarisi** — şasi + kızak, kutu-içinde-kutu terk edildi | Kullanıcı |
 | **D-65** | **WiFi varsayılan kapalı, talep üzerine açılır** | Kullanıcı |
 | **D-66** | **Host = 2U blade, kendi özel slotunda** | Kullanıcı |
+| **D-32** | **Backplane 26 → 12 pin** | Kullanıcı sorgusu üzerine uçtan uca değerlendirme |
+| **D-08** | **Tek ray: sadece +5V** (VBUS_RAW kaldırıldı) | Aynı değerlendirme |
+| **D-17** | **Adres pinleri yok, host atıyor** | Aynı değerlendirme |
+| **D-19 / D-20 / D-21** | **BOOT# / FAULT# / SYNC pinleri kaldırıldı** | Aynı değerlendirme |
 
 ---
 
@@ -70,7 +74,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | D-40 | Uyarlanabilir tarama hızı | 20 / 10 / 1 Hz — 200 Hz terk edildi | 🟡 | [10 §2.1](10-enerji-butcesi.md#21-tarama-hızı-gerçekte-ne-olmalı) |
 | D-41 | Wake-on-bus | Node STOP modunda uyur, USART start-bit ile uyanır | 🟡 | [10 §3](10-enerji-butcesi.md#3-wake-on-bus-nodeların-uyuması) |
 | D-42 | İki dönüştürücülü yapı | Housekeeping (Iq ≤ 25 µA) + ana buck (EN pinli) | 🟡 | [10 §7.1](10-enerji-butcesi.md#71-iki-dönüştürücülü-yapı) |
-| D-43 | Batarya izleme + LVD | VBUS_RAW gerilim ölçümü — **batarya sisteminde zorunlu** | 🟡 | [10 §9.1](10-enerji-butcesi.md#91-batarya-izleme) |
+| D-43 | Batarya izleme + LVD | VIN gerilim ölçümü — **batarya sisteminde zorunlu** | 🟡 | [10 §9.1](10-enerji-butcesi.md#91-batarya-izleme) |
 | D-44 | Uyandırma kaynakları | En az 2 RTC GPIO uyandırma girişi | 🟡 | [10 §9.2](10-enerji-butcesi.md#92-uyandırma-kaynakları) |
 
 ### Güç
@@ -78,9 +82,9 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
 | D-04 | Hedef ortam sıcaklığı | **60 °C** | 🟢 | [03 §5](03-guc-mimarisi.md#5-termal-analiz) |
-| D-08 | Backplane rail topolojisi | İkili rail: VBUS_RAW (12–48V) + +5V_SYS | 🟡 | [03 §2](03-guc-mimarisi.md#2-rail-topolojisi) |
+| D-08 | Backplane rail topolojisi | **Tek ray: sadece +5V** — VBUS_RAW dağıtımı kaldırıldı | 🟢 | [03 §2](03-guc-mimarisi.md#2-rail-topolojisi) |
 | D-09 | Giriş koruma topolojisi | Seri FET + gate zener clamp (~55V) → downstream 60V sınıfı | 🟡 | [03 §1](03-guc-mimarisi.md#1-giriş-koruma-katı) |
-| D-29 | Slot güç bütçesi | 1U: 150 mA tavan · toplam ≤ 1.2 A (descriptor ile zorlanır) | 🟡 | [03 §4](03-guc-mimarisi.md#4-güç-bütçesi) |
+| D-29 | Slot güç bütçesi | 1U: 150 mA · 2U: 300 mA · toplam ≤ 1.2 A (descriptor ile zorlanır) | 🟡 | [03 §4](03-guc-mimarisi.md#4-güç-bütçesi) |
 | D-31 | Ana buck tasarım noktası | **5V @ 1.5A** — 3A → 2A → 1.5A | 🟡 | [03 §3](03-guc-mimarisi.md#3-ana-dönüştürücü) |
 | D-48 | Dönüştürücü seçim kriteri | **Hafif yük verimi + düşük Iq**, tepe verim değil | 🟡 | [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri-değişti) |
 
@@ -96,7 +100,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | D-64 | AC node şebeke bariyeri | Klipsli plastik kapak (tam kutu değil) | 🟡 | [04 §1.1](04-backplane-mekanik.md#11-bladein-bedeli-ve-karşılığı) |
 | D-15 | 1U mekanik adım | **17.5 mm, 2U = 35 mm** (D-58 ile birleşti) | 🟢 | [04 §2](04-backplane-mekanik.md#2-slot-ve-node-ölçüleri) |
 | D-16 | 2U mating stratejisi | Sadece sol slot konnektörüne oturur | 🟡 | [04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi) |
-| D-32 | Backplane pinout | 26 pin, 4 kademeli mate sırası | 🟡 | [04 §5](04-backplane-mekanik.md#5-pinout) |
+| D-32 | Backplane pinout | **12 pin** (8 fonksiyonel + 4 rezerve), 4 kademeli mate | 🟢 | [04 §5](04-backplane-mekanik.md#5-pinout) |
 | D-24 | Hot-plug | Donanım yetenekli tasarla, v1'de garanti verme | 🟡 | [04 §8](04-backplane-mekanik.md#8-hot-plug-değerlendirmesi) |
 | D-45 | **Titreşim dayanımı** | Node tutucu mandal/vida zorunlu — konnektör tek başına tutmaz | 🟡 | [10 §9.3](10-enerji-butcesi.md#93-titreşim) |
 
@@ -105,22 +109,22 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
 | D-10 | Fiziksel katman | RS-485 diferansiyel — TTL UART elendi | 🟡 | [05 §1](05-dahili-bus.md#1-fiziksel-katman-kararı) |
-| D-11 | Dupleks | Yarım dupleks 2 tel, tam dupleks için 2 pin rezerve | 🟡 | [05 §2](05-dahili-bus.md#2-yarım-dupleks-mi-tam-dupleks-mi) |
+| D-11 | Dupleks | Yarım dupleks 2 tel — **tam dupleks rezervesi kaldırıldı** | 🟡 | [05 §2](05-dahili-bus.md#2-yarım-dupleks-mi-tam-dupleks-mi) |
 | D-12 | Baud hızı | 500 kbaud (konfigüre edilebilir) | 🟡 | [05 §4](05-dahili-bus.md#4-hız-ve-tarama-süresi) |
 | D-13 | Sonlandırma | Yansıma sonlandırması yok · fail-safe bias var | 🟡 | [05 §3](05-dahili-bus.md#3-sonlandırma-analizi) |
 | D-30 | Çerçeve formatı | SYNC+ADDR+FUNC+LEN+PAYLOAD+CRC16, max 70 byte | 🟡 | [05 §6](05-dahili-bus.md#6-çerçeve-formatı) |
-| D-33 | Trafik modeli | Katı host-node polling + donanım FAULT# event hattı | 🟡 | [05 §5](05-dahili-bus.md#5-trafik-modeli) |
-| D-21 | SYNC hattı | Var — eşzamanlı I/O latch strobe, 1 pin | 🟡 | [05 §9](05-dahili-bus.md#9-sync-stroboskobu) |
+| D-33 | Trafik modeli | Katı host-node polling · arızalar latch'lenip poll ile toplanır | 🟡 | [05 §5](05-dahili-bus.md#5-trafik-modeli) |
+| D-21 | SYNC | **Pin yok** — 0x0F broadcast çerçeve | 🟢 | [05 §9](05-dahili-bus.md#9-sync-donanım-pini-değil-broadcast-çerçeve) |
 | D-49 | Transceiver seçim kriteri | **Alıcı boşta akımı birincil kriter** (0.5 mA hedef) | 🟡 | [10 §3.1](10-enerji-butcesi.md#31-neden-rs-485-alıcısı-kapatılmıyor) |
 
 ### Slot yönetimi
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-17 | Slot adresleme | 4-bit coğrafi (backplane'de sabitlenmiş) | 🟡 | [06 §1](06-slot-yonetimi.md#1-slot-adresleme) |
+| D-17 | Slot adresleme | **Host atar** — ADDR pinleri yok, RST# ile izole enumerasyon | 🟢 | [06 §1](06-slot-yonetimi.md#1-slot-adresleme) |
 | D-18 | Presence + reset yönetimi | Tek PCA9555, INT# ile hot-plug algılama | 🟡 | [06 §3](06-slot-yonetimi.md#3-host-tarafı-io-genişletme) |
-| D-19 | Bootloader girişi | Ortak BOOT# + hedef slotun RST# bırakılması | 🟡 | [06 §5](06-slot-yonetimi.md#5-boot-stratejisi) |
-| D-20 | Fault bildirimi | Ortak open-drain wired-OR FAULT# | 🟡 | [06 §4](06-slot-yonetimi.md#4-fault-hattı) |
+| D-19 | Bootloader girişi | **BOOT# pini yok** — RST# + ~30 ms bootloader penceresi | 🟢 | [06 §5](06-slot-yonetimi.md#5-bootloadera-giriş) |
+| D-20 | Arıza bildirimi | **FAULT# pini yok** — node latch'ler, host poll eder | 🟢 | [06 §4](06-slot-yonetimi.md#4-arıza-bildirimi) |
 | D-22 | Reset varsayılanı | Node'da 10k pull-down → varsayılan reset'te | 🟡 | [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) |
 | D-23 | Slot başına koruma | Akım sınırlı load switch — **S3'ün de mekanizması** | 🟡 | [06 §7](06-slot-yonetimi.md#7-slot-başına-akım-koruması) |
 | D-34 | Discovery | Presence → IDENTIFY → bütçe → CONFIG → ENABLE | 🟡 | [06 §8](06-slot-yonetimi.md#8-discovery-akışı) |
@@ -154,7 +158,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | **D-56** | **Terminoloji: Host/Node mu Host/Node mü?** | **Host/Node öneriliyor** (draft'taki ürün dili) | 🟡 | [12 §1.1](12-mekanik-referans-rev01.md#11-terminoloji) |
 | **D-57** | **Fan + termostatik kontrol** | **Zorunlu** — doğal konveksiyon pakette yetmiyor; ama sürekli çalışamaz | 🟡 | [12 §3.5](12-mekanik-referans-rev01.md#35-soğutma-fan-ve-benim-termal-hatam) |
 | **D-58** | **Slot adımı 17.5 mm** | Draft benimsendi — cihaz 40 mm daha dar, 2U = 35 mm | 🟢 | [12 §3.1](12-mekanik-referans-rev01.md#31-slot-adımı-175-mm-kabul-edilmeli) |
-| D-59 | Backplane 3.3V rail | Dağıtılmasın, ama **pin rezerve edilsin** | 🟡 | [12 §3.3](12-mekanik-referans-rev01.md#33-backplane-rail-sayısı-33v-tartışmalı) |
+| D-59 | Backplane 3.3V rail | **Dağıtılmıyor, pin de rezerve edilmiyor** — kullanmamaya karar verilen şeye pin ayırmak tutarsızdı | 🟢 | [12 §3.3](12-mekanik-referans-rev01.md#33-backplane-rail-sayısı-33v-tartışmalı) |
 
 ### Node aileleri
 
@@ -201,3 +205,10 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | 2026-09-16 | **D-66** | Yeni — **host 2U blade** | Ayrı bölme gereksizdi: blade PCB yüz alanı (75×110) host için fazlasıyla yeterli. 2U, alan için değil bileşen yüksekliği için. Şasi 65 mm daralıyor |
 | 2026-09-16 | D-67 | Yeni — BLE uyandırma | Butonsuz UX, ~1–3 mW |
 | 2026-09-16 | Enerji bütçesi | 3.5 → **2.2 Wh/gün** | D-65; batarya ömrü 170 → 273 gün |
+| 2026-09-16 | **D-32** | **26 → 12 pin** | Uçtan uca sorgulama. GND 4→2 (akım için 1 bile yeter, 2'si titreşim redundansı), VBUS_RAW çıktı, ADDR çıktı, BOOT#/FAULT#/SYNC çıktı, rezerve 6→4 |
+| 2026-09-16 | **D-08** | İkili ray → **tek +5V rayı** | 12–48 V'un tek gerçek müşterisi analog çıkış compliance'ıydı; o node'a $0.30 boost, 8 slota 2 pin + yüksek gerilimden ucuz |
+| 2026-09-16 | **D-17** | Coğrafi → **host atamalı** | Per-slot RST# zaten çakışmasız enumerasyon mekanizması. Node'un konumunu bilmesinin işlevsel karşılığı yoktu |
+| 2026-09-16 | **D-19** | BOOT# pini → **bootloader penceresi** | Kilitlenmiş app reset sonrası zaten çalışmıyor; RST# yeterli |
+| 2026-09-16 | **D-20** | FAULT# pini → **poll** | 100 ms gecikme önemsiz; gerçek zamanlı koruma node'un işi. Wired-OR'un maskeleme arıza modu da gitti |
+| 2026-09-16 | **D-21** | SYNC pini → **broadcast çerçeve** | Bus zaten broadcast; µs ile ns farkı bu uygulamada ölçülemez |
+| 2026-09-16 | D-11, D-59 | Rezerve pinler 6 → 4 | Tam dupleks senaryosu gerçekçi değil; 3.3V'a zaten hayır denmişti |

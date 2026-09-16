@@ -106,10 +106,10 @@ yeniden tasarlanır. Bu yüzden ilk şema çizilmeden önce kilitlenmeleri gerek
 | Mekanik slot yapısı, 1U/2U | [04 §2](04-backplane-mekanik.md#2-slot-ve-node-ölçüleri) | Kutu, backplane ve tüm node PCB'leri bağlı |
 | Backplane pinout | [04 §5](04-backplane-mekanik.md#5-pinout) | Üretilmiş her node uyumsuz hale gelir |
 | Konnektör ve mate sırası | [04 §4](04-backplane-mekanik.md#4-konnektör-seçimi) | Hot-plug yeteneği sonradan eklenemez |
-| Güç dağıtımı ve rail tanımı | [03](03-guc-mimarisi.md) | Node regülatör tasarımı bağlı |
-| Dahili protokol ve fiziksel katman | [05](05-dahili-bus.md) | Sahadaki node'ların firmware'i bağlı |
-| Slot adresleme | [06](06-slot-yonetimi.md) | Saha servis prosedürü bağlı |
-| Discovery ve descriptor formatı | [06](06-slot-yonetimi.md) | Geriye uyumluluk için versiyon alanı şart |
+| Güç dağıtımı ve rail tanımı | [03 §2](03-guc-mimarisi.md#2-rail-topolojisi) | Node regülatör tasarımı bağlı |
+| Dahili protokol ve fiziksel katman | [05 §1](05-dahili-bus.md#1-fiziksel-katman-kararı) | Sahadaki node'ların firmware'i bağlı |
+| Slot adresleme | [06 §1](06-slot-yonetimi.md#1-slot-adresleme) | Saha servis prosedürü bağlı |
+| Discovery ve descriptor formatı | [06 §8](06-slot-yonetimi.md#8-discovery-akışı) | Geriye uyumluluk için versiyon alanı şart |
 | Bootloader protokolü | [07](07-firmware-update.md) | Sahadaki node'lar güncellenemez hale gelir |
 | Node uyku/uyanma sözleşmesi | [10 §3](10-enerji-butcesi.md#3-wake-on-bus-nodeların-uyuması) | Host ile node'un uyku beklentisi uyuşmazsa cevapsız kalır |
 | Node tutma mekanizması | [10 §9.3](10-enerji-butcesi.md#93-titreşim) | Mekanik standart — sonradan eklenemez |

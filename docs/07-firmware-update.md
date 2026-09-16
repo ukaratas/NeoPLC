@@ -33,7 +33,7 @@ açılmaz, hiçbir kablo sökülmez.
 Tek app:    [BL 16K][App 46K][meta 2K]        → app 46 KB
 ```
 
-### Karar: tek app + CRC + BOOT# donanım kaçışı
+### Karar: tek app + CRC + bootloader penceresi
 
 **Çift bank'in tek gerçek kazancı:** "güncelleme sırasında güç kesilirse eski
 sürüme dön."
@@ -78,7 +78,7 @@ Reset
   ↓
 Bootloader başlar
   ↓
-BOOT# hattı düşük mü?  ──evet──→  Bootloader modunda kal
+~30 ms bus penceresi: "bootloader'da kal" geldi mi?  ──evet──→  Kal
   ↓ hayır
 Metadata geçerlilik bayrağı set mi?  ──hayır──→  Bootloader modunda kal
   ↓ evet
@@ -100,7 +100,7 @@ Fonksiyon kodları 0x20–0x2F ([05 §7](05-dahili-bus.md#7-fonksiyon-kodları))
 │ 1. Host: DISABLE(slot N)                                    │
 │      → çıkışlar güvenli duruma, node tarama döngüsünden çıkar│
 ├───────────────────────────────────────────────────────────────┤
-│ 2. Host: RESET(slot N) + BOOT# düşük                        │
+│ 2. Host: RST# çek-bırak + pencerede "bootloader'da kal"     │
 │      → node bootloader'a girer                               │
 ├───────────────────────────────────────────────────────────────┤
 │ 3. Host: IDENTIFY → bootloader versiyonu ve kapasitesi      │
@@ -115,7 +115,7 @@ Fonksiyon kodları 0x20–0x2F ([05 §7](05-dahili-bus.md#7-fonksiyon-kodları))
 ├───────────────────────────────────────────────────────────────┤
 │ 7. Host: ACTIVATE → metadata yazılır, geçerlilik bayrağı set│
 ├───────────────────────────────────────────────────────────────┤
-│ 8. Host: RESET (BOOT# yüksek) → node yeni app ile açılır   │
+│ 8. Host: RST# çek-bırak (pencerede komut yok) → yeni app    │
 ├───────────────────────────────────────────────────────────────┤
 │ 9. Host: IDENTIFY → yeni FW versiyonu doğrulanır            │
 ├───────────────────────────────────────────────────────────────┤
@@ -166,8 +166,8 @@ ama prosesi durdurur. **Kademeli yaklaşım tercih ediliyor.**
 |---------|---------------|
 | Güncelleme sırasında güç kesildi | Geçerlilik bayrağı temiz → bootloader'da kalır → host yeniden yazar |
 | App CRC hatası | Bootloader'da kalır → host yeniden yazar |
-| App açılıyor ama kilitleniyor | **BOOT# donanım kaçışı** → bootloader'a zorla |
-| App bus'ı sürekli meşgul ediyor | MOD_RST# ile node reset'te tutulur, sonra BOOT# ile bootloader |
+| App açılıyor ama kilitleniyor | **RST# + bootloader penceresi** → bootloader'a zorla |
+| App bus'ı sürekli meşgul ediyor | MOD_RST# ile node reset'te tutulur; gerekirse diğer node'lar da susturulur |
 | Bootloader bozuldu | ⚠️ Kurtarılamaz — SWD gerekir |
 
 **Son satır bilinçli bir risktir.** Bootloader yazma korumalı ve asla

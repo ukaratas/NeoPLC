@@ -210,15 +210,13 @@ ESP32-S3-WROOM-1U-N16R8: octal PSRAM GPIO 33–37'yi tüketir, kullanılabilir
 | RS-485 saha portu (TX, RX, DE) | 3 |
 | Backplane bus (TX, RX, DE) | 3 |
 | I²C slot expander (SDA, SCL) + INT# | 3 |
-| FAULT# wired-OR girişi | 1 |
-| SYNC çıkışı | 1 |
-| VBUS_RAW gerilim ölçümü (ADC) | 1 |
+| VIN gerilim ölçümü (ADC) | 1 |
 | Uyandırma girişleri (RTC GPIO) | 2 |
 | Fan PWM + tacho | 2 |
 | Durum LED'leri | 4 |
 | Buton / config DIP | 2 |
-| **Ara toplam** | **22** |
-| **Yedek** | **~8** |
+| **Ara toplam** | **20** |
+| **Yedek** | **~10** |
 
 Ethernet'in düşmesiyle serbest kalan 6 GPIO, karavan bağlamının getirdiği yeni
 gereksinimleri (batarya ölçümü, uyandırma, fan kontrolü) fazlasıyla karşılıyor.
@@ -306,7 +304,7 @@ değerlendirilecek.
 |-------|---------|
 | **Host konnektörü node'unkinden farklı** | Slot başına RST#/PRESENT# hatları host'a gidiyor, node konnektöründe yok |
 | **Mekanik keying zorunlu** | Node host slotuna, host node slotuna takılamamalı — yanlış takma hasar verir |
-| **DC giriş klemensi arka panelde** | 2.5 A giriş akımı kart kenarı fingerlarından geçmemeli; arka panelden backplane'e, host oradan VBUS_RAW olarak alır |
+| **DC giriş klemensi arka panelde** | 2.5 A giriş akımı kart kenarı fingerlarından geçmemeli; arka panelden doğrudan host blade'ine gider |
 | Host çıkardığında sistem durur | Kabul edilen davranış — node'lar reset'te kalır (D-22), çıkışlar güvenli duruma geçer |
 
 ### 7.4 Kazançlar
@@ -327,12 +325,12 @@ değerlendirilecek.
   │ Giriş koruma (bkz. 03 §1)    │
   │ sigorta·CM choke·TVS·FET     │
   └────┬────────────────┬────────┘
-       │ VBUS_RAW       │
+       │ VBUS (dahili)  │
        │           ┌────▼──────┐
        │           │ Buck      │ 5V @ 3A
        │           │ 12-48→5V  │
        │           └────┬──────┘
-       │                │ +5V_SYS
+       │                │ +5V
        │                ├──────────────┐
        │                │         ┌────▼─────┐
        │                │         │ 5V→3.3V  │
@@ -352,9 +350,9 @@ değerlendirilecek.
        │                │          └─UART2─→ RS-485 xcvr ─┐
        │                │                            │
   ┌────▼────────────────▼────────────────────────────▼─────┐
-  │  BACKPLANE   VBUS_RAW · +5V_SYS · BUS_A/B · ADDR0-3    │
-  │              FAULT# · SYNC · BOOT# · PRESENT# · RST#   │
+  │  BACKPLANE (12 pin)   GND ×2 · +5V ×2 · BUS_A/B        │
+  │                       MOD_RST# · PRESENT# · 4× rezerve  │
   └──┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬────┘
    slot0  slot1  slot2  slot3  slot4  slot5  slot6  slot7
-     ↑ her slotta akım sınırlı load switch (+5V_SYS)
+     ↑ her slotta akım sınırlı load switch (+5V)
 ```

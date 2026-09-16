@@ -13,15 +13,11 @@ paylaşır; sadece saha tarafı farklıdır.
 │                                                             │
 │  ┌── ORTAK ÇEKİRDEK (tüm node'larda aynı) ──────────────┐   │
 │  │                                                       │   │
-│  │  Kart kenarı konnektörü (26 pin)                     │   │
-│  │  +5V_SYS → 3.3V regülatör                            │   │
+│  │  Kart kenarı konnektörü (12 pin)                     │   │
+│  │  +5V → 3.3V regülatör                            │   │
 │  │  RS-485 transceiver                                  │   │
 │  │  MCU + protokol firmware'i                           │   │
-│  │  ADDR0-3 pull-up'ları                                │   │
 │  │  MOD_RST# pull-down                                  │   │
-│  │  FAULT# open-drain sürücü                            │   │
-│  │  SYNC girişi                                         │   │
-│  │  BOOT# girişi                                        │   │
 │  │  Soft-start                                          │   │
 │  │  SWD test noktaları                                  │   │
 │  └───────────────────────────────────────────────────────┘   │
@@ -84,7 +80,7 @@ karmaşıklık, çekirdekteki sorunları maskeler.
 | Aday | Neden ilk olarak uygun değil |
 |------|------------------------------|
 | Dijital çıkış | Yük sürme, freewheel, kısa devre koruması — çekirdek hatalarını maskeleyebilir |
-| Röle çıkış | VBUS_RAW kullanımı ek değişken getirir; bobin akımı güç bütçesi testini bulandırır |
+| Röle çıkış | Bobin darbe akımı güç bütçesi testini bulandırır |
 | Analog giriş | Referans, kalibrasyon, gürültü — en zor node. Çekirdek olgunlaşmadan yapılmamalı |
 
 ---
@@ -150,9 +146,9 @@ Tek sıra yeterli — iki sıraya gerek yok. Ayrıntı:
 |-----|------|------|------------|
 | **1** | Dijital giriş | 1U | Çekirdek doğrulaması — D-28 |
 | **1** | Dijital çıkış | 1U | Çekirdek dondurulduktan sonra |
-| **2** | Röle çıkış | 1U / 2U | VBUS_RAW kullanımının ilk doğrulaması |
+| **2** | Röle çıkış | 1U / 2U | Bobin darbe yönetiminin ilk doğrulaması |
 | **2** | Analog giriş | 1U / 2U | Çekirdek olgun olmalı; gürültü bölgeleme kritik |
-| **2** | Analog çıkış | 1U / 2U | VBUS_RAW compliance gerilimi |
+| **2** | Analog çıkış | 1U / 2U | **Lokal boost** — 0–10 V compliance (tek ray kararının bedeli) |
 | **2** | **Ethernet / haberleşme** | 1U | **Ethernet host'tan çıkarıldı** (D-47) — kablolu Ethernet isteyen bu node'u takar. W5500 + magjack, sadece takılıyken enerji harcar |
 | **3** | Diğer haberleşme (CAN, ek RS-485) | 1U / 2U | Ek protokol yığını — node'da daha güçlü MCU gerekebilir |
 | **3** | Özel fonksiyon | 1U / 2U | Sayaç, enkoder, PWM, sıcaklık (RTD/TC) |
@@ -187,7 +183,7 @@ varyanttır**:
 |-------|----|----|
 | Ortak çekirdek | Aynı | **Aynı** |
 | Backplane konnektörü | 1 adet (sol slot) | **1 adet (sol slot)** — [04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi) |
-| +5V_SYS bütçesi | 200 mA | 400 mA |
+| +5V bütçesi | 200 mA | 400 mA |
 | Ön yüz genişliği | 17.5 mm | 35 mm |
 | Kanal sayısı | Baz | Tipik 2× |
 | Descriptor `form_factor` | 1U | 2U |
