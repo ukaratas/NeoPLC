@@ -14,6 +14,8 @@ yatar.
 
 Bu nedenle bu dokümantasyonun asıl konusu kartlar değil, **sözleşmedir.**
 
+![Sistem ön görünüm](img/01-sistem-onden.svg)
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  HOST BİRİM                                                  │

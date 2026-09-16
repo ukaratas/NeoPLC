@@ -14,6 +14,8 @@ gelecekteki tüm üyelerini bağlar.
 
 ---
 
+![NeoPLC sistem ön görünüm](img/01-sistem-onden.svg)
+
 ## Doküman haritası
 
 | # | Doküman | Kapsam | Durum |
@@ -31,6 +33,7 @@ gelecekteki tüm üyelerini bağlar.
 | **10** | **[Enerji Bütçesi](10-enerji-butcesi.md)** | **Güç durumları, tüketim bütçesi, batarya ömrü — birincil kısıt** | 🟡 Taslak |
 | 11 | [Çıkış Node'u Topolojileri](11-cikis-node-topolojileri.md) | MOSFET / latching röle / hibrit, DC-AC ayrımı, termal | 🟡 Taslak |
 | 12 | [Mekanik Referans Rev 0.1](12-mekanik-referans-rev01.md) | Çalışma draftı + mimari çakışma tablosu | 📌 Referans |
+| — | [Görseller](img/) | Mimari kararların görsel karşılıkları (SVG) | 🖼 |
 
 ---
 

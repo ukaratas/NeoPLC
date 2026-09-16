@@ -222,6 +222,8 @@ Gereksinimler:
 
 ### 3.6 Mekanik paradigma: kutu-içinde-kutu → gerçek blade
 
+![Blade şasi](img/02-blade-kizak-kesit.svg)
+
 Draft'ta her node kendi plastik muhafazasında, host'un önüne takılan kapalı bir
 kutu. Yani "kutuya kutular bağlanıyor".
 

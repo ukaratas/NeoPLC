@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" width="720" height="440" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="720" height="440" fill="#faf9f7"/>
+
+  <text x="30" y="30" font-size="16" font-weight="700" fill="#26241f">Hava Akışı — Blade Kanalları</text>
+  <text x="30" y="47" font-size="11" fill="#8a857c">Üstten görünüm · ön panelden emiş · blade'ler arası kanal · arkadan fan ile atış</text>
+
+  <defs>
+    <marker id="c2" markerWidth="8" markerHeight="8" refX="5.5" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#4a7fb5"/></marker>
+    <marker id="w2" markerWidth="8" markerHeight="8" refX="5.5" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#bf5b25"/></marker>
+  </defs>
+
+  <text x="345" y="72" font-size="9.5" font-weight="600" fill="#4a7fb5" text-anchor="middle">ÖN — emiş delikleri</text>
+
+  <!-- sasi -->
+  <rect x="150" y="80" width="390" height="240" rx="4" fill="#eceae5" stroke="#26241f" stroke-width="2"/>
+
+  <!-- on panel seridi (emis delikleri) -->
+  <rect x="150" y="80" width="390" height="16" fill="#3d5a80"/>
+  <g fill="#1e2f47">
+    <circle cx="176" cy="88" r="2.6"/><circle cx="196" cy="88" r="2.6"/><circle cx="216" cy="88" r="2.6"/>
+    <circle cx="236" cy="88" r="2.6"/><circle cx="256" cy="88" r="2.6"/><circle cx="276" cy="88" r="2.6"/>
+    <circle cx="296" cy="88" r="2.6"/><circle cx="316" cy="88" r="2.6"/><circle cx="336" cy="88" r="2.6"/>
+    <circle cx="356" cy="88" r="2.6"/><circle cx="376" cy="88" r="2.6"/><circle cx="396" cy="88" r="2.6"/>
+    <circle cx="416" cy="88" r="2.6"/><circle cx="436" cy="88" r="2.6"/><circle cx="456" cy="88" r="2.6"/>
+    <circle cx="476" cy="88" r="2.6"/><circle cx="496" cy="88" r="2.6"/><circle cx="516" cy="88" r="2.6"/>
+  </g>
+
+  <!-- blade'ler: dikey, on-arka dogrultusunda -->
+  <g fill="#2d6a4f">
+    <rect x="178" y="102" width="7" height="170"/>
+    <rect x="218" y="102" width="7" height="170"/>
+    <rect x="258" y="102" width="7" height="170"/>
+    <rect x="298" y="102" width="7" height="170"/>
+    <rect x="338" y="102" width="7" height="170"/>
+    <rect x="378" y="102" width="7" height="170"/>
+    <rect x="418" y="102" width="7" height="170"/>
+  </g>
+
+  <!-- bos slot: kor kapak -->
+  <rect x="455" y="102" width="9" height="170" fill="#c9c4ba" opacity="0.5" stroke="#a89f90" stroke-width="1" stroke-dasharray="4 3"/>
+  <text transform="rotate(-90 459 187)" x="459" y="187" font-size="7.5" fill="#57534a" text-anchor="middle">kör kapak</text>
+
+  <!-- soguk hava: kanallarda asagi dogru -->
+  <g stroke="#4a7fb5" stroke-width="2" fill="none">
+    <path d="M198 106 v160" marker-end="url(#c2)"/>
+    <path d="M238 106 v160" marker-end="url(#c2)"/>
+    <path d="M278 106 v160" marker-end="url(#c2)"/>
+    <path d="M318 106 v160" marker-end="url(#c2)"/>
+    <path d="M358 106 v160" marker-end="url(#c2)"/>
+    <path d="M398 106 v160" marker-end="url(#c2)"/>
+    <path d="M438 106 v160" marker-end="url(#c2)"/>
+  </g>
+
+  <!-- arka plenum -->
+  <rect x="156" y="278" width="378" height="36" rx="3" fill="#f7ece3" stroke="#bf5b25" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="240" y="300" font-size="8.5" fill="#bf5b25">arka plenum — sıcak hava toplanıyor</text>
+
+  <!-- fan -->
+  <circle cx="470" cy="296" r="22" fill="#fff" stroke="#bf5b25" stroke-width="2"/>
+  <path d="M470 278 a18 18 0 0 1 15.6 9 M470 314 a18 18 0 0 1 -15.6 -9 M485.6 305 a18 18 0 0 1 -31.2 0" fill="none" stroke="#bf5b25" stroke-width="1.7"/>
+
+  <!-- atis oku -->
+  <path d="M496 296 h58" stroke="#bf5b25" stroke-width="2.4" fill="none" marker-end="url(#w2)"/>
+  <text x="570" y="292" font-size="9.5" font-weight="700" fill="#bf5b25">atış</text>
+  <text x="570" y="305" font-size="8" fill="#8a857c">FAN 40 mm</text>
+
+  <text x="345" y="338" font-size="9" fill="#8a857c" text-anchor="middle">ARKA</text>
+
+  <!-- kanal olcusu -->
+  <g stroke="#8a857c" stroke-width="1">
+    <line x1="185" y1="118" x2="185" y2="132"/><line x1="218" y1="118" x2="218" y2="132"/>
+    <line x1="185" y1="125" x2="218" y2="125"/>
+  </g>
+  <path d="M185 125 l5 -2.5 v5 z M218 125 l-5 -2.5 v5 z" fill="#8a857c"/>
+  <text x="130" y="128" font-size="8.5" fill="#5c574e" text-anchor="end">kanal ≈ 15 mm</text>
+  <line x1="134" y1="125" x2="183" y2="125" stroke="#8a857c" stroke-width="0.8" stroke-dasharray="2 2"/>
+
+  <text x="345" y="356" font-size="8.5" fill="#5c574e" text-anchor="middle">PCB doğrudan hava akışında — arada plastik muhafaza yok</text>
+
+  <!-- hesap kutulari -->
+  <rect x="30" y="374" width="330" height="52" rx="4" fill="#eef4fa" stroke="#4a7fb5"/>
+  <text x="44" y="392" font-size="9.5" font-weight="700" fill="#2a5a8a">Gereken debi</text>
+  <text x="44" y="408" font-size="8.8" fill="#5c574e">CFM ≈ 1.76 × 13.5 W / 15 °C = <tspan font-weight="700" fill="#2a5a8a">1.6 CFM</tspan></text>
+  <text x="44" y="420" font-size="8" fill="#8a857c">40 mm fan tam hızda 5–10 CFM verir</text>
+
+  <rect x="372" y="374" width="318" height="52" rx="4" fill="#fff8ec" stroke="#bf5b25"/>
+  <text x="386" y="392" font-size="9.5" font-weight="700" fill="#bf5b25">Fan enerji maliyeti</text>
+  <text x="386" y="408" font-size="8.8" fill="#5c574e">%30 devir → 2–3 CFM → <tspan font-weight="700" fill="#bf5b25">~0.2 W</tspan> · yük yokken kapalı</text>
+  <text x="386" y="420" font-size="8" fill="#8a857c">günde 4 saat = 0.8 Wh — sistem bütçesinin %23'ü</text>
+</svg>

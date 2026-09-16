@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" width="720" height="440" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="720" height="440" fill="#faf9f7"/>
+
+  <text x="30" y="30" font-size="16" font-weight="700" fill="#26241f">1U Node — Blade Anatomisi</text>
+  <text x="30" y="47" font-size="11" fill="#8a857c">Yandan görünüm · çıplak PCB + ön panel · DO-DC-8A-L örneği (4 kanal latching)</text>
+
+  <!-- ust kizak -->
+  <rect x="96" y="76" width="340" height="12" fill="#d8d3c8" stroke="#8a857c" stroke-width="1"/>
+  <text x="266" y="70" font-size="8.5" fill="#8a857c" text-anchor="middle">üst kızak oluğu</text>
+
+  <!-- alt kizak -->
+  <rect x="96" y="313" width="340" height="12" fill="#d8d3c8" stroke="#8a857c" stroke-width="1"/>
+  <text x="266" y="342" font-size="8.5" fill="#8a857c" text-anchor="middle">alt kızak oluğu</text>
+
+  <!-- PCB -->
+  <rect x="100" y="88" width="330" height="225" fill="#2d6a4f" stroke="#1d5233" stroke-width="1.5"/>
+
+  <!-- on panel -->
+  <rect x="84" y="68" width="16" height="265" rx="2" fill="#3d5a80" stroke="#2a3f5c" stroke-width="1.2"/>
+  <text transform="rotate(-90 74 200)" x="74" y="200" font-size="9" font-weight="600" fill="#5c574e" text-anchor="middle">ÖN PANEL</text>
+  <circle cx="92" cy="84" r="3.4" fill="#7fd48a"/>
+  <circle cx="92" cy="96" r="3.4" fill="#d9a441"/>
+  <path d="M84 306 h-14 v16 h14" fill="#bf5b25" stroke="#8a3f16" stroke-width="1"/>
+  <text x="40" y="336" font-size="8" fill="#bf5b25">mandal</text>
+
+  <!-- klemens -->
+  <rect x="104" y="150" width="34" height="145" rx="2" fill="#2f7d4f" stroke="#16341f" stroke-width="1.2"/>
+  <g fill="#0f2416">
+    <circle cx="121" cy="167" r="4.6"/><circle cx="121" cy="197" r="4.6"/>
+    <circle cx="121" cy="227" r="4.6"/><circle cx="121" cy="257" r="4.6"/>
+    <circle cx="121" cy="285" r="4.6"/>
+  </g>
+
+  <!-- latching roleler -->
+  <g>
+    <rect x="150" y="160" width="46" height="62" rx="2" fill="#3a3630" stroke="#1c1a16"/>
+    <rect x="150" y="234" width="46" height="62" rx="2" fill="#3a3630" stroke="#1c1a16"/>
+    <rect x="204" y="160" width="46" height="62" rx="2" fill="#3a3630" stroke="#1c1a16"/>
+    <rect x="204" y="234" width="46" height="62" rx="2" fill="#3a3630" stroke="#1c1a16"/>
+  </g>
+  <text x="200" y="231" font-size="8.5" font-weight="600" fill="#f0ece6" text-anchor="middle">4 × LATCHING RÖLE</text>
+
+  <rect x="262" y="252" width="40" height="26" rx="2" fill="#57534a"/>
+  <text x="282" y="268" font-size="7.5" fill="#fff" text-anchor="middle">sürücü</text>
+
+  <rect x="262" y="150" width="44" height="46" rx="2" fill="#1c1a16"/>
+  <text x="284" y="169" font-size="8" fill="#f0ece6" text-anchor="middle">MCU</text>
+  <text x="284" y="182" font-size="7" fill="#a89f90" text-anchor="middle">STM32G0</text>
+
+  <rect x="322" y="152" width="34" height="22" rx="2" fill="#57534a"/>
+  <text x="339" y="166" font-size="7" fill="#fff" text-anchor="middle">RS-485</text>
+  <rect x="322" y="196" width="34" height="22" rx="2" fill="#57534a"/>
+  <text x="339" y="210" font-size="7" fill="#fff" text-anchor="middle">5→3V3</text>
+  <rect x="322" y="240" width="34" height="20" rx="2" fill="#57534a" opacity="0.75"/>
+  <text x="339" y="253" font-size="6.5" fill="#fff" text-anchor="middle">soft-start</text>
+
+  <g fill="#c9a227"><rect x="268" y="292" width="5" height="9"/><rect x="277" y="292" width="5" height="9"/><rect x="286" y="292" width="5" height="9"/><rect x="295" y="292" width="5" height="9"/></g>
+  <text x="284" y="309" font-size="7" fill="#d8e8df" text-anchor="middle">SWD pad</text>
+
+  <!-- kart kenari -->
+  <g fill="#c9a227">
+    <rect x="392" y="98" width="36" height="9"/><rect x="392" y="114" width="36" height="9"/>
+    <rect x="392" y="130" width="36" height="9"/><rect x="392" y="146" width="36" height="9"/>
+    <rect x="392" y="162" width="36" height="9"/><rect x="392" y="178" width="36" height="9"/>
+    <rect x="392" y="194" width="36" height="9"/><rect x="392" y="210" width="36" height="9"/>
+    <rect x="392" y="226" width="36" height="9"/><rect x="392" y="242" width="36" height="9"/>
+    <rect x="392" y="258" width="36" height="9"/><rect x="392" y="274" width="36" height="9"/>
+    <rect x="392" y="290" width="36" height="9"/>
+  </g>
+
+  <!-- PCB yukseklik olcusu -->
+  <g stroke="#8a857c" stroke-width="1">
+    <line x1="448" y1="88" x2="462" y2="88"/><line x1="448" y1="313" x2="462" y2="313"/>
+    <line x1="455" y1="88" x2="455" y2="313"/>
+  </g>
+  <path d="M455 88 l-3 6 h6 z M455 313 l-3 -6 h6 z" fill="#8a857c"/>
+  <text transform="rotate(-90 440 200)" x="440" y="200" font-size="9" fill="#5c574e" text-anchor="middle">PCB 75.0</text>
+
+  <!-- derinlik olcusu -->
+  <g stroke="#8a857c" stroke-width="1">
+    <line x1="100" y1="370" x2="100" y2="356"/><line x1="430" y1="370" x2="430" y2="356"/>
+    <line x1="100" y1="363" x2="430" y2="363"/>
+  </g>
+  <path d="M100 363 l7 -3.5 v7 z M430 363 l-7 -3.5 v7 z" fill="#8a857c"/>
+  <text x="265" y="382" font-size="9.5" fill="#5c574e" text-anchor="middle">PCB derinliği 110.0</text>
+
+  <!-- klemens callout (asagi sol, PCB disinda) -->
+  <line x1="121" y1="295" x2="121" y2="400" stroke="#5c574e" stroke-width="0.9" stroke-dasharray="3 2"/>
+  <rect x="30" y="400" width="236" height="32" rx="4" fill="#fff" stroke="#c9c4ba"/>
+  <text x="42" y="415" font-size="8.8" font-weight="700" fill="#26241f">5 kutup push-in · 3.5 mm adım</text>
+  <text x="42" y="427" font-size="8.2" fill="#8a857c">4 çıkış + ortak dönüş = tam 17.5 mm</text>
+
+  <!-- kart kenari callout -->
+  <rect x="478" y="88" width="216" height="58" rx="4" fill="#fff" stroke="#c9c4ba"/>
+  <text x="490" y="106" font-size="9.5" font-weight="700" fill="#26241f">Kart kenarı konnektörü</text>
+  <text x="490" y="121" font-size="8.2" fill="#8a857c">26 pin · 2.54 mm · çift sıra</text>
+  <text x="490" y="134" font-size="8.2" fill="#8a857c">4 kademeli stagger → görsel 04</text>
+  <line x1="430" y1="117" x2="478" y2="117" stroke="#8a857c" stroke-width="0.9"/>
+
+  <!-- bilesen yuksekligi -->
+  <rect x="478" y="164" width="216" height="118" rx="4" fill="#fff8ec" stroke="#bf5b25" stroke-width="1.3"/>
+  <text x="490" y="184" font-size="9.5" font-weight="700" fill="#bf5b25">Bileşen yüksekliği bütçesi</text>
+  <text x="490" y="204" font-size="8.5" fill="#5c574e">Slot adımı</text><text x="676" y="204" font-size="8.5" fill="#5c574e" text-anchor="end">17.5 mm</text>
+  <text x="490" y="219" font-size="8.5" fill="#5c574e">PCB kalınlığı</text><text x="676" y="219" font-size="8.5" fill="#5c574e" text-anchor="end">− 1.6 mm</text>
+  <text x="490" y="234" font-size="8.5" fill="#5c574e">Komşuya açıklık</text><text x="676" y="234" font-size="8.5" fill="#5c574e" text-anchor="end">− 1.5 mm</text>
+  <line x1="490" y1="241" x2="676" y2="241" stroke="#bf5b25" stroke-width="0.9"/>
+  <text x="490" y="256" font-size="9" font-weight="700" fill="#bf5b25">Kullanılabilir</text><text x="676" y="256" font-size="9" font-weight="700" fill="#bf5b25" text-anchor="end">14.4 mm</text>
+  <text x="490" y="273" font-size="8" fill="#8a857c">Latching röle ≤ 12 mm olmalı · D-61</text>
+</svg>

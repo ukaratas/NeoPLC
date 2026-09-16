@@ -5,6 +5,8 @@
 
 ---
 
+![Blade şasi üstten kesit](img/02-blade-kizak-kesit.svg)
+
 ## 1. Mekanik mimari: blade mi, kutu-içinde-kutu mu?
 
 İki paradigma var ve bu seçim node maliyetinden termal tasarıma kadar her şeyi
@@ -76,6 +78,8 @@ iki tolerans zinciri üst üste biniyor.
 **17.5 mm neden doğru:** Modüler şalt cihazlarının (sigorta, kontaktör) tek
 kutup genişliği 17.5/18 mm — yani DIN ekosistem argümanı geçerli. Ve 22.5 mm'ye
 göre cihazı **40 mm daraltıyor**; karavanda hacim pahalı.
+
+![1U node anatomisi](img/03-node-1u-anatomi.svg)
 
 ### 2.1 Bileşen yüksekliği bütçesi — kritik kısıt
 
@@ -181,6 +185,8 @@ Bu bir PCB süreç kararı, tasarımı etkilemiyor.
 
 ## 5. Pinout
 
+![Kart kenarı stagger ve pin dizilimi](img/04-kartkenari-stagger.svg)
+
 ### Karar: 26 pin, 4 kademeli mate sırası · D-32
 
 | # | Sinyal | Yön | Mate | Açıklama |
@@ -230,6 +236,8 @@ doğarsa sadece transceiver değişir, pinout ve mekanik aynı kalır.
 ## 6. Hava akışı ve termal
 
 Blade mimarisinin asıl kazandığı yer.
+
+![Hava akışı](img/05-hava-akisi.svg)
 
 ### 6.1 Akış düzeni
 
