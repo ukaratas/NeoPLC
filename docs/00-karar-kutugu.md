@@ -11,7 +11,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | Durum | Adet |
 |-------|------|
-| 🟢 Kabul edildi | 22 |
+| 🟢 Kabul edildi | 23 |
 | 🟡 Öneri hazır, onay bekliyor | 36 |
 | 🔴 Dışarıdan bilgi gerekiyor | 1 |
 | ⚪ Henüz ele alınmadı | 4 |
@@ -81,11 +81,11 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-04 | Hedef ortam sıcaklığı | **60 °C** | 🟢 | [03 §5](03-guc-mimarisi.md#5-termal-analiz) |
-| D-08 | Backplane rail topolojisi | **Tek ray: sadece +5V** — VBUS_RAW dağıtımı kaldırıldı | 🟢 | [03 §2](03-guc-mimarisi.md#2-rail-topolojisi) |
+| D-04 | Hedef ortam sıcaklığı | **60 °C** | 🟢 | [03 §6](03-guc-mimarisi.md#6-termal-analiz) |
+| D-08 | Backplane rail topolojisi | **Tek ray: sadece +5V, koşulsuz** — yüksek gerilim gereken node kendi boost'unu yapar | 🟢 | [03 §2](03-guc-mimarisi.md#2-rail-topolojisi) |
 | D-09 | Giriş koruma topolojisi | Seri FET + gate zener clamp (~55V) → downstream 60V sınıfı | 🟡 | [03 §1](03-guc-mimarisi.md#1-giriş-koruma-katı) |
 | D-29 | Slot güç bütçesi | 1U: 150 mA · 2U: 300 mA · toplam ≤ 1.2 A (descriptor ile zorlanır) | 🟡 | [03 §4](03-guc-mimarisi.md#4-güç-bütçesi) |
-| D-31 | Ana buck tasarım noktası | **5V @ 1.5A** — 3A → 2A → 1.5A | 🟡 | [03 §3](03-guc-mimarisi.md#3-ana-dönüştürücü) |
+| D-31 | Ana buck tasarım noktası | **5V @ 1.5A sürekli, akım limiti ≥2.5A** (röle darbe yedeği) | 🟡 | [03 §3](03-guc-mimarisi.md#3-ana-dönüştürücü) |
 | D-48 | Dönüştürücü seçim kriteri | **Hafif yük verimi + düşük Iq**, tepe verim değil | 🟡 | [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri-değişti) |
 
 ### Backplane ve mekanik
@@ -94,7 +94,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 |----|------|---------------|-------|-----|
 | D-14 | Konnektör tipi | PCB kart kenarı (gold finger), 2.54mm, çift sıra, 26 pin | 🟡 | [04 §4](04-backplane-mekanik.md#4-konnektör-seçimi) |
 | **D-60** | **Mekanik paradigma** | **Gerçek blade** — şasi + kızak, çıplak PCB. Kutu-içinde-kutu terk edildi | 🟢 | [04 §1](04-backplane-mekanik.md#1-mekanik-mimari-blade-mi-kutu-içinde-kutu-mu) |
-| **D-61** | **1U bileşen yüksekliği** | **14.4 mm bütçe** — latching röleler ≤12 mm olmalı, doğrulanacak | 🟡 | [04 §2.1](04-backplane-mekanik.md#21-bileşen-yüksekliği-bütçesi-kritik-kısıt) |
+| **D-61** | **1U bileşen yüksekliği** | **14.4 mm bütçe** — latching röle ≤12 mm. Bobin gerilimi artık kısıt değil | 🟡 | [04 §2.1](04-backplane-mekanik.md#21-bileşen-yüksekliği-bütçesi-kritik-kısıt) |
 | D-62 | Şasi malzemesi | Prototip: 3D baskı + Al kızak · Seri: **Al ekstrüzyon** (rijitlik + EMI + ısı yolu) | 🟡 | [04 §3.2](04-backplane-mekanik.md#32-şasi-malzemesi) |
 | D-63 | Boş slot kör kapağı | **Zorunlu** — hava akışı kısa devre olmasın | 🟡 | [04 §3.4](04-backplane-mekanik.md#34-boş-slotlar) |
 | D-64 | AC node şebeke bariyeri | Klipsli plastik kapak (tam kutu değil) | 🟡 | [04 §1.1](04-backplane-mekanik.md#11-bladein-bedeli-ve-karşılığı) |
@@ -152,7 +152,8 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 |----|------|---------------|-------|-----|
 | D-51 | DC / AC ayrımı | Ayrı node aileleri, AC minimum 2U (creepage) | 🟡 | [11 §4](11-cikis-node-topolojileri.md#4-dc-ac-ayrımı) |
 | D-52 | 8A sınıfı: latching ve MOSFET ayrı node mü? | Ayrı öneriliyor — PWM gerekenler MOSFET, uzun süre açık kalanlar latching | 🟡 | [11 §5.1](11-cikis-node-topolojileri.md#51-dc-çıkış) |
-| D-53 | Latching kontak durumu geri okuma | **Zorunlu** — yöntem açık (yardımcı kontak vs gerilim ölçümü) | 🟡 | [11 §7.3](11-cikis-node-topolojileri.md#73-durum-geri-okuma) |
+| D-53 | Latching kontak durumu geri okuma | **Zorunlu** — yöntem açık (yardımcı kontak vs gerilim ölçümü) | 🟡 |
+| **D-68** | **Anlık akım yönetimi** | Röle darbeleri node içinde ve node'lar arasında sıralanır · buck akım limiti ≥2.5 A · descriptor'a tepe akım alanı | 🟢 | [11 §7.3](11-cikis-node-topolojileri.md#73-durum-geri-okuma) |
 | D-54 | 32A/64A ısı yolu | Alüminyum ray/ön panel üzerinden — draft'taki hibrit yapı uygun | 🟡 | [11 §6.3](11-cikis-node-topolojileri.md#63-ek-termal-önlemler) |
 | D-55 | AC'de zero-cross anahtarlama | Açık | ⚪ | [11 §9](11-cikis-node-topolojileri.md#9-açık-sorular) |
 | **D-56** | **Terminoloji: Host/Node mu Host/Node mü?** | **Host/Node öneriliyor** (draft'taki ürün dili) | 🟡 | [12 §1.1](12-mekanik-referans-rev01.md#11-terminoloji) |
@@ -212,3 +213,6 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | 2026-09-16 | **D-20** | FAULT# pini → **poll** | 100 ms gecikme önemsiz; gerçek zamanlı koruma node'un işi. Wired-OR'un maskeleme arıza modu da gitti |
 | 2026-09-16 | **D-21** | SYNC pini → **broadcast çerçeve** | Bus zaten broadcast; µs ile ns farkı bu uygulamada ölçülemez |
 | 2026-09-16 | D-11, D-59 | Rezerve pinler 6 → 4 | Tam dupleks senaryosu gerçekçi değil; 3.3V'a zaten hayır denmişti |
+| 2026-09-16 | **D-08** | Koşullu → **koşulsuz** | 5 V bobin bulunabilirliği karara gömülü bir tedarik riskiydi. Yüksek gerilim gereken node kendi boost'unu yapıyor (~$0.30) — bağımlılık tamamen kalktı |
+| 2026-09-16 | **D-68** | Yeni — anlık akım yönetimi | Röle bobinleri rafta 2.6 A tepe yaratabilir. Bulk kapasitörle karşılamak 66 mF gerektiriyor, yani imkânsız. Sıralama optimizasyon değil yapısal gereklilik |
+| 2026-09-16 | D-61 | Kısıt daraldı | Latching röle aramasında bobin gerilimi artık filtre değil — sadece yükseklik ve şok değeri |

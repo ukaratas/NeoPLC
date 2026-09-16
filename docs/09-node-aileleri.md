@@ -14,12 +14,13 @@ paylaşır; sadece saha tarafı farklıdır.
 │  ┌── ORTAK ÇEKİRDEK (tüm node'larda aynı) ──────────────┐   │
 │  │                                                       │   │
 │  │  Kart kenarı konnektörü (12 pin)                     │   │
-│  │  +5V → 3.3V regülatör                            │   │
+│  │  +5V → 3.3V regülatör                                │   │
 │  │  RS-485 transceiver                                  │   │
 │  │  MCU + protokol firmware'i                           │   │
 │  │  MOD_RST# pull-down                                  │   │
-│  │  Soft-start                                          │   │
+│  │  Soft-start · lokal tampon kapasitör                 │   │
 │  │  SWD test noktaları                                  │   │
+│  │  (opsiyonel) lokal boost — bobin / compliance için   │   │
 │  └───────────────────────────────────────────────────────┘   │
 │                            ↕                                 │
 │  ┌── SAHA TARAFI (node tipine özgü) ────────────────────┐   │

@@ -300,23 +300,36 @@ dizi. Node MCU'sunda GPIO yakmıyor, maliyeti düşük.
 ### 7.2 Darbe yönetimi — kritik tasarım notu
 
 ```
-Bobin darbesi:  5V × 40 mA × 20 ms  =  4.0 mJ / geçiş
-                (5 V bobinli latching röle — tek ray kararı, D-08)
+Bobin gücü ≈ 300 mW, darbe 10–30 ms → **5 V tarafından ~70 mA**
+
+Bobin gerilimi serbest: 5 V bobin doğrudan sürülür, 12/24 V bobin gerekiyorsa
+node üzerinde küçük bir boost ya da gerilim katlayıcı ile üretilir (~$0.20–0.30).
+Bobin **gücü** sabit olduğu için 5 V tarafı akımı neredeyse değişmiyor
+([03 §5.1](03-guc-mimarisi.md#51-bobin-başına-5-v-tarafı-akımı)).
 
 4 kanal AYNI ANDA anahtarlanırsa:
-    4 × 40 mA  =  160 mA anlık
+    4 × 70 mA  =  280 mA anlık
     Slot +5V limiti       =  150 mA   ([03 §4](03-guc-mimarisi.md#4-güç-bütçesi))
 ```
 
-Limiti kısa süre aşıyor — **lokal tampon kapasitör zorunlu.** Ayrıca aynı anda ateşleme rail'de dip yaratır ve komşu slotları
+Slot limitinin (150 mA) çok üstünde. Aynı anda ateşleme rail'de dip yaratır ve komşu slotları
 etkileyebilir.
 
 **Kural: röle darbeleri sıralanmalı (staggered), asla eşzamanlı ateşlenmemeli.**
-Node firmware'inin sorumluluğu. Örneğin 2 ms arayla → tüm kanallar 16 ms'de
-tamamlanır, tepe akım 30 mA'de kalır.
+Node firmware'inin sorumluluğu. 2 ms arayla → 4 kanal 8 ms'de tamamlanır, tepe
+akım **70 mA**'de kalır.
 
-Node üzerinde bobin darbelerini besleyen yerel bir tampon kapasitör de
-eklenmeli — darbe akımını backplane yerine kapasitörden çekmek rail'i korur.
+Bu bir optimizasyon değil **yapısal gereklilik**: eşzamanlı ateşlemeyi bulk
+kapasitörle karşılamak 66 mF gerektiriyor, yani mümkün değil
+([03 §5.3](03-guc-mimarisi.md#53-neden-bulk-kapasitör-bu-işi-çözemiyor)).
+
+**Node'lar arası sıralama:** Röle durum değişiklikleri broadcast SYNC ile değil,
+node'un kendi işlemi sırasında uygulanır — host'un sıralı tarama düzeni
+node'ları doğal olarak ~600 µs arayla dağıtıyor. Böylece rafta aynı anda tek
+bobin enerjilenmiş oluyor.
+
+Node üzerinde ~100 µF lokal kapasitör, bobin akımının **kenarını** (di/dt)
+karşılar — darbenin tamamını değil, onu ray besliyor.
 
 ### 7.3 Durum geri okuma
 
@@ -340,6 +353,11 @@ konum değiştirme riski var.**
 Karavan yol titreşimi           ≈  < 5 g
 Tipik latching röle fonksiyonel şok değeri  ≈  10–20 g
 ```
+
+> **Parça seçim kriteri sadeleşti.** Tek ray kararı bobin gerilimini serbest
+> bıraktığı için latching röle aramasında **tek kısıt yükseklik** (≤ 12 mm,
+> D-61) ve şok değeri. Bobin gerilimi artık bir filtre değil — arama alanı
+> belirgin şekilde genişledi.
 
 Marj yeterli görünüyor **ama parça seçiminde şok değeri açıkça doğrulanacak** —
 bu, gözden kaçarsa sahada "kendiliğinden kapanan lamba" olarak geri döner.

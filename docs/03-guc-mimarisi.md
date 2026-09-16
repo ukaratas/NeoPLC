@@ -103,8 +103,14 @@ Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → Ters polarite + O
 | Node güç katı basitleşti | Tek giriş, 5V→3.3V tek regülatör |
 | Host güç katı basitleşti | VBUS_RAW dağıtımı, sigortalaması ve slot limiti ortadan kalktı |
 
-**Bağımlı doğrulama:** Latching röleler **5 V bobinli** olacak — standart
-katalog ürünü, ama D-61 (alçak profil) ile birlikte teyit edilecek.
+**Bobin gerilimi bir bağımlılık değil.** 5 V'tan yüksek bobin gerekiyorsa
+yükseltme **node üzerinde** yapılır — 5V→12V küçük bir boost ya da kapasitif
+gerilim katlayıcı, ~$0.20–0.30. Bu, tek ray kararını **koşulsuz** hale
+getiriyor: parça tedariği kararı geri açamaz.
+
+> Not: Bobin **gücü** gerilimden bağımsız (~300 mW). 12 V bobin + boost, 5 V
+> bobinle aynı 5 V-tarafı akımı çekiyor (%85 verimle ~%18 fazla). Yani
+> yükseltme yapmanın enerji bedeli de yok denecek kadar az.
 
 ---
 
@@ -116,6 +122,7 @@ katalog ürünü, ama D-61 (alçak profil) ile birlikte teyit edilecek.
 | Çıkış | 5V |
 | Tasarım akımı | **1.5A (7.5W)** · 🟡 D-31 — *3A → 2A → 1.5A, iki düzeltmeyle* |
 | Topoloji | **Senkron** buck |
+| Akım limiti | **≥ 2.5 A** — röle darbesi yedeği (§5) |
 | Gerilim sınıfı | 60V |
 | Anahtarlama frekansı | 300–500 kHz (verim / boyut dengesi) |
 
@@ -268,12 +275,86 @@ Ayrıntı: [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) ve
 
 ---
 
-## 5. Termal analiz
+## 5. Anlık akım — röle darbeleri
+
+Sürekli tüketim düşük, ama **röle bobinleri anlık olarak rayı zorlayabilir.**
+Tek ray kararının doğrudan sonucu, bu yüzden ayrı hesaplanıyor. · D-68
+
+### 5.1 Bobin başına 5 V tarafı akımı
+
+```
+Tipik latching röle bobini (8 A kontak)   ≈  300 mW, 10–30 ms darbe
+
+5 V bobin doğrudan        :  300 mW / 5 V          =  60 mA
+12 V bobin + lokal boost  :  300 mW / 0.85 / 5 V   =  71 mA
+
+Tasarım değeri: 70 mA / bobin
+```
+
+Bobin gerilimi 5 V-tarafı akımını neredeyse değiştirmiyor — **güç sabit.**
+
+### 5.2 Rafın tepe akımı — üç senaryo
+
+```
+Temel yük (8 node lojik + host)                     ≈  390 mA
+
+A) Node içi sıralı, node'lar arası da sıralı
+   (host normal tarama sırası ile uyguluyor)
+   Aynı anda 1 bobin                 70 mA   →  toplam  ~460 mA   ✓
+
+B) Node içi sıralı, tüm node'lar aynı anda tetiklenmiş
+   (broadcast SYNC ile)
+   Aynı anda 8 bobin                560 mA   →  toplam  ~950 mA   ✓
+
+C) Hiç sıralama yok — 32 bobin birlikte
+   Aynı anda 32 bobin              2240 mA   →  toplam  ~2.6 A    ⚠
+```
+
+### 5.3 Neden bulk kapasitör bu işi çözemiyor
+
+```
+C senaryosunda buck'ın karşılayamadığı fark  ≈ 1.1 A
+Darbe süresi                                 ≈ 15 ms
+İzin verilen düşüm (5 V → 4.75 V)            = 250 mV
+
+C = I × t / ΔV = 1.1 × 0.015 / 0.25 = 66 000 µF
+```
+
+**66 mF gerçekçi değil.** Yani sıralama (staggering) bir optimizasyon değil,
+**yapısal gereklilik.**
+
+### 5.4 Karar: sıralama mimaride, kapasitör kenarda
+
+| Katman | Kural |
+|--------|-------|
+| **Node içi** | 4 kanal asla eşzamanlı ateşlenmez — ~2 ms arayla sıralanır ([11 §7.2](11-cikis-node-topolojileri.md#72-darbe-yönetimi-kritik-tasarım-notu)) |
+| **Node'lar arası** | **Röle durum değişiklikleri broadcast SYNC ile değil, node'un kendi işlemi sırasında uygulanır** — host'un sıralı tarama düzeni doğal olarak ~600 µs arayla dağıtıyor ([05 §9](05-dahili-bus.md#9-sync-donanım-pini-değil-broadcast-çerçeve)) |
+| **Donanım yedeği** | Buck akım limiti ≥ 2.5 A — sıralama bir şekilde ihlal edilse bile ray çökmesin, parça zarar görmesin |
+| **Node lokal kapasitörü** | Bobin akımının **kenarını** (di/dt) karşılar, darbenin tamamını değil — ~100 µF yeterli |
+| **Host bulk** | Buck çıkışında yeterli bulk; ani yük basamağında düşümü sınırlar |
+
+Senaryo A yürürlükte olduğunda tepe akım **460 mA** — 1.5 A tasarım noktasının
+çok altında.
+
+### 5.5 Descriptor'a eklenen alan
+
+Host'un kaleyi tutabilmesi için node **tepe darbe akımını** da beyan etmeli:
+
+| Alan | Byte | Not |
+|------|------|-----|
+| Beyan edilen sürekli tüketim | 2 | mA @5V — mevcut |
+| **Beyan edilen tepe darbe akımı** | **2** | **mA @5V — yeni** |
+
+Böylece host, toplu bir işlem (örneğin "tüm çıkışları kapat") isteğini
+**raf bütçesine göre zamanlayabiliyor** — kaç node'u aynı anda tetikleyeceğine
+karar verebiliyor.
+
+## 6. Termal analiz
 
 **Ortam sıcaklığı: 60 °C** · 🟢 D-04 — karavan, kapalı mekân, güneş altında
 50 °C rahat görülür. Zorlamalı hava akımı yok, sadece doğal konveksiyon.
 
-### 5.1 Ana buck kaybı — iki senaryo
+### 6.1 Ana buck kaybı — iki senaryo
 
 ```
 EN KÖTÜ DURUM (tüm slotlar tepe)
@@ -287,14 +368,14 @@ Enerji bütçesi mimarisi sayesinde **sürekli çalışma noktası en kötü dur
 onda biri.** Termal tasarım en kötü duruma göre yapılır ama gerçek hayatta
 oraya nadiren gidilir.
 
-### 5.2 60 °C'de ne oluyor
+### 6.2 60 °C'de ne oluyor
 
 | Stackup | θ_ja (geniş döküm) | ΔT @1.36W | Junction @60°C | Değerlendirme |
 |---------|--------------------|-----------|----------------|---------------|
 | 2 katman | ~40 °C/W | 54 °C | **114 °C** | Sınırda — 125 °C sınırına 11 °C marj |
 | 4 katman + termal via | ~25 °C/W | 34 °C | **94 °C** | Rahat — 31 °C marj |
 
-### 5.3 Sonuç
+### 6.3 Sonuç
 
 **2 katman en kötü durumda çalışır, ama marjı dar.** Bu artık bir zorunluluk
 değil, bir marj tercihi — ayrıntı ve karar

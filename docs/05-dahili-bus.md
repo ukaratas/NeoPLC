@@ -278,9 +278,10 @@ girmezler.
 | Çıkış kanal sayısı | 1 | |
 | Yetenek bayrakları | 4 | |
 | Benzersiz kimlik | 12 | MCU fabrika UID'si |
-| **Beyan edilen güç tüketimi** | 2 | **mA @5V — bütçe zorlaması için** |
+| **Beyan edilen sürekli tüketim** | 2 | **mA @5V — bütçe zorlaması için** |
+| **Beyan edilen tepe darbe akımı** | 2 | **mA @5V — toplu işlem zamanlaması için** ([03 §5.5](03-guc-mimarisi.md#55-descriptora-eklenen-alan)) |
 | CRC | 2 | |
-| **Toplam** | **32 byte** | |
+| **Toplam** | **34 byte** | |
 
 İki alan özellikle kritik:
 
@@ -336,7 +337,19 @@ Karavan yüklerinin ihtiyacı    ~ms
 kodu** — SYNC pini pinout'tan kaldırıldı
 ([04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-kaldırılanların-gerekçesi)).
 
-### 9.1 Neden hâlâ değerli
+### 9.1 Kullanım kuralı — röleler SYNC ile uygulanmaz
+
+| Çıkış tipi | Uygulama anı | Gerekçe |
+|------------|--------------|---------|
+| MOSFET | **Broadcast SYNC** | Akım basamağı yok, eşzamanlılık bedava |
+| **Latching röle** | **Node'un kendi işlemi sırasında** | Bobin darbeleri eşzamanlı olmamalı — host'un sıralı taraması doğal olarak ~600 µs arayla dağıtıyor |
+| Girişler (tüm tipler) | Broadcast SYNC | Örnekleme skew'i ortadan kalkıyor |
+
+Röleleri SYNC'e bağlamak, 8 node'un bobinini aynı anda ateşleyip rayda 560 mA
+sıçrama yaratırdı. Sıralı uygulama ile rafta aynı anda **tek bobin** enerjili
+oluyor. Ayrıntı: [03 §5.4](03-guc-mimarisi.md#54-karar-sıralama-mimaride-kapasitör-kenarda)
+
+### 9.2 Neden hâlâ değerli
 
 SYNC olmadan slot 1'in girişi ile slot 8'in girişi arasında bir tam tarama
 süresi (4.8 ms) fark olur. Broadcast SYNC ile tüm proses imajı **tek bir zaman
