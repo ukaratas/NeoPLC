@@ -11,10 +11,10 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | Durum | Adet |
 |-------|------|
-| 🟢 Kabul edildi | 13 |
+| 🟢 Kabul edildi | 15 |
 | 🟡 Öneri hazır, onay bekliyor | 43 |
 | 🔴 Dışarıdan bilgi gerekiyor | 1 |
-| ⚪ Henüz ele alınmadı | 3 |
+| ⚪ Henüz ele alınmadı | 4 |
 
 ---
 
@@ -33,6 +33,8 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | **D-05** | **Host 2 katman** — üç gerekçe de ortadan kalktı | Türetilmiş |
 | **D-58** | **Slot adımı 17.5 mm** (2U = 35 mm) | Çalışma draftı Rev 0.1 |
 | **D-60** | **Gerçek blade mimarisi** — şasi + kızak, kutu-içinde-kutu terk edildi | Kullanıcı |
+| **D-65** | **WiFi varsayılan kapalı, talep üzerine açılır** | Kullanıcı |
+| **D-66** | **Host = 2U blade, kendi özel slotunda** | Kullanıcı |
 
 ---
 
@@ -52,7 +54,10 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 |----|------|---------------|-------|-----|
 | D-01 | Host MCU / SoC | ESP32-S3-WROOM-1U-N16R8 | 🟢 | [02](02-host-mimarisi.md#1-mcu-seçimi) |
 | D-02 | Ethernet kontrolcüsü | W5500 — **host'ta değil, haberleşme node'unda** (D-47) | 🟢 | [02](02-host-mimarisi.md#2-ethernet-hosttan-çıkarıldı) |
-| D-03 | WiFi anten | U.FL + harici anten (`-1U` varyantı) | 🟡 | [02](02-host-mimarisi.md#3-wifi) |
+| D-03 | WiFi anten | U.FL + harici anten (ESP32 `-1U` modül varyantı) | 🟡 |
+| **D-65** | **WiFi varsayılan kapalı** | Butonla 10 dk açılır. 3.5 → 2.2 Wh/gün, batarya 170 → 273 gün | 🟢 |
+| **D-66** | **Host = 2U blade, özel slot** | Şasi 250 → 185 mm. Node'larla aynı mekanik, farklı konnektör + keying | 🟢 |
+| D-67 | BLE ile butonsuz uyandırma | Değerlendirilecek — ~1–3 mW, UX kazancı büyük | ⚪ | [02](02-host-mimarisi.md#3-wifi) |
 | D-07 | Saha RS-485 izolasyonu | İzole — ama güç kapılı ([10 §7.3](10-enerji-butcesi.md#73-güç-kapısı-gereksinimleri)) | 🟡 | [02](02-host-mimarisi.md#4-rs-485-saha-portu) |
 | D-27 | Modbus register haritası | Slot başına 0x100'lük blok, 0x1000 tabanlı | 🟡 | [02](02-host-mimarisi.md#6-modbus-register-haritası) |
 | D-47 | Ethernet | **Host'tan çıkarıldı** — haberleşme node'u olarak sunulacak | 🟢 | [10 §8](10-enerji-butcesi.md#8-ethernet-kararı) |
@@ -192,3 +197,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | 2026-09-16 | D-57 | Fan bütçesi 0.5–1.5 W → **~0.2 W** | Gerçek debi ihtiyacı 1.6 CFM çıktı; blade mimarisi debiyi düşürdü |
 | 2026-09-16 | D-61..D-64 | Yeni — blade mekaniğinin getirdikleri | Bileşen yüksekliği, şasi malzemesi, kör kapak, AC bariyeri |
 | 2026-09-16 | 04 | **Baştan yazıldı** | Blade mimarisi + 17.5 mm + hava akışı bölümü eklendi |
+| 2026-09-16 | **D-65** | Yeni — **WiFi varsayılan kapalı** | WiFi'ın maliyeti varlığı değil sürekli bağlı kalması. Tamamen atmakla talep üzerine açmak arasında %14 fark var; atmak ise ESP32'den vazgeçmeyi ve fiziksel HMI eklemeyi gerektirir ki o daha pahalı |
+| 2026-09-16 | **D-66** | Yeni — **host 2U blade** | Ayrı bölme gereksizdi: blade PCB yüz alanı (75×110) host için fazlasıyla yeterli. 2U, alan için değil bileşen yüksekliği için. Şasi 65 mm daralıyor |
+| 2026-09-16 | D-67 | Yeni — BLE uyandırma | Butonsuz UX, ~1–3 mW |
+| 2026-09-16 | Enerji bütçesi | 3.5 → **2.2 Wh/gün** | D-65; batarya ömrü 170 → 273 gün |

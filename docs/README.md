@@ -66,9 +66,9 @@ gelecekteki tüm üyelerini bağlar.
 | Kısıt | Değer |
 |-------|-------|
 | Giriş gerilimi | 12–48V DC |
-| Node kapasitesi | 8U (1U = 17.5 mm, 2U = 35 mm) |
-| Mekanik | Blade şasi + kızak, çıplak PCB node'lar |
-| Dış haberleşme | RS-485 (Modbus RTU) + Wi-Fi (Modbus TCP) · Ethernet opsiyonel node |
+| Node kapasitesi | 8U (1U = 17.5 mm, 2U = 35 mm) + 2U host slotu |
+| Mekanik | Blade şasi + kızak · host dahil her kart blade · toplam ~185 mm |
+| Dış haberleşme | RS-485 (Modbus RTU) + Wi-Fi talep üzerine (Modbus TCP) · Ethernet opsiyonel node |
 | Dahili haberleşme | Hafif özel protokol, UART mantığında |
 | PCB tercihi | 2 katman — host ve node'lar |
 | Tedarik ekosistemi | JLCPCB / LCSC birinci tercih |

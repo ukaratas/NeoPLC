@@ -72,8 +72,19 @@ iki tolerans zinciri üst üste biniyor.
 | PCB kalınlığı | 1.6 mm | 1.6 mm |
 
 ```
-8 slot toplam  =  8 × 17.5  =  140 mm
+Node slotları   =  8 × 17.5  =  140 mm
+Host slotu (2U) =              35 mm     ← node kapasitesi tüketmez
+                               ───────
+Toplam slot alanı            = 175 mm    (+ duvarlar ≈ 185 mm)
 ```
+
+**Host da bir blade** — node'larla aynı kızak, ön panel ve mandal sistemini
+kullanır, kendi özel slotunda durur. Gerekçe ve alan hesabı:
+[02 §7](02-host-mimarisi.md#7-hostun-mekanik-formu) · D-66
+
+> ⚠️ **Host konnektörü node konnektöründen farklıdır** (slot başına
+> RST#/PRESENT# hatları host'a gider). **Mekanik keying zorunlu** — node host
+> slotuna, host node slotuna takılamamalı.
 
 **17.5 mm neden doğru:** Modüler şalt cihazlarının (sigorta, kontaktör) tek
 kutup genişliği 17.5/18 mm — yani DIN ekosistem argümanı geçerli. Ve 22.5 mm'ye

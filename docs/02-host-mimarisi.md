@@ -125,14 +125,54 @@ Bu, modüler mimarinin tam olarak çözmek için var olduğu problem.
 | | Değer |
 |---|---|
 | Radyo | ESP32-S3 dahili (802.11 b/g/n + BLE 5) |
-| Anten | **U.FL konnektör + harici anten** (`-1U` node varyantı) |
+| Anten | **U.FL konnektör + harici anten** — ESP32-S3-WROOM-**1U** modül varyantı |
+| **Varsayılan durum** | **KAPALI** — talep üzerine açılır · D-65 |
 
-**PCB anten neden elenmiş:** NeoPLC metal veya metalize endüstriyel kutu içinde
-DIN rayına monte edilecek. PCB anten bu ortamda çalışmaz. Node varyantı seçimi
-(`-1` PCB anten vs `-1U` U.FL) geri dönülemez bir kart kararıdır — baştan doğru
-seçilmeli.
+**PCB anten neden elenmiş:** NeoPLC metal veya metalize kutu içinde, karavanda
+kapalı bir hacme monte edilecek. PCB anten bu ortamda çalışmaz. ESP32 modül
+varyantı seçimi (`-1` PCB anten vs `-1U` U.FL) geri dönülemez bir kart
+kararıdır — baştan doğru seçilmeli.
 
-Kullanım: konfigürasyon web UI'ı, OTA, ikincil Modbus TCP erişimi.
+Kullanım: konfigürasyon web UI'ı, OTA, Modbus TCP erişimi.
+
+### 3.1 WiFi neden varsayılan kapalı
+
+| Senaryo | S1 boşta | Gerçekçi gün | Batarya ömrü |
+|---------|----------|--------------|--------------|
+| WiFi sürekli bağlı | 0.21 W | 3.5 Wh | 170 gün |
+| **WiFi talep üzerine** | **0.13 W** | **2.2 Wh** | **273 gün** |
+| WiFi tamamen yok (STM32'ye geçiş) | 0.15 W | 1.9 Wh | 320 gün |
+
+**Kritik bulgu:** WiFi'ı tamamen atmakla talep üzerine açmak arasında sadece
+**0.3 Wh/gün (%14)** fark var. Yani *WiFi'ın maliyeti varlığı değil, sürekli
+bağlı kalması.*
+
+Dahası: WiFi'ı tamamen atmanın kazancının çoğu radyodan değil,
+**ESP32'den vazgeçip STM32'ye geçebilmekten** geliyor — bu da D-01'i ve tüm
+host firmware yığınını değiştirir.
+
+**Tamamen atmama gerekçesi:** Karavanda telefon kontrol panelidir. WiFi
+atılırsa yerine fiziksel HMI/ekran gerekir — bir ekran 200 mW – 1 W çeker,
+yani **WiFi'dan pahalıdır.** Enerjiyi WiFi'dan kısıp ekrana harcamak net kayıp.
+
+### 3.2 Uyandırma mekanizması
+
+```
+Varsayılan              :  WiFi radyosu kapalı
+Kullanıcı butona basar  →  AP 10 dakika açık  →  otomatik kapanır
+```
+
+Süre ve davranış konfigüre edilebilir olmalı — "sürekli açık" seçeneği de
+sunulmalı; enerji bedelini kullanıcı görerek seçsin.
+
+Buton ön panelde, host'un RTC GPIO'suna bağlı — S2/S3'ten de uyandırabilmeli
+([10 §9.2](10-enerji-butcesi.md#92-uyandırma-kaynakları)).
+
+**Değerlendirilecek alternatif · D-67:** BLE ile butonsuz uyandırma. ESP32-S3
+light sleep'te 1 s aralıkla BLE advertising ~1–3 mW çekiyor — S1 bütçesindeki
+etkisi ihmal edilebilir. Kullanıcı telefonla yaklaşınca cihaz kendiliğinden
+WiFi'ı açabilir. Butona basmadan çalışan bir UX, neredeyse bedava.
+Uygulanabilirliği firmware aşamasında doğrulanacak.
 
 ---
 
@@ -220,7 +260,65 @@ sabit tutuyor: `slot_taban = 0x1000 + slot_no × 0x100`. Entegratör tek formül
 
 ---
 
-## 7. Host blok diyagramı
+## 7. Host'un mekanik formu
+
+### Karar: 2U blade, kendi özel slotunda · D-66
+
+Host, şasi içinde ayrı bir bölme değil — **node'larla aynı mekanik forma sahip
+bir blade.** 8U node kapasitesine ek olarak kendi 2U slotunu kullanır.
+
+```
+2U host + 8 × 1U node  =  35 + 140  =  175 mm   (+ duvarlar ≈ 185 mm)
+ayrı bölmeli tasarım                 ≈  250 mm
+                                        ─────────
+                                         65 mm dar
+```
+
+### 7.1 Alan yeterli mi? — hesap
+
+```
+Host bileşen alanı toplamı        ≈  2 100 mm²
+Routing ve keepout ile            ≈  4 000 – 6 000 mm²
+
+1U blade PCB, tek yüz (75 × 110)  =  8 250 mm²
+```
+
+**Alan hiç kısıt değil** — tek yüze bile sığıyor. Blade mimarisinde PCB yüz
+alanı slot adımından bağımsız; 17.5 mm *kalınlık* yönüdür, PCB yüzü 75 × 110 mm.
+
+### 7.2 Gerçek kısıt: bileşen yüksekliği
+
+| Bileşen | Yükseklik | 1U (14.4 mm) | 2U (31.9 mm) |
+|---------|-----------|--------------|--------------|
+| ESP32-S3-WROOM-1U | 3.2 mm | ✓ | ✓ |
+| Buck indüktörü | 4–6 mm | ✓ | ✓ |
+| İzole DC-DC | 8–12 mm | sınırda | ✓ |
+| CM choke | 8–15 mm | ⚠ | ✓ |
+| Giriş bulk elektrolitik (63 V) | 11–16 mm | ⚠ | ✓ |
+
+**2U, alan için değil yükseklik için seçildi.** Alçak profilli CM choke ve
+polimer kapasitörle 1U da mümkün olabilir; parça seçiminde yeniden
+değerlendirilecek.
+
+### 7.3 Uygulama kısıtları
+
+| Kısıt | Gerekçe |
+|-------|---------|
+| **Host konnektörü node'unkinden farklı** | Slot başına RST#/PRESENT# hatları host'a gidiyor, node konnektöründe yok |
+| **Mekanik keying zorunlu** | Node host slotuna, host node slotuna takılamamalı — yanlış takma hasar verir |
+| **DC giriş klemensi arka panelde** | 2.5 A giriş akımı kart kenarı fingerlarından geçmemeli; arka panelden backplane'e, host oradan VBUS_RAW olarak alır |
+| Host çıkardığında sistem durur | Kabul edilen davranış — node'lar reset'te kalır (D-22), çıkışlar güvenli duruma geçer |
+
+### 7.4 Kazançlar
+
+- Host da node gibi **servis edilebilir ve değiştirilebilir**
+- Aynı kızak, ön panel ve mandal tooling'i — tek mekanik tasarım
+- Host kendi hava kanalını alıyor ([04 §6](04-backplane-mekanik.md#6-hava-akışı-ve-termal))
+- Şasi 65 mm daralıyor
+
+---
+
+## 8. Host blok diyagramı
 
 ```
    12–48V DC

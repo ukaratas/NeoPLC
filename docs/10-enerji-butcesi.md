@@ -150,14 +150,20 @@ S3 için yeni donanım gerekmiyor — var olan iki mekanizma birlikte kullanıl�
 
 ### S1 — Boşta
 
+> **WiFi bu durumda KAPALI** · D-65 — [02 §3.1](02-host-mimarisi.md#31-wifi-neden-varsayılan-kapalı)
+
 | Kalem | Güç |
 |-------|-----|
-| ESP32-S3, modem-sleep (DTIM3) | 82 mW |
+| ESP32-S3, light sleep + 10 Hz uyanma, **WiFi kapalı** | 12 mW |
 | İzole RS-485 — güç kapılı, görev çevrimli | 20 mW |
 | PCA9555, LED, backplane xcvr | 66 mW |
 | 8 node (10 Hz) | 15 mW |
-| Dönüşüm kayıpları | 28 mW |
-| **Toplam** | **~0.21 W** |
+| Dönüşüm kayıpları | 15 mW |
+| **Toplam** | **~0.13 W** |
+
+> **S1'de artık "misc" (66 mW) baskın kalem.** WiFi ve RS-485 kapatıldıktan
+> sonra sıradaki hedef PCA9555 + LED'ler + backplane transceiver. LED'lerin
+> görev çevrimli sürülmesi buradan ~30 mW daha alabilir.
 
 > **S1'de RS-485 artık baskın yük.** Ethernet gittikten sonra sıradaki en büyük
 > kalem o. Bu yüzden izole beslemesi güç kapılı olmalı
@@ -192,21 +198,23 @@ S3 için yeni donanım gerekmiyor — var olan iki mekanizma birlikte kullanıl�
 
 ```
 S0   0.80 W   →  19.2 Wh/gün
-S1   0.21 W   →   5.0 Wh/gün
+S1   0.13 W   →   3.1 Wh/gün
 S2   0.06 W   →   1.44 Wh/gün
 S3   0.0013 W →   0.031 Wh/gün
 ```
 
 ### 6.1 Gerçekçi kullanım günü
 
-```
-S0  2 saat  =  1.60 Wh
-S1  4 saat  =  0.84 Wh
-S2 18 saat  =  1.08 Wh
-              ────────
-              3.52 Wh/gün
+WiFi talep üzerine açıldığı için S0 artık kısa ve seyrek:
 
-600 Wh kullanılabilir batarya  →  170 gün
+```
+S0  0.5 saat  =  0.40 Wh     (kullanıcı telefondan bağlanıyor)
+S1  5.5 saat  =  0.72 Wh
+S2 18   saat  =  1.08 Wh
+                ────────
+                2.20 Wh/gün
+
+600 Wh kullanılabilir batarya  →  273 gün
 ```
 
 ### 6.2 Kış deposu (90 gün, S3)
@@ -219,17 +227,18 @@ S2 18 saat  =  1.08 Wh
 
 | | Naif (her şey açık, 200 Hz, Ethernet) | Bu tasarım |
 |---|---|---|
-| Günlük | 32.9 Wh | **3.5 Wh** |
-| Batarya ömrü (kullanımda) | 18 gün | **170 gün** |
+| Günlük | 32.9 Wh | **2.2 Wh** |
+| Batarya ömrü (kullanımda) | 18 gün | **273 gün** |
 | 90 günlük depo | **2960 Wh — batarya ölür** | 2.8 Wh |
 
-**9× kullanımda, 1000× depoda.**
+**15× kullanımda, 1000× depoda.**
 
 Kazancın kaynakları:
 
 | Değişiklik | Katkı |
 |------------|-------|
 | Ethernet'in çıkarılması | 11.9 Wh/gün |
+| WiFi'ın talep üzerine açılması | 1.3 Wh/gün |
 | Wake-on-bus (node'lar uyuyor) | 6.3 Wh/gün |
 | Tarama hızı 200 → 10 Hz | (yukarıdakinin ön koşulu) |
 | S2 / S3 güç durumları | Deponun tamamı |
