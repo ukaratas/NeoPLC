@@ -24,7 +24,7 @@ maliyeti belirleyen bir çatal var.
 | **(a)** Tüm ön kat 100V sınıfı | 100V/3A senkron buck gerekir → LCSC'de seçenek az, fiyat yüksek |
 | **(b)** Seri koruma FET'i + gate zener clamp (~55V'ta kesiyor) | Downstream **60V sınıfı** yeterli → ucuz ve bol seçenek |
 
-### Karar: (b) · 🟡 D-09
+### Karar: (b)
 
 Tek bir seri FET üç işi birden yapıyor:
 
@@ -64,8 +64,8 @@ Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → Ters polarite + O
 | Aşırı gerilim | Gate zener clamp (§1.2) | bu doküman |
 | Surge / transient | TVS + CM choke, tam uyum için kademeli ön kat | [08](08-emc-koruma.md) |
 | ESD | TVS + klemens yerleşimi | [08](08-emc-koruma.md) |
-| Kısa devre | Sigorta (sistem) + slot load switch (modül) | [06 §7](06-slot-yonetimi.md#7-slot-başına-akım-koruması) |
-| Brownout | MCU BOR + modüllerin reset'te tutulması | [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) |
+| Kısa devre | Sigorta (sistem) + slot load switch (node) | [06 §7](06-slot-yonetimi.md#7-slot-başına-akım-koruması) |
+| Brownout | MCU BOR + node'ların reset'te tutulması | [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) |
 | Ani yük değişimi | Bulk + slot başına soft-start | §2, [06 §7](06-slot-yonetimi.md#7-slot-başına-akım-koruması) |
 
 ---
@@ -74,25 +74,25 @@ Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → Ters polarite + O
 
 ### Karşılaştırma
 
-| Seçenek | Modül maliyeti | EMI | Değerlendirme |
+| Seçenek | Node maliyeti | EMI | Değerlendirme |
 |---------|----------------|-----|---------------|
-| Backplane'e ham 12–48V, her modülde geniş girişli buck | 8 × ~$1.20 | 8 ayrı yüksek dV/dt kaynağı | Pahalı ve gürültülü. K1'i ihlal ediyor. |
-| Sadece +5V dağıt | 8 × ~$0.15 | Tek anahtarlama kaynağı | Röle ve analog çıkış modülleri saha gerilimi bulamaz |
-| **İkili rail** | Çoğu modülde ~$0.15 | Tek ana kaynak | **Esnek ve ucuz** |
+| Backplane'e ham 12–48V, her node'da geniş girişli buck | 8 × ~$1.20 | 8 ayrı yüksek dV/dt kaynağı | Pahalı ve gürültülü. K1'i ihlal ediyor. |
+| Sadece +5V dağıt | 8 × ~$0.15 | Tek anahtarlama kaynağı | Röle ve analog çıkış node'ları saha gerilimi bulamaz |
+| **İkili rail** | Çoğu node'da ~$0.15 | Tek ana kaynak | **Esnek ve ucuz** |
 
-### Karar: ikili rail · 🟡 D-08
+### Karar: ikili rail
 
 | Rail | Gerilim | Kaynak | Kullanım |
 |------|---------|--------|----------|
-| **+5V_SYS** | 5V ±%3 | Master'da tek verimli senkron buck | Modül lojiği. Modül 5V→3.3V için ucuz LDO/buck kullanır. |
-| **VBUS_RAW** | 12–48V (ham) | Giriş koruma katı çıkışı | Sadece ihtiyacı olan modül: röle bobini, analog çıkış compliance gerilimi, izole DC-DC primeri |
+| **+5V_SYS** | 5V ±%3 | Host'ta tek verimli senkron buck | Node lojiği. Node 5V→3.3V için ucuz LDO/buck kullanır. |
+| **VBUS_RAW** | 12–48V (ham) | Giriş koruma katı çıkışı | Sadece ihtiyacı olan node: röle bobini, analog çıkış compliance gerilimi, izole DC-DC primeri |
 
-**Neden bu doğru:** Modüllerin ezici çoğunluğu sadece lojik besleme istiyor.
+**Neden bu doğru:** Node'ların ezici çoğunluğu sadece lojik besleme istiyor.
 Onlara ham 48V verip her birine geniş girişli buck koydurmak, K1'in tam tersi —
-maliyeti sekiz kez ödemek. Tek iyi dönüştürücüyü master'da bir kez yapıyoruz.
+maliyeti sekiz kez ödemek. Tek iyi dönüştürücüyü host'ta bir kez yapıyoruz.
 
 VBUS_RAW yine de her slota gidiyor çünkü **pinout geri dönülemez** — ihtiyaç
-duyan modül tipi için sonradan eklenemez.
+duyan node tipi için sonradan eklenemez.
 
 ---
 
@@ -102,7 +102,7 @@ duyan modül tipi için sonradan eklenemez.
 |-----------|-------|
 | Giriş | 12–48V (ön kat sonrası ≤ 55V) |
 | Çıkış | 5V |
-| Tasarım akımı | **2A (10W)** · 🟡 D-31 — *enerji bütçesi düzeltmesiyle 3A'dan düşürüldü* |
+| Tasarım akımı | **1.5A (7.5W)** · 🟡 D-31 — *3A → 2A → 1.5A, iki düzeltmeyle* |
 | Topoloji | **Senkron** buck |
 | Gerilim sınıfı | 60V |
 | Anahtarlama frekansı | 300–500 kHz (verim / boyut dengesi) |
@@ -110,23 +110,26 @@ duyan modül tipi için sonradan eklenemez.
 ### Neden 3A değil 2A
 
 İlk tahsis (3A), slot başına 200 mA'in **sürekli** çekileceği varsayımına
-dayanıyordu. [Wake-on-bus](10-enerji-butcesi.md#3-wake-on-bus-modüllerin-uyuması)
+dayanıyordu. [Wake-on-bus](10-enerji-butcesi.md#3-wake-on-bus-nodeların-uyuması)
 ile bu varsayım geçersiz:
 
 ```
-Modül lojiği, uyanık            ≈  10 mA @3.3V  ≈  12 mA @5V
+Node lojiği, uyanık            ≈  10 mA @3.3V  ≈  12 mA @5V
 Duty cycle (10 Hz)              =  %0.6
 Gerçekçi ortalama               ≈  1 mA @5V
-Gerçekçi tepe (analog modül)    ≈  40 mA @5V
+Gerçekçi tepe (analog node)    ≈  40 mA @5V
 
 8 slot tepe    =  320 mA
-Master tepe    ≈  380 mA @5V
+Host tepe      ≈  290 mA @5V   (W5500 çıktıktan sonra)
                ─────────
-Toplam tepe    ≈  700 mA     →  2A tasarım noktası %185 headroom bırakıyor
+Toplam tepe    ≈  610 mA     →  1.5A tasarım noktası %145 headroom bırakıyor
 ```
 
-200 mA/slot **tavanı** korunuyor (bir modül geçici olarak çekebilmeli), ama
-toplam ≤ 1.6 A descriptor güç beyanı ile zorlanıyor
+**İkinci düşüş Ethernet'ten geldi:** W5500'ün 150 mA @3.3V'u (≈110 mA @5V)
+host'un tepe yükünden çıktı ([02 §2](02-host-mimarisi.md#2-ethernet-hosttan-çıkarıldı)).
+
+150 mA/slot **tavanı** korunuyor (bir node geçici olarak çekebilmeli), ama
+toplam ≤ 1.2 A descriptor güç beyanı ile zorlanıyor
 ([06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu)).
 
 ### Senkron neden zorunlu
@@ -158,7 +161,7 @@ buck bu bölgede %50 verimde olabilir; PFM / pulse-skipping destekleyen bir buck
 %85.
 
 **Tam yük verimi neredeyse hiç kullanılmıyor.** Seçim kriteri sıralaması
-tersine döndü — ayrıntı [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri--değişti).
+tersine döndü — ayrıntı [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri-değişti).
 
 ### 3.2 İki dönüştürücülü yapı
 
@@ -170,7 +173,7 @@ gerekiyor ve 2A için optimize edilmiş bir dönüştürücü bunu veremiyor.
         └─→ Ana buck           5V / 2A / EN pinli, senkron, PFM  ── S3'te kapalı
 ```
 
-Gerekçe ve hesap: [10 §7.1](10-enerji-butcesi.md#71-i̇ki-dönüştürücülü-yapı--🟡-d-42)
+Gerekçe ve hesap: [10 §7.1](10-enerji-butcesi.md#71-iki-dönüştürücülü-yapı)
 
 ### 3.3 3.3V rail
 
@@ -186,25 +189,25 @@ bulk eklenecek.
 
 ### 4.1 Slot başına (+5V_SYS)
 
-| Modül tipi | Tipik | Maksimum |
+| Node tipi | Tipik | Maksimum |
 |------------|-------|----------|
 | Dijital giriş (8 kanal) | 30 mA | 80 mA |
 | Dijital çıkış (8 kanal) | 50 mA | 120 mA |
 | Analog giriş (4 kanal, 16-bit) | 60 mA | 150 mA |
 | Röle çıkış (bobin VBUS_RAW'dan) | 40 mA | 100 mA |
 
-### Tahsis · 🟡 D-29
+### Tahsis
 
 | Slot | +5V_SYS | VBUS_RAW |
 |------|---------|----------|
 | **1U** | **200 mA (1.0 W)** | 500 mA |
 | **2U** | **400 mA (2.0 W)** | 500 mA |
 
-2U modül tek konnektörden ([04 §4](04-backplane-mekanik.md#4-2u-modül-stratejisi))
+2U node tek konnektörden ([04 §4](04-backplane-mekanik.md#4-2u-node-stratejisi))
 400mA çekiyor. 2 adet +5V_SYS kart kenarı kontağı üzerinden 400mA — 2.54mm
 kontak akım kapasitesinin çok altında, sorun yok.
 
-### 4.2 Master kartı
+### 4.2 Host kartı
 
 | Blok | Akım | Güç |
 |------|------|-----|
@@ -213,13 +216,13 @@ kontak akım kapasitesinin çok altında, sorun yok.
 | W5500 + magjack (100 Mbps) | 150 mA @3.3V | 0.50 W |
 | İzole RS-485 (xcvr + izole DC-DC) | 40 mA @5V | 0.20 W |
 | PCA9555 + LED'ler + misc | 60 mA @3.3V | 0.20 W |
-| **Master toplam (5V'tan)** | | **~2.0 W tipik / 3.0 W tepe** |
+| **Host toplam (5V'tan)** | | **~2.0 W tipik / 3.0 W tepe** |
 
 ### 4.3 Sistem toplamı
 
 ```
 8 slot × 1.0 W (maksimum)          =   8.0 W
-Master (tepe)                      =   3.0 W
+Host (tepe)                      =   3.0 W
                                       ───────
 +5V_SYS yükü (en kötü durum)       =  11.0 W   →  5V @ 2.2 A
 
@@ -241,12 +244,12 @@ karşılıyor.
 
 ### 4.4 Güç bütçesi zorlaması
 
-Bütçe kâğıt üzerinde kalmıyor — **donanımla zorlanıyor.** Modül descriptor'ı
-beyan ettiği tüketimi içeriyor; master, bütçe aşılıyorsa modülün reset'ini
+Bütçe kâğıt üzerinde kalmıyor — **donanımla zorlanıyor.** Node descriptor'ı
+beyan ettiği tüketimi içeriyor; host, bütçe aşılıyorsa node'un reset'ini
 bırakmıyor.
 
 Ayrıntı: [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) ve
-[05 §7](05-dahili-bus.md#7-modül-descriptorı).
+[05 §7](05-dahili-bus.md).
 
 ---
 

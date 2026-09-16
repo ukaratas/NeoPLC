@@ -1,6 +1,6 @@
 # 05 — Dahili Bus
 
-Master ile modüller arasındaki haberleşme. Hedef: **düşük sınıf MCU'da rahat
+Host ile node'lar arasındaki haberleşme. Hedef: **düşük sınıf MCU'da rahat
 çalışan, kolay debug edilen, uzun vadede sürdürülebilir** bir bus.
 
 ---
@@ -12,14 +12,14 @@ kilitlenmemeli.
 
 ### 1.1 TTL UART neden yetmiyor
 
-Ortam: 8U backplane, 9 düğüm (master + 8 modül), her modülde kendi anahtarlamalı
+Ortam: 8U backplane, 9 düğüm (host + 8 node), her node'da kendi anahtarlamalı
 regülatörü, hot-plug ihtimali, endüstriyel EMI.
 
 | Sorun | Açıklama |
 |-------|----------|
-| **Ground bounce doğrudan sinyale biniyor** | 3.3V CMOS'ta V_IL(max) = 0.8V. Modüllerin darbeli akım çekişi slotlar arası birkaç yüz mV GND farkı yaratır — gürültü marjının önemli kısmı daha başlamadan gidiyor. **Belirleyici sorun budur.** |
+| **Ground bounce doğrudan sinyale biniyor** | 3.3V CMOS'ta V_IL(max) = 0.8V. Node'ların darbeli akım çekişi slotlar arası birkaç yüz mV GND farkı yaratır — gürültü marjının önemli kısmı daha başlamadan gidiyor. **Belirleyici sorun budur.** |
 | Multi-drop open-drain zorunluluğu | Çakışmayı önlemek için open-drain + pull-up gerekir → yavaş kenarlar, sürekli pull-up akımı, hız tavanı |
-| Hot-plug kilitlenmesi | Beslemesiz modül takıldığında ESD diyotları busu GND'ye kelepçeler → tüm bus düşer |
+| Hot-plug kilitlenmesi | Beslemesiz node takıldığında ESD diyotları busu GND'ye kelepçeler → tüm bus düşer |
 | Tanımsız idle | Hiçbir sürücü aktif değilken hat serbest — çerçeve senkronizasyonu güvenilmez |
 
 ### 1.2 RS-485 ne getiriyor
@@ -38,18 +38,18 @@ Brief "düşük güç tüketimli" diyor. İtirazı sayıyla test edelim:
 ```
 Transceiver birim fiyatı (LCSC sınıfı)  ≈  $0.15 – 0.35
 Alıcı sürekli açık tüketimi              ≈  0.5 mA @ 3.3V  =  1.65 mW
-8 modül toplam                           ≈  13 mW
+8 node toplam                           ≈  13 mW
 ```
 
 Karşılaştırma: tek bir Cortex-M0+ MCU 64MHz'de ~10 mA @3.3V = **33 mW.**
 
-**Sonuç: 8 transceiver'ın toplam tüketimi, tek bir modül MCU'sunun yarısı kadar.
+**Sonuç: 8 transceiver'ın toplam tüketimi, tek bir node MCU'sunun yarısı kadar.
 Düşük güç argümanı TTL lehine çalışmıyor.**
 
-> Not: Transceiver'ın shutdown moduna alınması düşünülemez — slave'in master'ı
+> Not: Transceiver'ın shutdown moduna alınması düşünülemez — node'un host'u
 > her an duyabilmesi gerekiyor. Alıcı sürekli açık kalmalı.
 
-### Karar: RS-485 diferansiyel · 🟡 D-10
+### Karar: RS-485 diferansiyel
 
 Yazılım protokolü UART kadar basit kalıyor ([§6](#6-çerçeve-formatı)); sadece
 fiziksel taşıma katmanı sağlamlaştırılıyor. Brief'in istediği ayrım tam olarak
@@ -61,11 +61,11 @@ Dürüstlük gereği değerlendirildi:
 
 | Artı | Eksi |
 |------|------|
-| Donanımsal arbitrasyon | Modülde CAN kontrolcüsü gerekir → MCU seçimini daraltır ve pahalılaştırır |
+| Donanımsal arbitrasyon | Node'da CAN kontrolcüsü gerekir → MCU seçimini daraltır ve pahalılaştırır |
 | Donanımsal ACK ve hata sayaçları | Klasik CAN'de 8 byte çerçeve sınırı |
 | Polling'siz event-driven bildirim | Protokol ağırlığı — "UART kadar basit" hedefiyle çelişiyor |
 
-**Karar: RS-485.** CAN, ileride çok-master veya gerçek event-driven ihtiyacı
+**Karar: RS-485.** CAN, ileride çok-host veya gerçek event-driven ihtiyacı
 doğarsa yükseltme yolu olarak korunuyor — **backplane'deki A/B çifti CAN'e de
 uygun, sadece transceiver değişir.** Pinout bu yüzden geleceğe dayanıklı.
 
@@ -83,17 +83,17 @@ avantajının pratik değeri azalıyor.
 | Transceiver maliyeti | ~$0.15 | ~$0.40 |
 | LCSC seçenek zenginliği | **Çok yüksek** | Orta |
 | Turnaround riski | Var — donanım DE ile yönetilir | Yok |
-| Arızalı modül izolasyonu | Her iki yön de etkilenebilir | Master→modül yönü korunur |
+| Arızalı node izolasyonu | Her iki yön de etkilenebilir | Host→node yönü korunur |
 
 200 mm'lik bir bus için turnaround gerçek bir problem değil: hem ESP32 hem STM32
 USART'ları **donanımsal DE kontrolü** sunuyor, yazılım gecikmesi devre dışı.
 
-### Karar: yarım dupleks 2 tel · 🟡 D-11
+### Karar: yarım dupleks 2 tel
 
 **Ancak pinout'ta tam dupleks için 2 pin rezerve ediliyor**
 ([04 §3](04-backplane-mekanik.md#3-pinout), pin 15–16). Pinout geri dönülemez
 olduğu için bu rezervasyon şimdi yapılmalı — maliyeti sıfır, atlanmasının
-maliyeti tüm modül ailesi.
+maliyeti tüm node ailesi.
 
 ---
 
@@ -111,7 +111,7 @@ Lumped devre kriteri                 :  t_prop < t_r / 6
                                         1.33 ns  <<  33 – 67 ns   ✓ 25–50× marj
 ```
 
-### Karar: yansıma sonlandırması yok · 🟡 D-13
+### Karar: yansıma sonlandırması yok
 
 Hat elektriksel olarak **toplu (lumped) devre** — yansıma diye bir olgu yok.
 
@@ -125,14 +125,14 @@ Sonlandırma gereksiz, **bias gerekli.** Hiçbir sürücü aktif değilken difer
 hat tanımsız kalır; alıcı gürültüyü veri sanabilir.
 
 ```
-Master ucunda:
+Host ucunda:
   BUS_A → pull-up  (+3.3V)
   BUS_B → pull-down (GND)
   → idle durumda V_AB > +200 mV garanti edilir (mark/idle seviyesi)
 ```
 
-Bias dirençleri master'da **tek noktada** bulunur — modüllerde bias yoktur.
-Modül sayısı değiştikçe bias noktası değişmez.
+Bias dirençleri host'ta **tek noktada** bulunur — node'larda bias yoktur.
+Node sayısı değiştikçe bias noktası değişmez.
 
 ---
 
@@ -141,7 +141,7 @@ Modül sayısı değiştikçe bias noktası değişmez.
 ```
 500 kbaud, 8N1  →  10 bit/byte  →  20 µs/byte
 
-Bir modül işlemi (EXCHANGE):
+Bir node işlemi (EXCHANGE):
     istek       8 byte   =  160 µs
     turnaround           ≈   80 µs
     yanıt      16 byte   =  320 µs
@@ -149,7 +149,7 @@ Bir modül işlemi (EXCHANGE):
                            ───────
                            ~600 µs
 
-8 modül tam tarama      =  4.8 ms   →  ~200 Hz tarama frekansı
+8 node tam tarama      =  4.8 ms   →  ~200 Hz tarama frekansı
 ```
 
 | Referans | Değer |
@@ -160,21 +160,21 @@ Bir modül işlemi (EXCHANGE):
 
 > ⚠️ **200 Hz terk edildi.** Bu hesap teknik kapasiteyi gösteriyor, çalışma
 > noktasını değil. Enerji bütçesi ([10 §2.1](10-enerji-butcesi.md#21-tarama-hızı-gerçekte-ne-olmalı))
-> tarama hızını **uyarlanabilir 20 / 10 / 1 Hz**'e indirdi — 200 Hz modüllerin
+> tarama hızını **uyarlanabilir 20 / 10 / 1 Hz**'e indirdi — 200 Hz node'ların
 > uyumasını engelliyordu ve karavan yükleri için 20× gereksizdi.
 >
-> Yüksek baud hızı yine de değerli: **çerçeve ne kadar kısa sürerse modül o
+> Yüksek baud hızı yine de değerli: **çerçeve ne kadar kısa sürerse node o
 > kadar az uyanık kalıyor.** 500 kbaud'da bir işlem 600 µs; 115200'de 2.6 ms.
 > 10 Hz taramada bu %0.6 vs %2.6 duty cycle demek — **4× enerji farkı.**
 
-### Karar: 500 kbaud · 🟡 D-12
+### Karar: 500 kbaud
 
 **Hız için değil, denge için seçildi.** 115200 baud bile 20 ms tarama ile
 yeterdi. 500k'nın seçilme sebebi:
 
 - Slew-rate sınırlı transceiver'larla uyumlu (EMI düşük kalıyor)
 - Tarama marjı, ESP32'nin WiFi kaynaklı jitter'ı için tampon oluşturuyor
-  ([02 §1](02-master-mimarisi.md#dürüst-karşı-argümanlar))
+  ([02 §1](02-host-mimarisi.md#dürüst-karşı-argümanlar))
 - Firmware güncellemesinde blok transferi makul sürede bitiyor
 
 Baud hızı konfigüre edilebilir olacak — saha koşullarına göre düşürülebilmeli.
@@ -183,16 +183,16 @@ Baud hızı konfigüre edilebilir olacak — saha koşullarına göre düşürü
 
 ## 5. Trafik modeli
 
-### Karar: katı master-slave + donanım event hattı · 🟡 D-33
+### Karar: katı host-node + donanım event hattı
 
 | Kural | Sonuç |
 |-------|-------|
-| **Modül asla kendiliğinden konuşmaz** | Çakışma yok, arbitrasyon yok, tamamen deterministik |
-| **Modül işlemler arasında uyur** | STOP modunda ~2 µA, USART start-bit ile uyanır ([10 §3](10-enerji-butcesi.md#3-wake-on-bus-modüllerin-uyuması)) |
-| Master sırayla slot 0..7 tarar | Tarama süresi sabit ve öngörülebilir |
-| Modül yanıt süresi ≤ 500 µs | Aşılırsa master devam eder, gecikme birikmez |
-| Master timeout 2 ms | Kaybolan modül taramayı kilitlemiyor |
-| **Olaylar bus'ta değil, FAULT# hattında** | Polling gecikmesi olmadan olay bildirimi, multi-master karmaşıklığı olmadan |
+| **Node asla kendiliğinden konuşmaz** | Çakışma yok, arbitrasyon yok, tamamen deterministik |
+| **Node işlemler arasında uyur** | STOP modunda ~2 µA, USART start-bit ile uyanır ([10 §3](10-enerji-butcesi.md#3-wake-on-bus-nodeların-uyuması)) |
+| Host sırayla slot 0..7 tarar | Tarama süresi sabit ve öngörülebilir |
+| Node yanıt süresi ≤ 500 µs | Aşılırsa host devam eder, gecikme birikmez |
+| Host timeout 2 ms | Kaybolan node taramayı kilitlemiyor |
+| **Olaylar bus'ta değil, FAULT# hattında** | Polling gecikmesi olmadan olay bildirimi, multi-host karmaşıklığı olmadan |
 
 FAULT# tasarımı bu modelin kilit noktası: katı polling'in tek dezavantajı olan
 "olay gecikmesi", bir donanım hattıyla çözülüyor. Ayrıntı:
@@ -202,7 +202,7 @@ FAULT# tasarımı bu modelin kilit noktası: katı polling'in tek dezavantajı o
 
 ## 6. Çerçeve formatı
 
-### Karar · 🟡 D-30
+### Karar
 
 ```
 ┌────────┬──────┬──────┬─────┬─────────────────┬────────┐
@@ -215,7 +215,7 @@ FAULT# tasarımı bu modelin kilit noktası: katı polling'in tek dezavantajı o
 | Alan | Açıklama |
 |------|----------|
 | SYNC | 0x55 — alternating bit paterni, senkronizasyon ve baud doğrulama için ideal |
-| ADDR | bit7 = yön (0 = master isteği, 1 = modül yanıtı) · bit6..0 = slot adresi |
+| ADDR | bit7 = yön (0 = host isteği, 1 = node yanıtı) · bit6..0 = slot adresi |
 | | 0x00 = broadcast · 0x7F = rezerve |
 | FUNC | İşlem kodu (§7) |
 | LEN | Payload uzunluğu |
@@ -238,7 +238,7 @@ Modbus RTU çerçeveleri **3.5 karakterlik sessizlikle** ayırır. Bu:
 
 | Kod | İşlem | Kullanım |
 |-----|-------|----------|
-| 0x01 | IDENTIFY | Modül descriptor'ını oku |
+| 0x01 | IDENTIFY | Node descriptor'ını oku |
 | 0x02 | GET_STATUS | Sağlık özeti |
 | 0x03 | READ_INPUTS | Giriş proses imajı |
 | 0x04 | WRITE_OUTPUTS | Çıkış proses imajı |
@@ -246,22 +246,22 @@ Modbus RTU çerçeveleri **3.5 karakterlik sessizlikle** ayırır. Bu:
 | 0x06 | READ_CONFIG | Konfigürasyon oku |
 | 0x07 | WRITE_CONFIG | Konfigürasyon yaz |
 | 0x08 | GET_DIAG | Detaylı arıza bilgisi |
-| 0x10 | ENABLE | Modülü çalıştır |
-| 0x11 | DISABLE | Modülü durdur (çıkışlar güvenli duruma) |
+| 0x10 | ENABLE | Node'u çalıştır |
+| 0x11 | DISABLE | Node'u durdur (çıkışlar güvenli duruma) |
 | 0x20–0x2F | Firmware update | ERASE / WRITE_BLOCK / VERIFY / ACTIVATE — [07](07-firmware-update.md) |
 | 0x7F | RESET | Yazılımsal reset |
 
-**Normal tarama döngüsü yalnızca 0x05 EXCHANGE kullanır** — modül başına tek
+**Normal tarama döngüsü yalnızca 0x05 EXCHANGE kullanır** — node başına tek
 işlem. Diğer kodlar discovery, konfigürasyon ve bakım içindir; tarama süresine
 girmezler.
 
-### 7.1 Modül descriptor'ı (IDENTIFY yanıtı)
+### 7.1 Node descriptor'ı (IDENTIFY yanıtı)
 
 | Alan | Byte | Not |
 |------|------|-----|
 | **Protokol versiyonu** | 1 | **İlk bayt — geriye uyumluluğun tek kapısı** |
-| Modül tipi ID | 2 | 0x0101 = DI, 0x0201 = DO, 0x0301 = AI, ... |
-| Vendor ID | 2 | Üçüncü parti modüller için |
+| Node tipi ID | 2 | 0x0101 = DI, 0x0201 = DO, 0x0301 = AI, ... |
+| Vendor ID | 2 | Üçüncü parti node'lar için |
 | HW revizyonu | 1 | |
 | FW versiyonu | 3 | major.minor.patch |
 | Form faktör | 1 | 1U / 2U |
@@ -275,9 +275,9 @@ girmezler.
 
 İki alan özellikle kritik:
 
-- **Protokol versiyonu:** Master tanımadığı versiyonu görürse modülü devre dışı
+- **Protokol versiyonu:** Host tanımadığı versiyonu görürse node'u devre dışı
   bırakır ama rafı düşürmez. Sözleşmeyi ileride kontrollü kırabilmenin tek yolu.
-- **Beyan edilen güç:** Master, bütçe aşılıyorsa modülün reset'ini bırakmıyor
+- **Beyan edilen güç:** Host, bütçe aşılıyorsa node'un reset'ini bırakmıyor
   ([03 §4.4](03-guc-mimarisi.md#44-güç-bütçesi-zorlaması)). Güç bütçesi kâğıt
   üzerinde kalmıyor, donanımla zorlanıyor.
 
@@ -286,38 +286,38 @@ girmezler.
 ## 8. Zamanlama disiplini
 
 ```
-Master:
+Host:
   ├─ slot 0 EXCHANGE ─┐
   │                   ├─ yanıt ≤ 500 µs, timeout 2 ms
   ├─ slot 1 EXCHANGE ─┘
   ├─ ...
   ├─ slot 7 EXCHANGE
-  ├─ SYNC darbesi  ←── tüm modüller aynı anda latch/apply
+  ├─ SYNC darbesi  ←── tüm node'lar aynı anda latch/apply
   └─ döngü başa
 ```
 
 | Olay | Davranış |
 |------|----------|
-| Modül yanıt vermedi | Timeout, hata sayacı artar, tarama devam eder |
-| 3 ardışık timeout | Modül "kayıp" işaretlenir, Modbus durum bitine yansır |
+| Node yanıt vermedi | Timeout, hata sayacı artar, tarama devam eder |
+| 3 ardışık timeout | Node "kayıp" işaretlenir, Modbus durum bitine yansır |
 | CRC hatası | Yanıt atılır, sayaç artar, bir sonraki döngüde tekrar denenir |
 | FAULT# düştü | Tarama döngüsü sonunda GET_DIAG ile kaynak aranır |
 | PRESENT# değişti | PCA9555 INT# → discovery tetiklenir |
-| Tarama hızı değişti | Master broadcast ile bildirir; modüller uyku pencerelerini ayarlar |
+| Tarama hızı değişti | Host broadcast ile bildirir; node'lar uyku pencerelerini ayarlar |
 
 ---
 
 ## 9. SYNC stroboskobu
 
-### Karar: var · 🟡 D-21 · maliyet 1 pin
+### Karar: var · D-21 · maliyet 1 pin
 
-Master darbe verir → **tüm modüller girişlerini aynı anda latch'ler, çıkışlarını
+Host darbe verir → **tüm node'lar girişlerini aynı anda latch'ler, çıkışlarını
 aynı anda uygular.**
 
 **Neden önemli:** SYNC olmadan, slot 0'ın girişi ile slot 7'nin girişi arasında
 bir tam tarama süresi (4.8 ms) fark olur. Bir PLC için bu, ilişkili sinyallerin
 tutarsız görünmesi demek — örneğin bir enkoder ve limit switch farklı
-modüllerdeyse.
+node'lardaysa.
 
 SYNC ile tüm proses imajı **tek bir zaman anına** ait oluyor. 1 pin karşılığında
 gerçek bir kalite farkı.

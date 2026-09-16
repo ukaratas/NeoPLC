@@ -9,7 +9,7 @@ platformudur.
 birincil tasarım kısıtı yapıyor.
 
 Bu klasör, donanım tasarımı başlamadan önce netleştirilmesi gereken **platform
-standartlarını** tutar. Buradaki kararlar tek bir kartı değil, tüm modül ailesinin
+standartlarını** tutar. Buradaki kararlar tek bir kartı değil, tüm node ailesinin
 gelecekteki tüm üyelerini bağlar.
 
 ---
@@ -19,17 +19,17 @@ gelecekteki tüm üyelerini bağlar.
 | # | Doküman | Kapsam | Durum |
 |---|---------|--------|-------|
 | 00 | [Karar Kütüğü](00-karar-kutugu.md) | Tüm açık/kapalı kararların tek listesi | 🟡 Onay bekliyor |
-| 01 | [Sistem Genel Bakış](01-sistem-genel-bakis.md) | Kapsam, kısıtlar, blok diyagram, modül aileleri | 🟡 Taslak |
-| 02 | [Master Mimarisi](02-master-mimarisi.md) | MCU seçimi, Ethernet/RS-485/WiFi, Modbus, GPIO bütçesi | 🟡 Taslak |
+| 01 | [Sistem Genel Bakış](01-sistem-genel-bakis.md) | Kapsam, kısıtlar, blok diyagram, node aileleri | 🟡 Taslak |
+| 02 | [Host Mimarisi](02-host-mimarisi.md) | MCU seçimi, Ethernet/RS-485/WiFi, Modbus, GPIO bütçesi | 🟡 Taslak |
 | 03 | [Güç Mimarisi](03-guc-mimarisi.md) | 12–48V ön kat, rail topolojisi, güç bütçesi, termal | 🟡 Taslak |
 | 04 | [Backplane ve Mekanik](04-backplane-mekanik.md) | 1U/2U standardı, konnektör, pinout | 🟡 Taslak |
 | 05 | [Dahili Bus](05-dahili-bus.md) | Fiziksel katman kararı, protokol spesifikasyonu, zamanlama | 🟡 Taslak |
 | 06 | [Slot Yönetimi](06-slot-yonetimi.md) | Adresleme, discovery, presence/fault/reset, güç zorlaması | 🟡 Taslak |
 | 07 | [Firmware Update](07-firmware-update.md) | Bootloader, güncelleme akışı, kurtarma | 🟡 Taslak |
 | 08 | [EMC ve Koruma](08-emc-koruma.md) | ESD/EFT/surge, katman sayısı kararı | 🟡 Taslak |
-| 09 | [Modül Aileleri](09-modul-aileleri.md) | İlk modül ailesi tanımları ve türetme kuralları | 🟡 Taslak |
+| 09 | [Node Aileleri](09-node-aileleri.md) | İlk node ailesi tanımları ve türetme kuralları | 🟡 Taslak |
 | **10** | **[Enerji Bütçesi](10-enerji-butcesi.md)** | **Güç durumları, tüketim bütçesi, batarya ömrü — birincil kısıt** | 🟡 Taslak |
-| 11 | [Çıkış Modülü Topolojileri](11-cikis-modul-topolojileri.md) | MOSFET / latching röle / hibrit, DC-AC ayrımı, termal | 🟡 Taslak |
+| 11 | [Çıkış Node'u Topolojileri](11-cikis-node-topolojileri.md) | MOSFET / latching röle / hibrit, DC-AC ayrımı, termal | 🟡 Taslak |
 | 12 | [Mekanik Referans Rev 0.1](12-mekanik-referans-rev01.md) | Çalışma draftı + mimari çakışma tablosu | 📌 Referans |
 
 ---
@@ -63,10 +63,10 @@ gelecekteki tüm üyelerini bağlar.
 | Kısıt | Değer |
 |-------|-------|
 | Giriş gerilimi | 12–48V DC |
-| Modül kapasitesi | 8U (1U = 1 slot, 2U = 2 slot) |
-| Dış haberleşme | Ethernet (Modbus TCP), RS-485 (Modbus RTU), Wi-Fi |
+| Node kapasitesi | 8U (1U = 17.5 mm, 2U = 35 mm) |
+| Dış haberleşme | RS-485 (Modbus RTU) + Wi-Fi (Modbus TCP) · Ethernet opsiyonel node |
 | Dahili haberleşme | Hafif özel protokol, UART mantığında |
-| PCB tercihi | 2 katman (gerekçelendirilmedikçe) |
+| PCB tercihi | 2 katman — host ve node'lar |
 | Tedarik ekosistemi | JLCPCB / LCSC birinci tercih |
 | Hedef ortam sıcaklığı | 60 °C |
 | EMC hedefi | Seviye A (ESD + EFT), sertifikasyon yok |

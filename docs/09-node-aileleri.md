@@ -1,17 +1,17 @@
-# 09 — Modül Aileleri
+# 09 — Node Aileleri
 
 ---
 
-## 1. Ortak modül çekirdeği
+## 1. Ortak node çekirdeği
 
-Platformun en önemli tasarım kalemi. Her modül, **aynı değişmez çekirdeği**
+Platformun en önemli tasarım kalemi. Her node, **aynı değişmez çekirdeği**
 paylaşır; sadece saha tarafı farklıdır.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  MODÜL                                                      │
+│  NODE                                                       │
 │                                                             │
-│  ┌── ORTAK ÇEKİRDEK (tüm modüllerde aynı) ──────────────┐   │
+│  ┌── ORTAK ÇEKİRDEK (tüm node'larda aynı) ──────────────┐   │
 │  │                                                       │   │
 │  │  Kart kenarı konnektörü (26 pin)                     │   │
 │  │  +5V_SYS → 3.3V regülatör                            │   │
@@ -26,7 +26,7 @@ paylaşır; sadece saha tarafı farklıdır.
 │  │  SWD test noktaları                                  │   │
 │  └───────────────────────────────────────────────────────┘   │
 │                            ↕                                 │
-│  ┌── SAHA TARAFI (modül tipine özgü) ────────────────────┐   │
+│  ┌── SAHA TARAFI (node tipine özgü) ────────────────────┐   │
 │  │  İzolasyon · sürücüler · filtreleme · klemensler      │   │
 │  └───────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
@@ -36,13 +36,13 @@ paylaşır; sadece saha tarafı farklıdır.
 
 | Kazanç | Açıklama |
 |--------|----------|
-| **Yeni modül türetme maliyeti düşer** | Sadece saha tarafı tasarlanır; çekirdek kopyalanır |
-| **Doğrulama bir kez yapılır** | Çekirdek bir modülde doğrulandıysa hepsinde doğrulanmıştır |
-| **Firmware paylaşılır** | Protokol katmanı ortak kütüphane; modül sadece I/O katmanını yazar |
+| **Yeni node türetme maliyeti düşer** | Sadece saha tarafı tasarlanır; çekirdek kopyalanır |
+| **Doğrulama bir kez yapılır** | Çekirdek bir node'da doğrulandıysa hepsinde doğrulanmıştır |
+| **Firmware paylaşılır** | Protokol katmanı ortak kütüphane; node sadece I/O katmanını yazar |
 | **KiCAD'de yeniden kullanım** | Hiyerarşik sayfa veya design block olarak saklanabilir |
 
-**Tasarım kuralı:** Çekirdekte yapılan her değişiklik tüm modül ailesini
-etkiler. Çekirdek, ilk modülle birlikte donduruluyor.
+**Tasarım kuralı:** Çekirdekte yapılan her değişiklik tüm node ailesini
+etkiler. Çekirdek, ilk node'la birlikte donduruluyor.
 
 ### 1.2 Çekirdeğin BOM tahmini
 
@@ -59,9 +59,9 @@ bu, çekirdek maliyetinin neden bu kadar düşük kalabildiğinin ana sebebi.
 
 ---
 
-## 2. İlk modül seçimi
+## 2. İlk node seçimi
 
-### 🔴 D-28 — Karar bekliyor
+### D-28 — Karar bekliyor
 
 **Öneri: Dijital giriş, 8 kanal, 1U.**
 
@@ -75,8 +75,8 @@ Gerekçe:
 | Güç tüketimi | En düşük — güç bütçesi varsayımlarını doğrulamak için iyi başlangıç |
 | Hata riski | Saha tarafında yanlış gidecek çok az şey var |
 
-**Amaç ilk modülde I/O fonksiyonunu göstermek değil, platform sözleşmesini
-doğrulamaktır.** Bunun için en basit modül en iyisidir — saha tarafındaki
+**Amaç ilk node'da I/O fonksiyonunu göstermek değil, platform sözleşmesini
+doğrulamaktır.** Bunun için en basit node en iyisidir — saha tarafındaki
 karmaşıklık, çekirdekteki sorunları maskeler.
 
 ### 2.1 Alternatif değerlendirmesi
@@ -85,11 +85,11 @@ karmaşıklık, çekirdekteki sorunları maskeler.
 |------|------------------------------|
 | Dijital çıkış | Yük sürme, freewheel, kısa devre koruması — çekirdek hatalarını maskeleyebilir |
 | Röle çıkış | VBUS_RAW kullanımı ek değişken getirir; bobin akımı güç bütçesi testini bulandırır |
-| Analog giriş | Referans, kalibrasyon, gürültü — en zor modül. Çekirdek olgunlaşmadan yapılmamalı |
+| Analog giriş | Referans, kalibrasyon, gürültü — en zor node. Çekirdek olgunlaşmadan yapılmamalı |
 
 ---
 
-## 3. Modül MCU'su
+## 3. Node MCU'su
 
 ### ⚪ D-37 — Henüz ele alınmadı
 
@@ -98,9 +98,9 @@ Bu karar için gereken girdi:
 | Girdi | Kaynak |
 |-------|--------|
 | Flash kapasitesi → bootloader yapısı | [07 §2](07-firmware-update.md#2-bootloader-yapısı) — 64 KB ise tek app, 128 KB+ ise çift bank yeniden değerlendirilir |
-| GPIO sayısı | Modül tipine göre değişir; en yüksek kanal sayılı modül belirleyici |
+| GPIO sayısı | Node tipine göre değişir; en yüksek kanal sayılı node belirleyici |
 | Donanımsal DE kontrolü olan USART | [05 §2](05-dahili-bus.md#2-yarım-dupleks-mi-tam-dupleks-mi) — turnaround gecikmesini yazılımdan çıkarmak için |
-| Fabrika UID | [05 §7.1](05-dahili-bus.md#71-modül-descriptorı-identify-yanıtı) — descriptor'daki benzersiz kimlik |
+| Fabrika UID | [05 §7.1](05-dahili-bus.md#71-node-descriptorı-identify-yanıtı) — descriptor'daki benzersiz kimlik |
 | Sıcaklık sınıfı | D-04'e bağlı |
 | LCSC stok ve fiyat | Konnect `integration` toolset'i ile doğrulanacak |
 
@@ -108,7 +108,7 @@ Bu karar için gereken girdi:
 kontrollü USART, geniş LCSC stoğu, endüstriyel sıcaklık aralığı, tek toolchain
 ile tüm aile.
 
-Karar, D-28 (ilk modül) netleştiğinde o modülün gereksinimleriyle birlikte
+Karar, D-28 (ilk node) netleştiğinde o node'un gereksinimleriyle birlikte
 verilecek.
 
 ---
@@ -130,7 +130,7 @@ kararıdır.**
 > ⚠️ **Titreşim (K5) vidalı klemensi eliyor.** Karavan hareketli bir araç;
 > vidalı klemens titreşim altında gevşer ve gevşeyen bir klemens yüksek akımda
 > ısınma ve yangın riskidir. **Push-in yaylı veya çıkarılabilir yaylı klemens
-> zorunlu.** ([10 §9.3](10-enerji-butcesi.md#93-titreşim--🟡-d-45))
+> zorunlu.** ([10 §9.3](10-enerji-butcesi.md#93-titreşim))
 
 İki sıra kullanılırsa kutup sayısı ikiye katlanır (~12), ama ön yüz derinliği
 artar.
@@ -140,7 +140,7 @@ dönüş gerekli. Bu, D-28 ile birlikte kararlaştırılacak.
 
 ---
 
-## 5. Modül ailesi yol haritası
+## 5. Node ailesi yol haritası
 
 | Faz | Aile | Form | Bağımlılık |
 |-----|------|------|------------|
@@ -149,12 +149,13 @@ dönüş gerekli. Bu, D-28 ile birlikte kararlaştırılacak.
 | **2** | Röle çıkış | 1U / 2U | VBUS_RAW kullanımının ilk doğrulaması |
 | **2** | Analog giriş | 1U / 2U | Çekirdek olgun olmalı; gürültü bölgeleme kritik |
 | **2** | Analog çıkış | 1U / 2U | VBUS_RAW compliance gerilimi |
-| **3** | Haberleşme | 1U / 2U | Ek protokol yığını — modülde daha güçlü MCU gerekebilir |
+| **2** | **Ethernet / haberleşme** | 1U | **Ethernet host'tan çıkarıldı** (D-47) — kablolu Ethernet isteyen bu node'u takar. W5500 + magjack, sadece takılıyken enerji harcar |
+| **3** | Diğer haberleşme (CAN, ek RS-485) | 1U / 2U | Ek protokol yığını — node'da daha güçlü MCU gerekebilir |
 | **3** | Özel fonksiyon | 1U / 2U | Sayaç, enkoder, PWM, sıcaklık (RTD/TC) |
 
-### 5.1 Modül tipi ID tahsisi
+### 5.1 Node tipi ID tahsisi
 
-Descriptor'daki `Modül tipi ID` alanı için ([05 §7.1](05-dahili-bus.md#71-modül-descriptorı-identify-yanıtı)):
+Descriptor'daki `Node tipi ID` alanı için ([05 §7.1](05-dahili-bus.md#71-node-descriptorı-identify-yanıtı)):
 
 ```
 0x01xx   Dijital giriş        0x0101 = 8ch 24V
@@ -167,21 +168,21 @@ Descriptor'daki `Modül tipi ID` alanı için ([05 §7.1](05-dahili-bus.md#71-mo
 0xFFxx   Rezerve / test
 ```
 
-Üst bayt aile, alt bayt varyant. Master, tanımadığı bir varyantı gördüğünde
-aile davranışına göre genel muamele edebilir — yeni varyantlar master
+Üst bayt aile, alt bayt varyant. Host, tanımadığı bir varyantı gördüğünde
+aile davranışına göre genel muamele edebilir — yeni varyantlar host
 güncellemesi gerektirmeden çalışabilir.
 
 ---
 
 ## 6. 1U → 2U türetme kuralı
 
-Bir modülün 2U versiyonu **yeni bir tasarım değil, genişletilmiş bir
+Bir node'un 2U versiyonu **yeni bir tasarım değil, genişletilmiş bir
 varyanttır**:
 
 | Kalem | 1U | 2U |
 |-------|----|----|
 | Ortak çekirdek | Aynı | **Aynı** |
-| Backplane konnektörü | 1 adet (sol slot) | **1 adet (sol slot)** — [04 §4](04-backplane-mekanik.md#4-2u-modül-stratejisi) |
+| Backplane konnektörü | 1 adet (sol slot) | **1 adet (sol slot)** — [04 §4](04-backplane-mekanik.md#4-2u-node-stratejisi) |
 | +5V_SYS bütçesi | 200 mA | 400 mA |
 | Ön yüz genişliği | 22.5 mm | 45 mm |
 | Kanal sayısı | Baz | Tipik 2× |

@@ -11,8 +11,8 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | Durum | Adet |
 |-------|------|
-| 🟢 Kabul edildi | 5 |
-| 🟡 Öneri hazır, onay bekliyor | 44 |
+| 🟢 Kabul edildi | 11 |
+| 🟡 Öneri hazır, onay bekliyor | 38 |
 | 🔴 Dışarıdan bilgi gerekiyor | 1 |
 | ⚪ Henüz ele alınmadı | 3 |
 
@@ -22,11 +22,16 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | ID | Karar | Kaynak |
 |----|-------|--------|
-| **D-01** | Master MCU: **ESP32-S3-WROOM-1U-N16R8** | Kullanıcı onayı |
+| **D-01** | Host MCU: **ESP32-S3-WROOM-1U-N16R8** | Kullanıcı onayı |
 | **D-02** | Ethernet: **W5500** (SPI, donanım TCP/IP) | Kullanıcı onayı |
 | **D-04** | Hedef ortam sıcaklığı: **60 °C** | Kullanıcı — kapalı mekân, güneş altında 50 °C rahat görülür |
 | **D-06** | EMC: **sertifikasyon hedefi yok**, seviye A (ESD + EFT) | Kullanıcı |
 | **D-46** | Uygulama bağlamı: **karavan yönetimi**, batarya beslemeli | Kullanıcı |
+| **D-47** | **Ethernet host kartından çıkarıldı** — RS-485 + WiFi yeterli | Kullanıcı onayı |
+| **D-52** | **Çıkış node'ları: 4 kanal, her node tek teknoloji** | Kullanıcı onayı |
+| **D-56** | **Terminoloji: Host / Node** — tüm dokümanlarda uygulandı | Kullanıcı onayı |
+| **D-05** | **Host 2 katman** — üç gerekçe de ortadan kalktı | Türetilmiş |
+| **D-58** | **Slot adımı 17.5 mm** (2U = 35 mm) | Çalışma draftı Rev 0.1 |
 
 ---
 
@@ -34,22 +39,22 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | ID | Soru | Neyi etkiliyor |
 |----|------|----------------|
-| **D-28** | İlk örnek modül ve modül aileleri | İlk şemanın kapsamı. *Kullanıcı ayrıca detaylandıracak.* |
+| **D-28** | İlk örnek node ve node aileleri | İlk şemanın kapsamı. *Kullanıcı ayrıca detaylandıracak.* |
 
 ---
 
 ## Karar tablosu
 
-### Master
+### Host
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-01 | Master MCU / SoC | ESP32-S3-WROOM-1U-N16R8 | 🟢 | [02](02-master-mimarisi.md#1-mcu-seçimi) |
-| D-02 | Ethernet kontrolcüsü | W5500 (SPI, donanım TCP/IP) | 🟢 | [02](02-master-mimarisi.md#2-ethernet) |
-| D-03 | WiFi anten | U.FL + harici anten (`-1U` varyantı) | 🟡 | [02](02-master-mimarisi.md#3-wifi) |
-| D-07 | Saha RS-485 izolasyonu | İzole — ama güç kapılı ([10 §7.3](10-enerji-butcesi.md#73-güç-kapısı-gereksinimleri)) | 🟡 | [02](02-master-mimarisi.md#4-rs-485-saha-portu) |
-| D-27 | Modbus register haritası | Slot başına 0x100'lük blok, 0x1000 tabanlı | 🟡 | [02](02-master-mimarisi.md#6-modbus-register-haritası) |
-| D-47 | Ethernet gerçekten gerekli mi? | **Değerlendirmeye sunuldu** — 495 mW ile en büyük sürekli yük | 🟡 | [10 §8](10-enerji-butcesi.md#8-ethernetin-enerji-maliyeti) |
+| D-01 | Host MCU / SoC | ESP32-S3-WROOM-1U-N16R8 | 🟢 | [02](02-host-mimarisi.md#1-mcu-seçimi) |
+| D-02 | Ethernet kontrolcüsü | W5500 — **host'ta değil, haberleşme node'unda** (D-47) | 🟢 | [02](02-host-mimarisi.md#2-ethernet-hosttan-çıkarıldı) |
+| D-03 | WiFi anten | U.FL + harici anten (`-1U` varyantı) | 🟡 | [02](02-host-mimarisi.md#3-wifi) |
+| D-07 | Saha RS-485 izolasyonu | İzole — ama güç kapılı ([10 §7.3](10-enerji-butcesi.md#73-güç-kapısı-gereksinimleri)) | 🟡 | [02](02-host-mimarisi.md#4-rs-485-saha-portu) |
+| D-27 | Modbus register haritası | Slot başına 0x100'lük blok, 0x1000 tabanlı | 🟡 | [02](02-host-mimarisi.md#6-modbus-register-haritası) |
+| D-47 | Ethernet | **Host'tan çıkarıldı** — haberleşme node'u olarak sunulacak | 🟢 | [10 §8](10-enerji-butcesi.md#8-ethernet-kararı) |
 
 ### Enerji bütçesi — birincil kısıt
 
@@ -57,10 +62,10 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 |----|------|---------------|-------|-----|
 | D-39 | Güç durumları | S0 Aktif / S1 Boşta / S2 Bekleme / S3 Depo | 🟡 | [10 §4](10-enerji-butcesi.md#4-güç-durumları) |
 | D-40 | Uyarlanabilir tarama hızı | 20 / 10 / 1 Hz — 200 Hz terk edildi | 🟡 | [10 §2.1](10-enerji-butcesi.md#21-tarama-hızı-gerçekte-ne-olmalı) |
-| D-41 | Wake-on-bus | Modül STOP modunda uyur, USART start-bit ile uyanır | 🟡 | [10 §3](10-enerji-butcesi.md#3-wake-on-bus-modüllerin-uyuması) |
-| D-42 | İki dönüştürücülü yapı | Housekeeping (Iq ≤ 25 µA) + ana buck (EN pinli) | 🟡 | [10 §7.1](10-enerji-butcesi.md#71-i̇ki-dönüştürücülü-yapı--🟡-d-42) |
-| D-43 | Batarya izleme + LVD | VBUS_RAW gerilim ölçümü — **batarya sisteminde zorunlu** | 🟡 | [10 §9.1](10-enerji-butcesi.md#91-batarya-i̇zleme--🟡-d-43) |
-| D-44 | Uyandırma kaynakları | En az 2 RTC GPIO uyandırma girişi | 🟡 | [10 §9.2](10-enerji-butcesi.md#92-uyandırma-kaynakları--🟡-d-44) |
+| D-41 | Wake-on-bus | Node STOP modunda uyur, USART start-bit ile uyanır | 🟡 | [10 §3](10-enerji-butcesi.md#3-wake-on-bus-nodeların-uyuması) |
+| D-42 | İki dönüştürücülü yapı | Housekeeping (Iq ≤ 25 µA) + ana buck (EN pinli) | 🟡 | [10 §7.1](10-enerji-butcesi.md#71-iki-dönüştürücülü-yapı) |
+| D-43 | Batarya izleme + LVD | VBUS_RAW gerilim ölçümü — **batarya sisteminde zorunlu** | 🟡 | [10 §9.1](10-enerji-butcesi.md#91-batarya-izleme) |
+| D-44 | Uyandırma kaynakları | En az 2 RTC GPIO uyandırma girişi | 🟡 | [10 §9.2](10-enerji-butcesi.md#92-uyandırma-kaynakları) |
 
 ### Güç
 
@@ -69,9 +74,9 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | D-04 | Hedef ortam sıcaklığı | **60 °C** | 🟢 | [03 §5](03-guc-mimarisi.md#5-termal-analiz) |
 | D-08 | Backplane rail topolojisi | İkili rail: VBUS_RAW (12–48V) + +5V_SYS | 🟡 | [03 §2](03-guc-mimarisi.md#2-rail-topolojisi) |
 | D-09 | Giriş koruma topolojisi | Seri FET + gate zener clamp (~55V) → downstream 60V sınıfı | 🟡 | [03 §1](03-guc-mimarisi.md#1-giriş-koruma-katı) |
-| D-29 | Slot güç bütçesi | 1U: 200 mA tavan · toplam ≤ 1.6 A (descriptor ile zorlanır) | 🟡 | [03 §4](03-guc-mimarisi.md#4-güç-bütçesi) |
-| D-31 | Ana buck tasarım noktası | **5V @ 2A** — enerji bütçesi düzeltmesiyle 3A'dan düşürüldü | 🟡 | [03 §3](03-guc-mimarisi.md#3-ana-dönüştürücü) |
-| D-48 | Dönüştürücü seçim kriteri | **Hafif yük verimi + düşük Iq**, tepe verim değil | 🟡 | [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri--değişti) |
+| D-29 | Slot güç bütçesi | 1U: 150 mA tavan · toplam ≤ 1.2 A (descriptor ile zorlanır) | 🟡 | [03 §4](03-guc-mimarisi.md#4-güç-bütçesi) |
+| D-31 | Ana buck tasarım noktası | **5V @ 1.5A** — 3A → 2A → 1.5A | 🟡 | [03 §3](03-guc-mimarisi.md#3-ana-dönüştürücü) |
+| D-48 | Dönüştürücü seçim kriteri | **Hafif yük verimi + düşük Iq**, tepe verim değil | 🟡 | [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri-değişti) |
 
 ### Backplane ve mekanik
 
@@ -79,10 +84,10 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 |----|------|---------------|-------|-----|
 | D-14 | Konnektör tipi | PCB kart kenarı (gold finger), 2.54mm, çift sıra, 26 pin | 🟡 | [04 §2](04-backplane-mekanik.md#2-konnektör-seçimi) |
 | D-15 | 1U mekanik adım | 22.5 mm, 2U = 45 mm | 🟡 | [04 §1](04-backplane-mekanik.md#1-mekanik-standart) |
-| D-16 | 2U mating stratejisi | Sadece sol slot konnektörüne oturur | 🟡 | [04 §4](04-backplane-mekanik.md#4-2u-modül-stratejisi) |
+| D-16 | 2U mating stratejisi | Sadece sol slot konnektörüne oturur | 🟡 | [04 §4](04-backplane-mekanik.md#4-2u-node-stratejisi) |
 | D-32 | Backplane pinout | 26 pin, 4 kademeli mate sırası | 🟡 | [04 §3](04-backplane-mekanik.md#3-pinout) |
 | D-24 | Hot-plug | Donanım yetenekli tasarla, v1'de garanti verme | 🟡 | [04 §5](04-backplane-mekanik.md#5-hot-plug-değerlendirmesi) |
-| D-45 | **Titreşim dayanımı** | Modül tutucu mandal/vida zorunlu — konnektör tek başına tutmaz | 🟡 | [10 §9.3](10-enerji-butcesi.md#93-titreşim--🟡-d-45) |
+| D-45 | **Titreşim dayanımı** | Node tutucu mandal/vida zorunlu — konnektör tek başına tutmaz | 🟡 | [10 §9.3](10-enerji-butcesi.md#93-titreşim) |
 
 ### Dahili haberleşme
 
@@ -93,7 +98,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | D-12 | Baud hızı | 500 kbaud (konfigüre edilebilir) | 🟡 | [05 §4](05-dahili-bus.md#4-hız-ve-tarama-süresi) |
 | D-13 | Sonlandırma | Yansıma sonlandırması yok · fail-safe bias var | 🟡 | [05 §3](05-dahili-bus.md#3-sonlandırma-analizi) |
 | D-30 | Çerçeve formatı | SYNC+ADDR+FUNC+LEN+PAYLOAD+CRC16, max 70 byte | 🟡 | [05 §6](05-dahili-bus.md#6-çerçeve-formatı) |
-| D-33 | Trafik modeli | Katı master-slave polling + donanım FAULT# event hattı | 🟡 | [05 §5](05-dahili-bus.md#5-trafik-modeli) |
+| D-33 | Trafik modeli | Katı host-node polling + donanım FAULT# event hattı | 🟡 | [05 §5](05-dahili-bus.md#5-trafik-modeli) |
 | D-21 | SYNC hattı | Var — eşzamanlı I/O latch strobe, 1 pin | 🟡 | [05 §9](05-dahili-bus.md#9-sync-stroboskobu) |
 | D-49 | Transceiver seçim kriteri | **Alıcı boşta akımı birincil kriter** (0.5 mA hedef) | 🟡 | [10 §3.1](10-enerji-butcesi.md#31-neden-rs-485-alıcısı-kapatılmıyor) |
 
@@ -102,10 +107,10 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
 | D-17 | Slot adresleme | 4-bit coğrafi (backplane'de sabitlenmiş) | 🟡 | [06 §1](06-slot-yonetimi.md#1-slot-adresleme) |
-| D-18 | Presence + reset yönetimi | Tek PCA9555, INT# ile hot-plug algılama | 🟡 | [06 §3](06-slot-yonetimi.md#3-master-tarafı-io-genişletme) |
+| D-18 | Presence + reset yönetimi | Tek PCA9555, INT# ile hot-plug algılama | 🟡 | [06 §3](06-slot-yonetimi.md#3-host-tarafı-io-genişletme) |
 | D-19 | Bootloader girişi | Ortak BOOT# + hedef slotun RST# bırakılması | 🟡 | [06 §5](06-slot-yonetimi.md#5-boot-stratejisi) |
 | D-20 | Fault bildirimi | Ortak open-drain wired-OR FAULT# | 🟡 | [06 §4](06-slot-yonetimi.md#4-fault-hattı) |
-| D-22 | Reset varsayılanı | Modülde 10k pull-down → varsayılan reset'te | 🟡 | [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) |
+| D-22 | Reset varsayılanı | Node'da 10k pull-down → varsayılan reset'te | 🟡 | [06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu) |
 | D-23 | Slot başına koruma | Akım sınırlı load switch — **S3'ün de mekanizması** | 🟡 | [06 §7](06-slot-yonetimi.md#7-slot-başına-akım-koruması) |
 | D-34 | Discovery | Presence → IDENTIFY → bütçe → CONFIG → ENABLE | 🟡 | [06 §8](06-slot-yonetimi.md#8-discovery-akışı) |
 
@@ -113,9 +118,9 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-25 | Modül bootloader yapısı | Tek app + CRC + BOOT# donanım kaçışı | 🟡 | [07 §2](07-firmware-update.md#2-bootloader-yapısı) |
-| D-26 | Master OTA | ESP32 çift partisyon + rollback | 🟡 | [07 §5](07-firmware-update.md#5-master-ota) |
-| D-35 | Modül FW dağıtımı | Master, dahili bus üzerinden yazar | 🟡 | [07 §1](07-firmware-update.md#1-dağıtım-modeli) |
+| D-25 | Node bootloader yapısı | Tek app + CRC + BOOT# donanım kaçışı | 🟡 | [07 §2](07-firmware-update.md#2-bootloader-yapısı) |
+| D-26 | Host OTA | ESP32 çift partisyon + rollback | 🟡 | [07 §5](07-firmware-update.md#5-host-ota) |
+| D-35 | Node FW dağıtımı | Host, dahili bus üzerinden yazar | 🟡 | [07 §1](07-firmware-update.md#1-dağıtım-modeli) |
 | D-50 | Güç durumu firmware'i | S0–S3 durum makinesi, güvenli geçiş, raporlama | 🟡 | [10 §10](10-enerji-butcesi.md#10-firmware-sorumlulukları) |
 
 ### EMC ve üretim
@@ -123,30 +128,30 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
 | D-06 | EMC hedef seviyesi | **Sertifikasyon yok** — seviye A (ESD + EFT) | 🟢 | [08 §4](08-emc-koruma.md#4-uyumluluk-hedefi) |
-| D-05 | Master katman sayısı | **Yeniden değerlendirildi** — artık zorunlu değil, tercih | 🟡 | [08 §5](08-emc-koruma.md#5-katman-sayısı-kararı) |
-| D-36 | Modül katman sayısı | 2 katman | 🟡 | [08 §5](08-emc-koruma.md#5-katman-sayısı-kararı) |
+| D-05 | Host katman sayısı | **2 katman** — üç gerekçe de çözüldü (D-06, D-47, D-31) | 🟢 | [08 §5](08-emc-koruma.md#5-katman-sayısı-kararı) |
+| D-36 | Node katman sayısı | 2 katman | 🟡 | [08 §5](08-emc-koruma.md#5-katman-sayısı-kararı) |
 
-### Çıkış modülleri ve mekanik referans
+### Çıkış node'ları ve mekanik referans
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-51 | DC / AC ayrımı | Ayrı modül aileleri, AC minimum 2U (creepage) | 🟡 | [11 §4](11-cikis-modul-topolojileri.md#4-dc--ac-ayrımı) |
-| D-52 | 8A sınıfı: latching ve MOSFET ayrı modül mü? | Ayrı öneriliyor — PWM gerekenler MOSFET, uzun süre açık kalanlar latching | 🟡 | [11 §5.1](11-cikis-modul-topolojileri.md#51-dc-çıkış) |
-| D-53 | Latching kontak durumu geri okuma | **Zorunlu** — yöntem açık (yardımcı kontak vs gerilim ölçümü) | 🟡 | [11 §7.3](11-cikis-modul-topolojileri.md#73-durum-geri-okuma) |
-| D-54 | 32A/64A ısı yolu | Alüminyum ray/ön panel üzerinden — draft'taki hibrit yapı uygun | 🟡 | [11 §6.3](11-cikis-modul-topolojileri.md#63-ek-termal-önlemler) |
-| D-55 | AC'de zero-cross anahtarlama | Açık | ⚪ | [11 §9](11-cikis-modul-topolojileri.md#9-açık-sorular) |
-| **D-56** | **Terminoloji: Host/Node mu Master/Modül mü?** | **Host/Node öneriliyor** (draft'taki ürün dili) | 🟡 | [12 §1.1](12-mekanik-referans-rev01.md#11-terminoloji) |
-| **D-57** | **Fan + termostatik kontrol** | **Zorunlu** — doğal konveksiyon pakette yetmiyor; ama sürekli çalışamaz | 🟡 | [12 §3.5](12-mekanik-referans-rev01.md#35-soğutma-fan--ve-benim-termal-hatam) |
-| **D-58** | **Slot adımı 22.5 → 17.5 mm** | **Draft benimseniyor** — 40 mm daha dar cihaz | 🟡 | [12 §3.1](12-mekanik-referans-rev01.md#31-slot-adımı-175-mm-kabul-edilmeli) |
+| D-51 | DC / AC ayrımı | Ayrı node aileleri, AC minimum 2U (creepage) | 🟡 | [11 §4](11-cikis-node-topolojileri.md#4-dc-ac-ayrımı) |
+| D-52 | 8A sınıfı: latching ve MOSFET ayrı node mü? | Ayrı öneriliyor — PWM gerekenler MOSFET, uzun süre açık kalanlar latching | 🟡 | [11 §5.1](11-cikis-node-topolojileri.md#51-dc-çıkış) |
+| D-53 | Latching kontak durumu geri okuma | **Zorunlu** — yöntem açık (yardımcı kontak vs gerilim ölçümü) | 🟡 | [11 §7.3](11-cikis-node-topolojileri.md#73-durum-geri-okuma) |
+| D-54 | 32A/64A ısı yolu | Alüminyum ray/ön panel üzerinden — draft'taki hibrit yapı uygun | 🟡 | [11 §6.3](11-cikis-node-topolojileri.md#63-ek-termal-önlemler) |
+| D-55 | AC'de zero-cross anahtarlama | Açık | ⚪ | [11 §9](11-cikis-node-topolojileri.md#9-açık-sorular) |
+| **D-56** | **Terminoloji: Host/Node mu Host/Node mü?** | **Host/Node öneriliyor** (draft'taki ürün dili) | 🟡 | [12 §1.1](12-mekanik-referans-rev01.md#11-terminoloji) |
+| **D-57** | **Fan + termostatik kontrol** | **Zorunlu** — doğal konveksiyon pakette yetmiyor; ama sürekli çalışamaz | 🟡 | [12 §3.5](12-mekanik-referans-rev01.md#35-soğutma-fan-ve-benim-termal-hatam) |
+| **D-58** | **Slot adımı 17.5 mm** | Draft benimsendi — cihaz 40 mm daha dar, 2U = 35 mm | 🟢 | [12 §3.1](12-mekanik-referans-rev01.md#31-slot-adımı-175-mm-kabul-edilmeli) |
 | D-59 | Backplane 3.3V rail | Dağıtılmasın, ama **pin rezerve edilsin** | 🟡 | [12 §3.3](12-mekanik-referans-rev01.md#33-backplane-rail-sayısı-33v-tartışmalı) |
 
-### Modül aileleri
+### Node aileleri
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-28 | İlk örnek modül | — *Kullanıcı detaylandıracak* | 🔴 | [09 §2](09-modul-aileleri.md#2-ilk-modül-seçimi) |
-| D-37 | Modül MCU ailesi | ⚪ — ön eğilim STM32G0 (STOP modu + donanım DE) | ⚪ | [09 §3](09-modul-aileleri.md#3-modül-mcusu) |
-| D-38 | Saha klemens tipi | ⚪ — **titreşim nedeniyle push-in yaylı öneriliyor** | ⚪ | [09 §4](09-modul-aileleri.md#4-saha-bağlantısı) |
+| D-28 | İlk örnek node | — *Kullanıcı detaylandıracak* | 🔴 | [09 §2](09-node-aileleri.md#2-ilk-node-seçimi) |
+| D-37 | Node MCU ailesi | ⚪ — ön eğilim STM32G0 (STOP modu + donanım DE) | ⚪ | [09 §3](09-node-aileleri.md#3-node-mcusu) |
+| D-38 | Saha klemens tipi | ⚪ — **titreşim nedeniyle push-in yaylı öneriliyor** | ⚪ | [09 §4](09-node-aileleri.md#4-saha-bağlantısı) |
 | D-46 | Uygulama bağlamı | **Karavan yönetimi** — batarya beslemeli, hareketli araç | 🟢 | [01 §3](01-sistem-genel-bakis.md#3-tasarımı-yöneten-kısıtlar) |
 
 ---
@@ -161,11 +166,18 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | 2026-09-16 | D-06 | 🔴 → 🟢 **sertifikasyon yok** | Kullanıcı: önemsiz |
 | 2026-09-16 | D-46 | Yeni — karavan bağlamı | Enerji bütçesini birincil kısıt yapıyor |
 | 2026-09-16 | D-39..D-45, D-47..D-50 | Yeni — enerji bütçesi kararları | [10](10-enerji-butcesi.md) |
-| 2026-09-16 | **D-40** | **200 Hz → 20/10/1 Hz uyarlanabilir** | 200 Hz endüstriyel varsayımdı; modüllerin uyumasını engelliyordu |
+| 2026-09-16 | **D-40** | **200 Hz → 20/10/1 Hz uyarlanabilir** | 200 Hz endüstriyel varsayımdı; node'ların uyumasını engelliyordu |
 | 2026-09-16 | **D-31** | **3A → 2A** | Wake-on-bus ile gerçekçi slot tüketimi düştü; 200 mA/slot varsayımı fazla cömertti |
 | 2026-09-16 | **D-05** | Gerekçe değişti | D-06 (sertifikasyon yok) EMC gerekçesini zayıflattı; D-31 (2A) termal gerekçeyi zayıflattı. Artık zorunlu değil. |
 | 2026-09-16 | D-29 | Toplam limit eklendi | Descriptor güç beyanı ile ≤ 1.6 A zorlanıyor |
-| 2026-09-16 | D-51..D-55 | Yeni — çıkış modülü topolojileri | [11](11-cikis-modul-topolojileri.md) |
+| 2026-09-16 | D-51..D-55 | Yeni — çıkış node'u topolojileri | [11](11-cikis-node-topolojileri.md) |
 | 2026-09-16 | D-56..D-59 | Yeni — mekanik draft Rev 0.1 ile uzlaştırma | [12](12-mekanik-referans-rev01.md) |
 | 2026-09-16 | **D-58** | **Slot adımı 22.5 → 17.5 mm** | Çalışma draftı; cihaz 40 mm daralıyor, 17.5 mm de DIN standardı |
 | 2026-09-16 | **[11 §6.1] düzeltme** | **Termal hesap hatalıydı** | Paketlenmiş node'da yan yüzeyler havaya bakmıyor — 5× hata. Fan zorunlu. |
+| 2026-09-16 | **D-56** | 🟡 → 🟢 **Host / Node** | Draft'taki ürün dili benimsendi, 14 dokümanda uygulandı |
+| 2026-09-16 | **D-47** | 🟡 → 🟢 **Ethernet host'tan çıkarıldı** | 495 mW ile en büyük sürekli yüktü. RS-485 2 tel aynı işi ~$0.20 ve çok daha az enerjiyle yapıyor. Modbus TCP WiFi üzerinden sürüyor; kablolu Ethernet isteyen haberleşme node'u takar |
+| 2026-09-16 | **D-52** | 🟡 → 🟢 **4 kanal, tek teknoloji/node** | Daha basit, daha modüler. 3.5 mm push-in ile 5 kutup tam 17.5 mm ediyor |
+| 2026-09-16 | **D-58** | 🟡 → 🟢 **17.5 mm slot adımı** | Cihaz 40 mm daralıyor; 17.5 mm de DIN standardı |
+| 2026-09-16 | **D-31** | 2A → **1.5A** | Ethernet çıkınca host tepe yükü 380 → 290 mA düştü |
+| 2026-09-16 | **D-05** | 🟡 → 🟢 **2 katman** | D-06, D-47 ve D-31 üç gerekçeyi de ortadan kaldırdı. Brief'in 2 katman tercihine dönüldü |
+| 2026-09-16 | D-29 | 200 → 150 mA/slot, toplam 1.2 A | D-31 ile uyum |

@@ -28,12 +28,12 @@ korumalıdır**:
 ```
 
 Ek TVS gerekiyor ama korumanın ana yükünü seri direnç ve izolasyon taşıyor.
-Modül tasarımının en kolay korunan kısmı burası.
+Node tasarımının en kolay korunan kısmı burası.
 
 ### 1.2 Backplane neden düşük riskli
 
 Backplane kapalı metal/plastik kutu içinde, saha kablosuna doğrudan bağlı değil.
-Buradaki risk dış EMI değil, **kendi ürettiğimiz gürültü** — modül
+Buradaki risk dış EMI değil, **kendi ürettiğimiz gürültü** — node
 regülatörlerinin ground bounce'ı. Bu da RS-485'in common-mode reddi ile
 çözülüyor ([05 §1.2](05-dahili-bus.md#12-rs-485-ne-getiriyor)).
 
@@ -47,7 +47,7 @@ regülatörlerinin ground bounce'ı. Bu da RS-485'in common-mode reddi ile
 | Dönüş yolu | Her yüksek hızlı sinyalin altında kesintisiz referans düzlemi |
 | Anahtarlama döngüsü | Buck'ın yüksek dI/dt döngüsü (giriş kapasitörü–üst FET–alt FET) mümkün olan en küçük alanda |
 | Kristal/osilatör | Anahtarlamalı güçten uzak, altında kesintisiz GND |
-| RF | ESP32 modülü anten keepout'una uyulur; U.FL hattı kısa |
+| RF | ESP32 node'u anten keepout'una uyulur; U.FL hattı kısa |
 | Saha klemensleri | TVS'ler klemense mümkün olduğunca yakın — koruma kartın içine girmeden çalışmalı |
 
 ### 2.1 Saha klemensi kuralı
@@ -61,7 +61,7 @@ kontrol edilecek.
 
 ---
 
-## 3. Master kartının zorluğu
+## 3. Host kartının zorluğu
 
 Aynı kartta dört gürültü rejimi bir arada:
 
@@ -80,7 +80,7 @@ Bu kombinasyon §5'teki katman sayısı kararının ana gerekçesi.
 
 ## 4. Uyumluluk hedefi
 
-### 🟢 D-06 — Karar: sertifikasyon hedefi yok, seviye A
+### D-06 — Karar: sertifikasyon hedefi yok, seviye A
 
 | Seviye | Kapsam | Tasarım etkisi | Maliyet |
 |--------|--------|----------------|---------|
@@ -91,7 +91,7 @@ Bu kombinasyon §5'teki katman sayısı kararının ana gerekçesi.
 **Bu kararın etkisi:**
 
 - Giriş koruma katının fiziksel alanı ve topolojisi
-- Master katman sayısı (§5)
+- Host katman sayısı (§5)
 - Klemens seçimi (surge için daha geniş creepage gerekebilir)
 - Proje takvimi ve bütçesi
 
@@ -111,13 +111,18 @@ maliyeti yok, ileride B gerekirse yeniden tasarım olmaktan çıkarıyor.
 
 ## 5. Katman sayısı kararı
 
-### 5.1 Modüller: 2 katman · 🟡 D-36
+### 5.1 Node'lar: 2 katman
 
 Tereddütsüz. Düşük hızlı, düşük güçlü, basit kartlar. Kısıt K3 tam olarak burada
-karşılanıyor — **ve modüller sekiz kez üretileceği için tasarrufun asıl etkili
+karşılanıyor — **ve node'lar sekiz kez üretileceği için tasarrufun asıl etkili
 olduğu yer de burası.**
 
-### 5.2 Master: Ethernet hesabı
+### 5.2 Host: Ethernet hesabı (tarihsel)
+
+> Ethernet host kartından çıkarıldı (D-47). Bu bölüm, 2 katmanda Ethernet'in
+> **mümkün olduğunu** gösteren hesabı kayıt altında tutuyor — Ethernet node'u
+> tasarlanırken aynı hesap geçerli olacak
+> ([09 §5](09-node-aileleri.md#5-node-ailesi-yol-haritası)).
 
 2 katman 1.6 mm FR4'te kontrollü empedans mümkün mü?
 
@@ -144,7 +149,7 @@ Lumped kriteri:  t_prop < t_r / 6
 empedans kontrolsüz ama elektriksel olarak toplu devre, yansıma oluşmuyor.
 
 Bu bir **yerleşim kısıtıdır, imkânsızlık değil.**
-([02 §2](02-master-mimarisi.md#2-ethernet)'de bağlayıcı kısıt olarak kayıtlı.)
+([02 §2](02-host-mimarisi.md#2-ethernet-hosttan-çıkarıldı)'de bağlayıcı kısıt olarak kayıtlı.)
 
 ### 5.3 Üç gerekçe yeniden değerlendirildi
 
@@ -153,31 +158,71 @@ sonra ikisi zayıfladı:
 
 | # | Gerekçe | İlk durum | Şimdiki durum |
 |---|---------|-----------|---------------|
-| 1 | **Termal** | 15W → 2 katmanda 140°C junction ✗ | **2A/10W → 114°C, 11°C marj.** Çalışıyor ama dar |
-| 2 | **EMC** | Sertifikasyon riski | **Sertifikasyon yok** (D-06). Sadece kendi kendine girişim kaldı — zayıfladı |
-| 3 | **Ethernet** | 25 mm yerleşim kısıtı | Geçerli, ama D-47 (Ethernet gerekli mi?) açıksa tamamen düşebilir |
+| 1 | **Termal** | 15W → 2 katmanda 140°C junction ✗ | **1.5A/7.5W → 100°C, 25°C marj** ✓ |
+| 2 | **EMC** | Sertifikasyon riski | **Sertifikasyon yok** (D-06) — düştü |
+| 3 | **Ethernet** | 25 mm yerleşim kısıtı | **Ethernet host'tan çıkarıldı** (D-47) — düştü |
 
-**Maliyet farkı:** JLCPCB'de 4 katman adet bazında ~$2. Master tek kart —
-modüller gibi sekiz kez üretilmiyor.
+**Üç gerekçe de ortadan kalktı.** Termal hesap güncel değerlerle:
 
-### Karar: 🟡 D-05 — artık zorunlu değil, marj tercihi
+```
+Ana buck 1.5A / 7.5W  ·  verim ~%87  →  kayıp ≈ 1.0 W
 
-**Öneri: 4 katman.** Gerekçe artık "2 katman çalışmaz" değil,
-**"60 °C ortamda 11 °C termal marj yetersiz"**:
+2 katman, geniş döküm  θ_ja ≈ 40 °C/W
+    ΔT = 40 °C   →  junction ≈ 100 °C @ 60 °C ortam
+    125 °C sınırına  25 °C marj                        ✓
 
-- Karavan kapalı hacminde zorlamalı hava akımı yok
-- 60 °C zaten iyimser olabilir (park halinde kara kutu içinde daha yüksek)
-- Titreşim + termal döngü birlikte yaşlanmayı hızlandırıyor (K5)
-- Master tek kart — $2 birim maliyet farkı önemsiz
+4 katman + termal via  θ_ja ≈ 25 °C/W
+    ΔT = 25 °C   →  junction ≈  85 °C                  ✓✓
+```
 
-**2 katman seçilirse** çalışır, ama:
-- Termal marj 11 °C — parça seçiminde 150 °C sınıfı tercih edilmeli
-- Ethernet 25 mm kısıtı bağlayıcı hale gelir
-- D-31 (2A) yukarı revize edilemez
+**Maliyet farkı:** JLCPCB'de 4 katman adet bazında ~$2. Host tek kart —
+node'lar gibi sekiz kez üretilmiyor.
 
-**Bu senin marj tercihin.** Teknik olarak iki seçenek de savunulabilir.
+### Karar: host 2 katman · D-05
 
-### 5.4 Önerilen stackup (master, 4 katman)
+Brief'in kuralı: *"Yüksek yoğunluk, sinyal bütünlüğü veya EMC gereksinimi
+nedeniyle zorunlu olmadıkça 4 katmana geçilmemelidir."*
+
+**Artık zorlayan bir gerekçe kalmadı.** Üçü de bağımsız kararlarla çözüldü:
+sertifikasyon hedefi kalktı (D-06), Ethernet host'tan çıktı (D-47), güç bütçesi
+düştü (D-31). **2 katman uygulanıyor.**
+
+> İlginç olan, bu sonucun katman tartışmasından değil **enerji bütçesi
+> çalışmasından** gelmesi. Tüketimi düşürmek için yapılan her şey aynı zamanda
+> ısıyı da düşürdü.
+
+### Karar koşulları — bunlar değişirse yeniden değerlendirilir
+
+| Koşul | Eşik |
+|-------|------|
+| Ana buck tasarım noktası | > 2 A olursa termal marj 11 °C'ye iner |
+| Ethernet host'a geri eklenirse | 25 mm yerleşim kısıtı geri gelir |
+| EMC sertifikasyonu hedeflenirse | Kesintisiz ground plane ihtiyacı doğar |
+| Ortam sıcaklığı > 60 °C | Marj tükenir |
+
+Her biri karar kütüğünde bağlı karar olarak izlenmeli.
+
+### 5.4 Önerilen stackup (host, 2 katman)
+
+```
+L1  Sinyal + bileşenler + GND dökümü
+L2  Ağırlıklı GND dökümü + kaçınılmaz sinyal geçişleri
+```
+
+2 katmanda ground plane'in bütünlüğünü korumak en önemli iş. L2'deki her
+sinyal geçişi ground'u bölüyor.
+
+**Bağlayıcı yerleşim kuralları:**
+
+| Kural | Gerekçe |
+|-------|---------|
+| Güç katının altındaki GND dökümü hiçbir sinyalle bölünmemeli | Anahtarlama döngüsünün dönüş yolu kesintisiz olmalı |
+| ESP32 anten keepout'una uyulmalı | WROOM datasheet gereksinimi |
+| Buck'ın yüksek dI/dt döngüsü (giriş kapasitörü–üst FET–alt FET) en küçük alanda | Radiated emission ve ringing |
+| Backplane konnektörüne giden RS-485 çifti birlikte yönlendirilmeli | Diferansiyel bütünlüğü |
+| Sinyal geçişleri güç bölgesinin dışına yönlendirilmeli | Yukarıdaki ilk kuralın uygulaması |
+
+**4 katmana geçilirse** (§5'teki karar koşullarından biri tetiklenirse):
 
 ```
 L1  Sinyal + bileşenler
@@ -186,16 +231,5 @@ L3  Güç düzlemleri       (+3V3, +5V_SYS, VBUS_RAW bölgeleri)
 L4  Sinyal + güç dökümü
 ```
 
-L2'nin kesintisiz olması 4 katmanın kazancının büyük kısmı — bölünmüş bir ground
-plane, avantajın çoğunu geri veriyor.
-
-**2 katman seçilirse stackup:**
-
-```
-L1  Sinyal + bileşenler + GND dökümü
-L2  Ağırlıklı GND dökümü + kaçınılmaz sinyal geçişleri
-```
-
-L2'deki her sinyal geçişi ground'u böler. Kritik kural: **güç katının ve
-Ethernet bölgesinin altındaki GND dökümü hiçbir sinyalle bölünmemeli** — sinyal
-geçişleri bu bölgelerin dışına yönlendirilmeli.
+L2'nin kesintisiz olması 4 katmanın kazancının büyük kısmı — bölünmüş bir
+ground plane avantajın çoğunu geri veriyor.

@@ -12,7 +12,7 @@ kayıt altına alır ve mevcut mimari kararlarla çakışmalarını işaretler.
 
 ### 1.1 Terminoloji
 
-Draft **Host / Node** kullanıyor; mimari dokümanlar **Master / Modül**.
+Draft **Host / Node** kullanıyor; mimari dokümanlar **Host / Node**.
 
 > **🟡 D-56 — Terminoloji birleştirilmeli.** Draft senin kendi ürün dilin
 > olduğu için Host/Node'a geçmeyi öneriyorum. Onaylarsan tüm dokümanlarda
@@ -58,7 +58,7 @@ Mate kademesi: **Uzun pin = GND · Orta pin = Power · Kısa pin = Signal** (3 k
 | Montaj | Kızak rayı + yan kılavuz, önden tak-kilitle |
 | Yapı | 3D baskı + alüminyum ray hibrit |
 | Soğutma | **Arka panelde fan** |
-| 2U örnek | Güç röle modülü 30A / 50A |
+| 2U örnek | Güç röle node'u 30A / 50A |
 
 ---
 
@@ -76,7 +76,7 @@ Mate kademesi: **Uzun pin = GND · Orta pin = Power · Kısa pin = Signal** (3 k
 | 8 | Node yüksekliği | 80 mm | 100 mm (varsayım) | **Draft kazanıyor** — gerçek ölçü |
 | 9 | Mekanik kilit | **Var** | D-45'te sonradan eklendi | **Draft kazanıyor** — zaten çözülmüş |
 | 10 | Soğutma | **Fan** | Doğal konveksiyon | **Draft kazanıyor** — §3.5, benim hatam |
-| 11 | Terminoloji | Host / Node | Master / Modül | Draft — D-56 |
+| 11 | Terminoloji | Host / Node | Host / Node | Draft — D-56 |
 
 ---
 
@@ -84,7 +84,7 @@ Mate kademesi: **Uzun pin = GND · Orta pin = Power · Kısa pin = Signal** (3 k
 
 ### 3.1 Slot adımı: 17.5 mm kabul edilmeli
 
-22.5 mm önerim, endüstriyel DIN modül genişliğine dayanıyordu. Ama **17.5 mm de
+22.5 mm önerim, endüstriyel DIN node genişliğine dayanıyordu. Ama **17.5 mm de
 bir DIN standardıdır** — modüler şalt cihazlarının (sigorta, kontaktör) tek
 kutup genişliği 17.5/18 mm'dir. Yani ekosistem argümanı her ikisi için de
 geçerli.
@@ -108,11 +108,11 @@ sorun:
 | 5.0 mm | 3 kutup | ≤ 16 A |
 | 7.5 mm | 2 kutup | ≤ 24 A |
 
-**Sonuç: 8 kanallı bir 1U modül tek sırada mümkün değil.** İki sıra (üst/alt)
+**Sonuç: 8 kanallı bir 1U node tek sırada mümkün değil.** İki sıra (üst/alt)
 veya daha az kanal gerekiyor. Draft'ın 1U ön panelinde de zaten 2 sıra var.
 
-→ [09 §4](09-modul-aileleri.md#4-saha-bağlantısı) ve
-[11 §5](11-cikis-modul-topolojileri.md#5-önerilen-modül-ailesi) bu kısıta göre
+→ [09 §4](09-node-aileleri.md#4-saha-bağlantısı) ve
+[11 §5](11-cikis-node-topolojileri.md#5-önerilen-node-ailesi) bu kısıta göre
 revize edilmeli.
 
 ### 3.2 I²C backplane: değiştirilmesi öneriliyor
@@ -153,7 +153,7 @@ Draft 24V + 5V + 3.3V dağıtıyor; mimari VBUS_RAW + 5V öneriyor.
 | Esneklik | Node 3.3V'tan başka gerilim isterse yine regülatör gerekir | Her node kendi ihtiyacına göre |
 
 **Öneri: 3.3V dağıtılmasın.** Node başına $0.15'lik regülatör, gürültü
-izolasyonu ve esneklik karşılığında ucuz. Özellikle analog giriş modüllerinde
+izolasyonu ve esneklik karşılığında ucuz. Özellikle analog giriş node'larında
 paylaşılan 3.3V rail'i ölçüm kalitesini düşürür.
 
 **Ama** 3.3V dağıtımının bir avantajı var: **çok düşük güçlü node'lar
@@ -174,8 +174,8 @@ ileride iki host'un zincirlenmesi.
 
 **Draft'ın arka panelinde fan var. Haklı, ve ben yanılmışım.**
 
-[11 §6.1](11-cikis-modul-topolojileri.md#61-termal-sınır--kanal-sayısını-belirleyen-şey)'deki
-termal hesabım, modülün **serbest havada tek başına** durduğunu varsayıyordu.
+[11 §6.1](11-cikis-node-topolojileri.md#61-termal-sınır-kanal-sayısını-belirleyen-şey)'deki
+termal hesabım, node'un **serbest havada tek başına** durduğunu varsayıyordu.
 Gerçekte 8 node yan yana paketlenmiş — **yan yüzeyler komşu node'a bakıyor,
 havaya değil.**
 
@@ -210,7 +210,7 @@ S1 / S2 / S3'te     :  fan kapalı
 ```
 
 Bu doğal bir uyum sağlıyor: ısı yalnızca **çıkışlar yük sürerken** oluşuyor
-([11 §6](11-cikis-modul-topolojileri.md#6-i̇letim-kaybı-ve-termal)). Latching
+([11 §6](11-cikis-node-topolojileri.md#6-iletim-kaybı-ve-termal)). Latching
 röle ve MOSFET'in tutma gücü sıfıra yakın olduğu için, yük yokken ısı da yok,
 fan da gerekmiyor.
 
@@ -242,8 +242,8 @@ Bunlar tartışmasız — draft zaten doğru çözmüş:
 | Doküman | Gerekçe |
 |---------|---------|
 | [04](04-backplane-mekanik.md) | Slot adımı 22.5 → 17.5 mm; node ölçüleri; kilit mandalı |
-| [09](09-modul-aileleri.md) | Klemens/kanal sayısı 17.5 mm'ye göre; iki sıra klemens |
-| [11](11-cikis-modul-topolojileri.md) | **Termal hesap düzeltilmeli** (§3.5); kanal sayıları revize |
+| [09](09-node-aileleri.md) | Klemens/kanal sayısı 17.5 mm'ye göre; iki sıra klemens |
+| [11](11-cikis-node-topolojileri.md) | **Termal hesap düzeltilmeli** (§3.5); kanal sayıları revize |
 | [10](10-enerji-butcesi.md) | Fan enerji kalemi eklenmeli (D-57) |
 | [03](03-guc-mimarisi.md) | Fan beslemesi; 3.3V rail rezervasyonu |
 | Tümü | Terminoloji Host/Node (D-56 onayına bağlı) |
