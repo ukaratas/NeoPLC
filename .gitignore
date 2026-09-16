@@ -1,0 +1,22 @@
+# KiCAD
+*-backups/
+*.kicad_prl
+fp-info-cache
+*.kicad_sch-bak
+*.kicad_pcb-bak
+*.bak
+\#auto_saved_files#
+_autosave-*
+*.lck
+
+# KiCAD üretim çıktıları (gerektiğinde yeniden üretilir)
+/gerber/
+/fab/
+/bom/
+
+# macOS
+.DS_Store
+
+# Editör
+*.swp
+*~

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "konnect": {
+      "command": "/Users/ukaratas/Downloads/konnect",
+      "env": {
+        "RUST_LOG": "info"
+      }
+    }
+  }
+}
