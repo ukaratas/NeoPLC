@@ -2,20 +2,25 @@
 
 ## 1. MCU seçimi
 
-### Karşılaştırma
+> 📎 **§1.1 ve §1.2 tarihseldir.** Aşağıdaki karşılaştırma ve gerekçeler, MCU
+> seçiminin yapıldığı dönemde — Ethernet henüz host'ta planlanırken —
+> geçerliydi. Ethernet sonradan host'tan çıkarıldı (D-47); **W5500 artık host
+> mimarisinin parçası değil.** Seçimin bugün geçerli gerekçeleri §1.3'te.
+
+### 1.1 Karşılaştırma (tarihsel — seçim dönemi)
 
 | | **ESP32-S3 + W5500** | STM32G0/G4 + ESP32-C6 + W5500 | ESP32 + LAN8720 (RMII) | STM32H563 + PHY |
 |---|---|---|---|---|
-| WiFi | Dahili, node sertifikalı | Ayrı node, sertifikalı | Dahili | Yok — ek node |
+| WiFi | Dahili, **modül** ön sertifikalı | Ayrı modül, sertifikalı | Dahili | Yok — ek modül |
 | Ethernet | SPI, donanım TCP/IP | SPI, donanım TCP/IP | RMII 50MHz + yazılım yığını | Dahili MAC + harici PHY |
 | 2 katman uyumu | **İyi** | İyi | **Kötü** | Kötü |
 | RT determinizmi | Orta → core pinning ile iyi | **Çok iyi** | Orta | Çok iyi |
 | Firmware | **Tek image, tek toolchain** | İki image, iki toolchain | Tek | Tek |
 | Lojik BOM (yaklaşık) | **~$7** | ~$10 | ~$6 | ~$14 |
 | LCSC bulunabilirlik | **Çok yüksek** | Yüksek | Yüksek | Orta |
-| Sertifikasyon riski | **Düşük** (hazır node) | Düşük | Düşük | — |
+| Sertifikasyon riski | **Düşük** (hazır RF modülü) | Düşük | Düşük | — |
 
-### Karar: ESP32-S3-WROOM-1U-N16R8
+### 1.2 Seçim dönemindeki gerekçeler (tarihsel)
 
 **Gerekçe 1 — W5500 kısıt K3'ü çözüyor.** RMII, 50MHz saat + 4 sinyalin
 kontrollü empedansla taşınmasını ister. 2 katman 1.6mm FR4'te bu pratik değil
@@ -34,14 +39,14 @@ Backplane taraması ağ trafiğinden izole edilir. Bu, ESP32'ye yöneltilen "RT 
 uygun değil" itirazının pratikteki cevabıdır — ama tamamen ortadan kaldırmaz
 (aşağıya bakınız).
 
-**Gerekçe 3 — hazır node sertifikasyon riskini alıyor.** WROOM node'u FCC/CE
+**Gerekçe 3 — hazır RF modülü sertifikasyon riskini alıyor.** WROOM modülü FCC/CE
 ön sertifikalı. Kendi RF ön katımızı 2 katmanda tasarlamıyoruz.
 
 **Gerekçe 4 — 16MB flash / 8MB PSRAM.** Web UI + OTA çift partisyon + **node
 firmware imajlarının host'ta saklanması** için yeterli. Sonuncusu önemli:
 [07](07-firmware-update.md)'deki merkezi güncelleme modelini mümkün kılıyor.
 
-### Dürüst karşı argümanlar
+### 1.2.1 Dürüst karşı argümanlar
 
 | Risk | Değerlendirme |
 |------|---------------|
@@ -50,7 +55,23 @@ firmware imajlarının host'ta saklanması** için yeterli. Sonuncusu önemli:
 | Ağ + kontrol tek noktada | Host arızası tüm rafı düşürür. Redundancy kapsam dışı. |
 | Endüstriyel sıcaklık | WROOM-1 SKU'sunun -40..+85°C derecelendirmesi sipariş öncesi doğrulanmalı. |
 
-### Geçiş yolu (v2)
+### 1.3 Bugün geçerli gerekçeler · D-01
+
+Ethernet host'tan çıktıktan sonra ESP32-S3-WROOM-1U-N16R8 seçimini ayakta tutan
+gerekçeler:
+
+| Gerekçe | Detay |
+|---------|-------|
+| **Wi-Fi + web UI** | Karavanda telefon kontrol panelidir; radyo modülde hazır ve ön sertifikalı ([§3](#3-wifi)) |
+| **16 MB flash / 8 MB PSRAM** | Web UI + OTA çift partisyon + **node firmware imajlarının host'ta saklanması** ([07](07-firmware-update.md)) |
+| **Çift çekirdek** | Core 0 ağ/UI, Core 1 backplane bus + Modbus RTU — tarama ağ trafiğinden izole |
+| **Olgun OTA + rollback** | ESP-IDF'in çift partisyon mekanizması ([07 §5](07-firmware-update.md#5-host-ota)) |
+| **Düşük güç modları** | Light/deep sleep, RTC GPIO uyandırma — enerji bütçesinin temeli ([10 §4](10-enerji-butcesi.md#4-güç-durumları)) |
+| **Tedarik** | LCSC'de yüksek stok, düşük maliyet |
+
+**Ethernet bu listede yok** — seçim artık ona bağlı değil.
+
+### 1.4 Geçiş yolu (v2)
 
 Gerçek hard-real-time veya SIL hedefi doğarsa: **STM32G0B1 + ESP32-C6-MINI.**
 
@@ -113,7 +134,7 @@ Bu, modüler mimarinin tam olarak çözmek için var olduğu problem.
 | Kazanç | Detay |
 |--------|-------|
 | 6 GPIO serbest kaldı | SPI + INT + RST |
-| **25 mm yerleşim kısıtı ortadan kalktı** | 100BASE-TX diferansiyel izleri yok |
+| **25 mm yerleşim kısıtı ortadan kalktı** | Host'ta yüksek hızlı diferansiyel iz kalmadı |
 | ~$3 BOM tasarrufu | W5500 + magjack |
 | Kart alanı | Magjack hatırı sayılır yer kaplıyordu |
 | **2 katman host uygulanabilir hale geldi** | [08 §5](08-emc-koruma.md#5-katman-sayısı-kararı) |

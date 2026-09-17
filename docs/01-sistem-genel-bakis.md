@@ -20,9 +20,9 @@ Bu nedenle bu dokümantasyonun asıl konusu kartlar değil, **sözleşmedir.**
 ┌──────────────────────────────────────────────────────────────┐
 │  HOST BİRİM                                                  │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │ ESP32-S3 + W5500 · Güç katı · Slot yönetimi            │  │
+│  │ ESP32-S3 · RS-485 · Wi-Fi · Güç katı · Slot yönetimi   │  │
 │  └────────────────────────────────────────────────────────┘  │
-│  ═══════════════════ BACKPLANE (8 slot) ═══════════════════  │
+│  ═════════ BACKPLANE — 8U node kapasitesi ═════════════════  │
 │   ┌───┐ ┌───┐ ┌───────┐ ┌───┐ ┌───┐ ┌───────┐               │
 │   │1U │ │1U │ │  2U   │ │1U │ │1U │ │  2U   │               │
 │   │DI │ │DO │ │  AI   │ │RLY│ │DO │ │ ÖZEL  │               │
@@ -36,16 +36,19 @@ Bu nedenle bu dokümantasyonun asıl konusu kartlar değil, **sözleşmedir.**
 
 ### Host birim
 
-Node slotu **tüketmez**. Node'ları barındıran, besleyen, yöneten ve dış dünya
-ile haberleştiren ana platformdur.
+Host, **kendine ayrılmış sabit 2U host slotunda** duran bir blade'dir ve
+**8U kullanıcı node kapasitesinden tüketmez.** Ürün fiziksel olarak
+**2U host + 8U node** şeklindedir. Node'ları barındıran, besleyen, yöneten ve
+dış dünya ile haberleştiren ana platformdur.
 
 Sorumlulukları:
 
 - 12–48V giriş koruması ve sistem güç üretimi
-- 8 slotun beslenmesi, güç bütçesi zorlaması, arıza izolasyonu
+- 8U node kapasitesinin beslenmesi, güç bütçesi zorlaması, arıza izolasyonu
 - Node discovery, konfigürasyon, sağlık takibi
 - Dahili bus yöneticiliği (deterministik tarama)
-- Dış haberleşme: Ethernet / Modbus TCP, RS-485 / Modbus RTU, Wi-Fi
+- Dış haberleşme: **RS-485 / Modbus RTU** (ana kablolu kanal) ·
+  **Wi-Fi** (varsayılan kapalı; talep üzerine web UI, OTA, Modbus TCP)
 - Node firmware dağıtımı
 - Web tabanlı konfigürasyon arayüzü
 
@@ -66,9 +69,9 @@ kısıta hizmet ettiği sorulmalı.
 
 | # | Kısıt | Türettiği kararlar |
 |---|-------|--------------------|
-| **K1** | 8 slot × düşük maliyetli node | Node elektroniği ucuz ve az pinli olmalı. Karmaşıklık host'a yığılır — orada bir kez ödenir, node'da sekiz kez. |
+| **K1** | 8U node kapasitesi × düşük maliyetli node | Node elektroniği ucuz ve az pinli olmalı. Karmaşıklık host'a yığılır — orada bir kez ödenir, node'da sekiz kez. |
 | **K2** | 12–48V geniş giriş | 48V nominal → transient sonrası ~90V. Ön kat gerilim sınıfını bu belirliyor, dolayısıyla parça maliyetini ve tedarik edilebilirliğini. |
-| **K3** | 2 katman tercihi | Kontrollü empedans ve RMII 50MHz pratikte elenir. Bu, doğrudan MCU ve Ethernet kontrolcüsü seçimini değiştiriyor. |
+| **K3** | 2 katman tercihi | Kontrollü empedans pratikte elenir. Bu kısıt MCU seçimini ve yüksek hızlı arayüzlerin tasarıma girip girmeyeceğini belirledi. *(Seçim döneminde Ethernet kontrolcüsü tercihini de bu kısıt şekillendirmişti; Ethernet sonradan host'tan çıkarıldı — D-47.)* |
 | **K4** | **Batarya beslemesi — enerji bütçesi** | **Boşta tüketim ürünün yaşayabilirliğini belirliyor.** Sürekli çalışan her bileşen sorgulanır; uyku durumları donanım gereksinimidir, optimizasyon değil. → [10](10-enerji-butcesi.md) |
 | **K5** | Hareketli araç | Titreşim: konnektör tutma, ağır bileşen desteği, klemens tipi. Endüstriyel DIN pano varsayımında yoktu. |
 

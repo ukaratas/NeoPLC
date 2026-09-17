@@ -58,16 +58,20 @@ kendi konumunu bilmesinin hiçbir işlevsel karşılığı yoktu.
 **Adres ataması RAM'de tutulur, kalıcı yazılmaz** — böylece bir node başka bir
 sisteme takıldığında eski adresi taşımaz.
 
-## 2. Naif tasarımın problemi
+## 2. Naif tasarımın problemi (tarihsel)
 
-8 slotu doğrudan MCU'ya bağlamak:
+> 📎 Bu bölüm, ilk taslaktaki yaklaşımın neden elendiğini kayıt altında tutar.
+> FAULT# ve BOOT# hatları sonradan tamamen kaldırıldı (D-20, D-19); güncel
+> fiziksel yönetim sinyalleri yalnız **MOD_RST#** ve **PRESENT#**'tir.
+
+İlk taslakta 8 slotu doğrudan MCU'ya bağlamak düşünülmüştü:
 
 ```
 8 × PRESENT#  +  8 × FAULT#  +  8 × RESET#  +  8 × BOOT#  =  32 GPIO
 ```
 
 ESP32-S3-WROOM'da ~30 kullanılabilir GPIO var — sadece slot yönetimi tüm bütçeyi
-yiyor, Ethernet ve bus'a yer kalmıyor.
+yiyordu.
 
 ---
 

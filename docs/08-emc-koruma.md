@@ -11,7 +11,7 @@
 | Saha dijital çıkış | Yüksek | Freewheel diyot + TVS + akım sınırı |
 | Saha analog giriş | Yüksek | Seri direnç + diferansiyel filtre + clamp diyotlar |
 | RS-485 saha portu | Yüksek | **İzolasyon** + ±15 kV ESD dereceli transceiver + TVS |
-| Ethernet | Orta | Magjack entegre manyetik + Bob Smith sonlandırma |
+| *Ethernet (opsiyonel haberleşme node'u)* | Orta | Magjack entegre manyetik + Bob Smith sonlandırma — **host'ta yok** (D-47) |
 | Backplane | **Düşük — kapalı hacim** | RS-485 common-mode reddi yeterli |
 
 ### 1.1 Dijital girişin doğal sağlamlığı
@@ -47,7 +47,7 @@ regülatörlerinin ground bounce'ı. Bu da RS-485'in common-mode reddi ile
 | Dönüş yolu | Her yüksek hızlı sinyalin altında kesintisiz referans düzlemi |
 | Anahtarlama döngüsü | Buck'ın yüksek dI/dt döngüsü (giriş kapasitörü–üst FET–alt FET) mümkün olan en küçük alanda |
 | Kristal/osilatör | Anahtarlamalı güçten uzak, altında kesintisiz GND |
-| RF | ESP32 node'u anten keepout'una uyulur; U.FL hattı kısa |
+| RF | ESP32 modülünün anten keepout'una uyulur; U.FL hattı kısa |
 | Saha klemensleri | TVS'ler klemense mümkün olduğunca yakın — koruma kartın içine girmeden çalışmalı |
 
 ### 2.1 Saha klemensi kuralı
@@ -63,16 +63,18 @@ kontrol edilecek.
 
 ## 3. Host kartının zorluğu
 
-Aynı kartta dört gürültü rejimi bir arada:
+Aynı kartta üç gürültü rejimi bir arada:
 
 ```
 ┌─────────────────┬──────────────────────────────────────────┐
-│ Anahtarlamalı güç│ 12–48V girişten 15W, yüksek dV/dt        │
-│ RF               │ 2.4 GHz WiFi vericisi                    │
-│ Yüksek hızlı dij.│ Ethernet 100BASE-TX + SPI ~30 MHz        │
+│ Anahtarlamalı güç│ 12–48V girişten ~8W, yüksek dV/dt        │
+│ RF               │ 2.4 GHz Wi-Fi vericisi (talep üzerine)   │
 │ Çok noktalı bus  │ 8 slota giden RS-485 + kontrol hatları   │
 └─────────────────┴──────────────────────────────────────────┘
 ```
+
+Ethernet host'tan çıkarıldığı için (D-47) yüksek hızlı diferansiyel rejim
+listeden düştü — geriye **üç** rejim kaldı.
 
 Bu kombinasyon §5'teki katman sayısı kararının ana gerekçesi.
 
@@ -103,9 +105,9 @@ maliyeti yok, ileride B gerekirse yeniden tasarım olmaktan çıkarıyor.
 
 > **Bu kararın ikinci etkisi:** EMC, artık §5'teki katman sayısı kararının
 > gerekçelerinden biri **değil**. Uyumluluk zorunluluğu ortadan kalktı; geriye
-> sadece **kendi kendine girişim** kaygısı kaldı (WiFi + anahtarlamalı güç +
-> Ethernet aynı kartta). Bu gerçek bir kaygı ama "sertifikadan kalırız"
-> kaygısından çok daha zayıf.
+> sadece **kendi kendine girişim** kaygısı kaldı (anahtarlamalı güç + talep
+> üzerine açılan Wi-Fi aynı kartta). Bu gerçek bir kaygı ama "sertifikadan
+> kalırız" kaygısından çok daha zayıf.
 
 ---
 

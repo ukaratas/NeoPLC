@@ -174,7 +174,7 @@ yeterdi. 500k'nın seçilme sebebi:
 
 - Slew-rate sınırlı transceiver'larla uyumlu (EMI düşük kalıyor)
 - Tarama marjı, ESP32'nin WiFi kaynaklı jitter'ı için tampon oluşturuyor
-  ([02 §1](02-host-mimarisi.md#dürüst-karşı-argümanlar))
+  ([02 §1](02-host-mimarisi.md#13-bugün-geçerli-gerekçeler-d-01))
 - Firmware güncellemesinde blok transferi makul sürede bitiyor
 
 Baud hızı konfigüre edilebilir olacak — saha koşullarına göre düşürülebilmeli.
@@ -199,7 +199,7 @@ fazla 100 ms, ve gerçek zamanlı koruma zaten node'un kendi işi (kısa devre i
 100 ms de çok geç). Ek kazanç: wired-OR hattın bir arıza modu vardı — hattı
 düşük tutan tek arızalı node diğerlerinin arızasını maskeliyordu; o mod da
 ortadan kalktı. Tam gerekçe:
-[04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-kaldırılanların-gerekçesi)
+[04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-tarihsel-karşılaştırma)
 
 > **Node arızayı latch'lemeli** — iki poll arasında oluşan olay kaybolmamalı.
 
@@ -335,7 +335,7 @@ Karavan yüklerinin ihtiyacı    ~ms
 
 µs ile ns arasındaki fark bu uygulamada ölçülemez. **1 pin yerine 1 fonksiyon
 kodu** — SYNC pini pinout'tan kaldırıldı
-([04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-kaldırılanların-gerekçesi)).
+([04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-tarihsel-karşılaştırma)).
 
 ### 9.1 Kullanım kuralı — röleler SYNC ile uygulanmaz
 

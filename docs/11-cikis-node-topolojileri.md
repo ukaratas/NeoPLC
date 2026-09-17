@@ -390,7 +390,7 @@ mimarisinin parçası** yapıyor.
 
 | ID | Soru |
 |----|------|
-| D-52 | 8 A sınıfında latching ve MOSFET **iki ayrı node mü**, yoksa tek node'da karışık mı? Ayrı olması üretimi ve stoğu basitleştirir; karışık olması kullanıcıya esneklik verir. |
+| ~~D-52~~ | ✅ **Karara bağlandı:** ayrı node'lar, her node 4 kanal ve tek teknoloji ([§5.1](#51-dc-çıkış)) |
 | D-53 | Kontak durumu geri okuma yöntemi: yardımcı kontak mı, çıkış gerilimi ölçümü mü? İkincisi daha ucuz ama yük bağlı değilse yanıltıcı. |
 | D-54 | 32 A / 64 A node'larda ısı yolu: alüminyum ön panel, kutu gövdesi, yoksa sadece PCB bakırı mı? |
 | D-55 | AC node'larında sıfır geçişinde anahtarlama (zero-cross) uygulanacak mı? Kontak ömrünü uzatır, ek zamanlama devresi ister. |

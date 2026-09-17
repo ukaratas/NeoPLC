@@ -22,7 +22,7 @@ gelecekteki tüm üyelerini bağlar.
 |---|---------|--------|-------|
 | 00 | [Karar Kütüğü](00-karar-kutugu.md) | Tüm açık/kapalı kararların tek listesi | 🟡 Onay bekliyor |
 | 01 | [Sistem Genel Bakış](01-sistem-genel-bakis.md) | Kapsam, kısıtlar, blok diyagram, node aileleri | 🟡 Taslak |
-| 02 | [Host Mimarisi](02-host-mimarisi.md) | MCU seçimi, Ethernet/RS-485/WiFi, Modbus, GPIO bütçesi | 🟡 Taslak |
+| 02 | [Host Mimarisi](02-host-mimarisi.md) | MCU seçimi, RS-485 / Wi-Fi, Modbus, GPIO bütçesi, host blade formu | 🟡 Taslak |
 | 03 | [Güç Mimarisi](03-guc-mimarisi.md) | 12–48V ön kat, rail topolojisi, güç bütçesi, termal | 🟡 Taslak |
 | 04 | [Backplane ve Mekanik](04-backplane-mekanik.md) | Blade mimarisi, şasi + kızak, 17.5 mm slot, **12 pin konnektör**, hava akışı | 🟡 Taslak |
 | 05 | [Dahili Bus](05-dahili-bus.md) | Fiziksel katman kararı, protokol spesifikasyonu, zamanlama | 🟡 Taslak |

@@ -3,7 +3,7 @@
 Tüm mimari kararların tek kaynağı. Bir karar burada 🟢 olmadan ilgili donanım
 tasarlanmaz. Karar değişirse önce burası güncellenir.
 
-**Son güncelleme:** 2026-09-16 · Karavan bağlamı ve enerji bütçesi eklendi
+**Son güncelleme:** 2026-09-17 · Repo geneli consistency review
 
 ---
 
@@ -11,10 +11,14 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | Durum | Adet |
 |-------|------|
-| 🟢 Kabul edildi | 23 |
-| 🟡 Öneri hazır, onay bekliyor | 36 |
+| 🟢 Kabul edildi | 22 |
+| 🟡 Öneri hazır, onay bekliyor | 40 |
 | 🔴 Dışarıdan bilgi gerekiyor | 1 |
 | ⚪ Henüz ele alınmadı | 4 |
+| ⛔ Superseded | 1 |
+
+*Sayılar karar tablosundaki satırlardan otomatik doğrulanmıştır
+(2026-09-17 consistency review).*
 
 ---
 
@@ -23,7 +27,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | ID | Karar | Kaynak |
 |----|-------|--------|
 | **D-01** | Host MCU: **ESP32-S3-WROOM-1U-N16R8** | Kullanıcı onayı |
-| **D-02** | Ethernet: **W5500** (SPI, donanım TCP/IP) | Kullanıcı onayı |
+| **D-02** | Ethernet kontrolcüsü W5500 — *kapsamı değişti:* **host'ta değil**, yalnız gelecekteki Ethernet haberleşme node'u için geçerli (D-47) | Kullanıcı onayı, D-47 ile yeniden kapsamlandırıldı |
 | **D-04** | Hedef ortam sıcaklığı: **60 °C** | Kullanıcı — kapalı mekân, güneş altında 50 °C rahat görülür |
 | **D-06** | EMC: **sertifikasyon hedefi yok**, seviye A (ESD + EFT) | Kullanıcı |
 | **D-46** | Uygulama bağlamı: **karavan yönetimi**, batarya beslemeli | Kullanıcı |
@@ -57,7 +61,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
 | D-01 | Host MCU / SoC | ESP32-S3-WROOM-1U-N16R8 | 🟢 | [02](02-host-mimarisi.md#1-mcu-seçimi) |
-| D-02 | Ethernet kontrolcüsü | W5500 — **host'ta değil, haberleşme node'unda** (D-47) | 🟢 | [02](02-host-mimarisi.md#2-ethernet-hosttan-çıkarıldı) |
+| D-02 | Ethernet kontrolcüsü | W5500 — **host'ta değil.** Yalnız gelecekteki Ethernet haberleşme node'u kapsamında geçerli · *D-47 ile yeniden kapsamlandırıldı* | 🟢 | [02 §2](02-host-mimarisi.md#2-ethernet-hosttan-çıkarıldı) |
 | D-03 | WiFi anten | U.FL + harici anten (ESP32 `-1U` modül varyantı) | 🟡 |
 | **D-65** | **WiFi varsayılan kapalı** | Butonla 10 dk açılır. 3.5 → 2.2 Wh/gün, batarya 170 → 273 gün | 🟢 |
 | **D-66** | **Host = 2U blade, özel slot** | Şasi 250 → 185 mm. Node'larla aynı mekanik, farklı konnektör + keying | 🟢 |
@@ -92,7 +96,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-14 | Konnektör tipi | PCB kart kenarı (gold finger), 2.54mm, çift sıra, 26 pin | 🟡 | [04 §4](04-backplane-mekanik.md#4-konnektör-seçimi) |
+| ~~D-14~~ | Konnektör tipi (26 pin) | ⛔ **superseded by D-32** — kart kenarı/gold finger tercihi korundu, pin sayısı 26 → 12 | ⛔ | [04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-tarihsel-karşılaştırma) |
 | **D-60** | **Mekanik paradigma** | **Gerçek blade** — şasi + kızak, çıplak PCB. Kutu-içinde-kutu terk edildi | 🟢 | [04 §1](04-backplane-mekanik.md#1-mekanik-mimari-blade-mi-kutu-içinde-kutu-mu) |
 | **D-61** | **1U bileşen yüksekliği** | **14.4 mm bütçe** — latching röle ≤12 mm. Bobin gerilimi artık kısıt değil | 🟡 | [04 §2.1](04-backplane-mekanik.md#21-bileşen-yüksekliği-bütçesi-kritik-kısıt) |
 | D-62 | Şasi malzemesi | Prototip: 3D baskı + Al kızak · Seri: **Al ekstrüzyon** (rijitlik + EMI + ısı yolu) | 🟡 | [04 §3.2](04-backplane-mekanik.md#32-şasi-malzemesi) |
@@ -133,7 +137,7 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
-| D-25 | Node bootloader yapısı | Tek app + CRC + BOOT# donanım kaçışı | 🟡 | [07 §2](07-firmware-update.md#2-bootloader-yapısı) |
+| D-25 | Node bootloader yapısı | Tek app + CRC + **RST# sonrası bootloader penceresi** (BOOT# pini D-19 ile kaldırıldı) | 🟡 | [07 §2](07-firmware-update.md#2-bootloader-yapısı) |
 | D-26 | Host OTA | ESP32 çift partisyon + rollback | 🟡 | [07 §5](07-firmware-update.md#5-host-ota) |
 | D-35 | Node FW dağıtımı | Host, dahili bus üzerinden yazar | 🟡 | [07 §1](07-firmware-update.md#1-dağıtım-modeli) |
 | D-50 | Güç durumu firmware'i | S0–S3 durum makinesi, güvenli geçiş, raporlama | 🟡 | [10 §10](10-enerji-butcesi.md#10-firmware-sorumlulukları) |
@@ -151,12 +155,12 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | ID | Konu | Karar / Öneri | Durum | Ref |
 |----|------|---------------|-------|-----|
 | D-51 | DC / AC ayrımı | Ayrı node aileleri, AC minimum 2U (creepage) | 🟡 | [11 §4](11-cikis-node-topolojileri.md#4-dc-ac-ayrımı) |
-| D-52 | 8A sınıfı: latching ve MOSFET ayrı node mü? | Ayrı öneriliyor — PWM gerekenler MOSFET, uzun süre açık kalanlar latching | 🟡 | [11 §5.1](11-cikis-node-topolojileri.md#51-dc-çıkış) |
+| D-52 | Çıkış node yapısı | **4 kanal, her node tek teknoloji** — latching ve MOSFET ayrı node'lar | 🟢 | [11 §5.1](11-cikis-node-topolojileri.md#51-dc-çıkış) |
 | D-53 | Latching kontak durumu geri okuma | **Zorunlu** — yöntem açık (yardımcı kontak vs gerilim ölçümü) | 🟡 |
-| **D-68** | **Anlık akım yönetimi** | Röle darbeleri node içinde ve node'lar arasında sıralanır · buck akım limiti ≥2.5 A · descriptor'a tepe akım alanı | 🟢 | [11 §7.3](11-cikis-node-topolojileri.md#73-durum-geri-okuma) |
+| **D-68** | **Anlık akım yönetimi** | Röle darbeleri node içinde ve node'lar arasında sıralanır · buck akım limiti ≥2.5 A · descriptor'a tepe akım alanı | 🟢 | [03 §5](03-guc-mimarisi.md#5-anlık-akım-röle-darbeleri) |
 | D-54 | 32A/64A ısı yolu | Alüminyum ray/ön panel üzerinden — draft'taki hibrit yapı uygun | 🟡 | [11 §6.3](11-cikis-node-topolojileri.md#63-ek-termal-önlemler) |
 | D-55 | AC'de zero-cross anahtarlama | Açık | ⚪ | [11 §9](11-cikis-node-topolojileri.md#9-açık-sorular) |
-| **D-56** | **Terminoloji: Host/Node mu Host/Node mü?** | **Host/Node öneriliyor** (draft'taki ürün dili) | 🟡 | [12 §1.1](12-mekanik-referans-rev01.md#11-terminoloji) |
+| **D-56** | **Terminoloji** | **Host / Node** — 14 dokümanda uygulandı | 🟢 | [12 §1.1](12-mekanik-referans-rev01.md#11-terminoloji) |
 | **D-57** | **Fan + termostatik kontrol** | **Zorunlu** — doğal konveksiyon pakette yetmiyor; ama sürekli çalışamaz | 🟡 | [12 §3.5](12-mekanik-referans-rev01.md#35-soğutma-fan-ve-benim-termal-hatam) |
 | **D-58** | **Slot adımı 17.5 mm** | Draft benimsendi — cihaz 40 mm daha dar, 2U = 35 mm | 🟢 | [12 §3.1](12-mekanik-referans-rev01.md#31-slot-adımı-175-mm-kabul-edilmeli) |
 | D-59 | Backplane 3.3V rail | **Dağıtılmıyor, pin de rezerve edilmiyor** — kullanmamaya karar verilen şeye pin ayırmak tutarsızdı | 🟢 | [12 §3.3](12-mekanik-referans-rev01.md#33-backplane-rail-sayısı-33v-tartışmalı) |
@@ -216,3 +220,9 @@ tasarlanmaz. Karar değişirse önce burası güncellenir.
 | 2026-09-16 | **D-08** | Koşullu → **koşulsuz** | 5 V bobin bulunabilirliği karara gömülü bir tedarik riskiydi. Yüksek gerilim gereken node kendi boost'unu yapıyor (~$0.30) — bağımlılık tamamen kalktı |
 | 2026-09-16 | **D-68** | Yeni — anlık akım yönetimi | Röle bobinleri rafta 2.6 A tepe yaratabilir. Bulk kapasitörle karşılamak 66 mF gerektiriyor, yani imkânsız. Sıralama optimizasyon değil yapısal gereklilik |
 | 2026-09-16 | D-61 | Kısıt daraldı | Latching röle aramasında bobin gerilimi artık filtre değil — sadece yükseklik ve şok değeri |
+| **2026-09-17** | **D-14** | 🟡 → ⛔ **superseded by D-32** | 26 pin aktif öneri gibi duruyordu; kart kenarı/gold finger tercihi korundu, pin sayısı 12'ye indi |
+| **2026-09-17** | **D-02** | Kapsam daraltıldı | W5500 host Ethernet kontrolcüsü olarak görünüyordu; D-47 ile çelişiyordu. Artık yalnız gelecekteki Ethernet haberleşme node'u kapsamında |
+| **2026-09-17** | **D-56** | Statü birleştirildi | Üstte 🟢, tabloda 🟡 görünüyordu — 🟢'ye sabitlendi |
+| **2026-09-17** | **D-25** | İfade düzeltildi | "BOOT# donanım kaçışı" diyordu; BOOT# D-19 ile kaldırılmıştı. RST# + bootloader penceresi olarak yazıldı |
+| **2026-09-17** | **D-52** | Statü birleştirildi | Kabul listesinde 🟢, tabloda 🟡 görünüyordu — 🟢'ye sabitlendi |
+| **2026-09-17** | — | Consistency review | 20 çelişki düzeltildi; yeni mimari karar üretilmedi |

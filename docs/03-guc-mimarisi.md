@@ -92,7 +92,7 @@ Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → Ters polarite + O
 > compliance) olduğu görüldü. O node'a ~$0.30'luk lokal boost koymak, sekiz
 > slota iki pin + backplane boyunca yüksek gerilim dağıtmaktan ucuz ve güvenli.
 > Gerekçelerin tamamı:
-> [04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-kaldırılanların-gerekçesi)
+> [04 §5.3](04-backplane-mekanik.md#53-neden-26-değil-12-tarihsel-karşılaştırma)
 
 **Tek ray olmasının kazançları:**
 
@@ -234,35 +234,39 @@ kontak akım kapasitesinin çok altında, sorun yok.
 
 | Blok | Akım | Güç |
 |------|------|-----|
-| ESP32-S3 — WiFi aktif ortalama | 150 mA @3.3V | 0.50 W |
-| ESP32-S3 — WiFi TX tepe | 350 mA @3.3V | 1.16 W |
-| W5500 + magjack (100 Mbps) | 150 mA @3.3V | 0.50 W |
+| ESP32-S3 — Wi-Fi kapalı (varsayılan, D-65) | 40 mA @3.3V | 0.13 W |
+| ESP32-S3 — Wi-Fi TX tepe (talep üzerine) | 350 mA @3.3V | 1.16 W |
 | İzole RS-485 (xcvr + izole DC-DC) | 40 mA @5V | 0.20 W |
 | PCA9555 + LED'ler + misc | 60 mA @3.3V | 0.20 W |
-| **Host toplam (5V'tan)** | | **~2.0 W tipik / 3.0 W tepe** |
+| **Host toplam (5V'tan)** | | **~0.4 W tipik / ~1.6 W tepe** |
+
+> Host'ta Ethernet yok (D-47) — önceki sürümdeki W5500 + magjack satırı (0.50 W)
+> bütçeden çıkarıldı.
 
 ### 4.3 Sistem toplamı
 
 ```
-8 slot × 1.0 W (maksimum)          =   8.0 W
-Host (tepe)                      =   3.0 W
+8 slot × 0.75 W (1U tavanı, D-29)  =   6.0 W
+Host (Wi-Fi TX tepesi)             =   1.6 W
                                       ───────
-+5V yükü (en kötü durum)       =  11.0 W   →  5V @ 2.2 A
++5V yükü (teorik en kötü durum)    =   7.6 W   →  5V @ 1.52 A
 
-Tasarım noktası                    =  5V @ 3.0 A (15 W)
-Headroom                           =  %36
+Tasarım noktası (sürekli, D-31)    =  5V @ 1.5 A (7.5 W)
+Akım limiti (röle darbe yedeği)    =  ≥ 2.5 A            (§5)
 
-Giriş gücü @ %88 verim             =  17.0 W
-    @ 12 V  →  1.42 A     ← en yüksek giriş akımı, boyutlandırma buradan
-    @ 24 V  →  0.71 A
-    @ 48 V  →  0.35 A
+Giriş gücü @ %87 verim             =   8.7 W
+    @ 12 V  →  0.73 A     ← en yüksek giriş akımı, boyutlandırma buradan
+    @ 24 V  →  0.36 A
+    @ 48 V  →  0.18 A
 
-Giriş sigortası                    =  2.5 A yavaş atan
+Giriş sigortası                    =  2.5 A yavaş atan  (§1.3'te sabit)
 ```
 
-**Not:** Gerçekçi karışık konfigürasyonda +5V yükü ~5–6W olacak. 15W tasarım
-noktası, tüm slotların aynı anda maksimum çektiği teorik en kötü durumu
-karşılıyor.
+**Not:** Teorik en kötü durum (1.52 A) tasarım noktasının hemen üstünde; bu
+kısa süreli örtüşme ≥2.5 A akım limitiyle karşılanıyor. Gerçekte node toplamı
+descriptor ile **1.2 A'e** sınırlandığı için sürekli yük ~1.5 A'i aşamıyor
+([§4.4](#44-güç-bütçesi-zorlaması)). Tipik çalışma noktası çok daha düşük:
+S1/S2'de 0.1–0.2 A ([10 §5](10-enerji-butcesi.md#5-güç-durumu-bütçeleri)).
 
 ### 4.4 Güç bütçesi zorlaması
 

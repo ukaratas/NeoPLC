@@ -6,14 +6,14 @@
 
 | Seçenek | Değerlendirme |
 |---------|---------------|
-| **Host, node FW'ini dahili bus üzerinden yazar** | **Tek web UI'dan tüm raf güncellenir.** FW imajları host'a Ethernet/WiFi ile gelir, host'un 16MB flash'ında saklanır. |
+| **Host, node FW'ini dahili bus üzerinden yazar** | **Tek web UI'dan tüm raf güncellenir.** FW imajları host'a **Wi-Fi / web UI** üzerinden yüklenir ve host'un 16 MB flash'ında saklanır. *(Kablolu Ethernet yalnız opsiyonel Ethernet haberleşme node'u takılıysa alternatif taşıma kanalı olabilir — D-47.)* |
 | Node üzerinde SWD header | Cihazı açmak gerekir. Saha servisi için kabul edilemez. |
 | Node başına USB | Maliyet ve pin israfı — K1'i ihlal ediyor |
 
 ### Karar: bus üzerinden merkezi güncelleme
 
 ESP32-S3'ün 16MB flash'ı bu modeli mümkün kılıyor
-([02 §1](02-host-mimarisi.md#karar-esp32-s3-wroom-1u-n16r8)) — node
+([02 §1](02-host-mimarisi.md#13-bugün-geçerli-gerekçeler-d-01)) — node
 firmware imajları host'ta saklanabiliyor.
 
 **Saha senaryosu:** Teknisyen web UI'a bağlanır, yeni node firmware'ini yükler,

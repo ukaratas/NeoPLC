@@ -285,7 +285,7 @@ PFM destekleyen bir buck %85. **Tam yük verimi neredeyse hiç kullanılmıyor.*
 
 | Yük | Kapılama | Gerekçe |
 |-----|----------|---------|
-| **W5500 + magjack** | Load switch (3.3V) | **Tek en büyük sürekli yük — 495 mW** |
+| **Wi-Fi radyosu** | Yazılımdan kapatılır (varsayılan kapalı, D-65) | **En büyük değişken yük — S0'da 396 mW** |
 | İzole RS-485 saha portu | Load switch (5V) | 200 mW, sürekli Modbus RTU gerekmiyorsa kapatılır |
 | Slotlar | Mevcut slot load switch'leri | [06 §7](06-slot-yonetimi.md#7-slot-başına-akım-koruması) |
 

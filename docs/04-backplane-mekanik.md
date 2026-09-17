@@ -155,7 +155,7 @@ aktarıyor.
 ### 3.3 Takma / çıkarma
 
 ```
-Kart kenarı sürtünme kuvveti  ≈  26 pin × ~0.5 N  ≈  13 N
+Kart kenarı sürtünme kuvveti  ≈  12 pin × ~0.5 N  ≈  6 N
 ```
 
 Parmakla takılabilir seviyede. Çıkarma için ön panelde **kol veya çekme
@@ -182,7 +182,11 @@ Boş slotlara **kör kapak** takılmalı:
 | Pin header 2×N | ~$0.15 | Düşük | Yok |
 | DIN 41612 | ~$2–4 | Çok yüksek | Var |
 
-### Karar: PCB kart kenarı, 2.54 mm adım, çift sıra, 26 pin · D-14
+### Karar: PCB kart kenarı, 2.54 mm adım, 2 × 6 = **12 pin** · D-32
+
+> ⛔ İlk karar D-14 (26 pin) **D-32 tarafından supersede edildi.** Kart kenarı /
+> gold finger tercihi aynen korundu; değişen yalnızca pin sayısı. Gerekçeler:
+> [§5.3](#53-neden-26-değil-12--tarihsel-karşılaştırma)
 
 Blade mimarisi bu kararı **güçlendiriyor**: kızak sistemi, kart kenarı
 konnektörünün en hassas olduğu şeyi — giriş açısı ve yükseklik hizalaması —
@@ -238,13 +242,18 @@ kadar node'u yok sayar; yarım oturmuş bir node sistemi hiç etkilemez.
 
 ```
 12 pin, 2 sıra × 6, 2.54 mm adım  →  kenar uzunluğu 15.24 mm
-(26 pin, 2 × 13                   →  33.0 mm)
 ```
+
+*(Karşılaştırma için: supersede edilen 26 pinli tasarım 2 × 13 → 33.0 mm idi.)*
 
 75 mm'lik kart kenarında rahat yer var. Hizalamayı zaten kızak yapıyor (§4),
 konnektörün uzun olmasına gerek yok.
 
-### 5.3 Neden 26 değil 12 — kaldırılanların gerekçesi
+### 5.3 Neden 26 değil 12 — tarihsel karşılaştırma
+
+> 📎 Bu bölüm **tarihseldir.** İlk taslaktaki 26 pinli pinout'un (D-14) neden
+> 12 pine indirildiğini kayıt altında tutar. Güncel bağlayıcı pinout §5'teki
+> tablodur (D-32).
 
 #### GND ×4 → ×2
 

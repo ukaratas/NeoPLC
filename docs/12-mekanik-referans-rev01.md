@@ -270,7 +270,7 @@ Bunlar tartışmasız — draft zaten doğru çözmüş:
 | [09](09-node-aileleri.md) | Klemens/kanal sayısı 17.5 mm'ye göre; iki sıra klemens |
 | [11](11-cikis-node-topolojileri.md) | **Termal hesap düzeltilmeli** (§3.5); kanal sayıları revize |
 | [10](10-enerji-butcesi.md) | Fan enerji kalemi eklenmeli (D-57) |
-| [03](03-guc-mimarisi.md) | Fan beslemesi; 3.3V rail rezervasyonu |
+| [03](03-guc-mimarisi.md) | ✅ Fan beslemesi VIN'den; **3.3V rail dağıtılmıyor, pin de rezerve edilmiyor** (D-59) |
 | Tümü | Terminoloji Host/Node (D-56 onayına bağlı) |
 
 Bu revizyonlar, çakışma kararları (§2 tablosu) netleştikten sonra tek seferde
