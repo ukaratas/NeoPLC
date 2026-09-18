@@ -4,6 +4,222 @@
 	(generator_version "10.0")
 	(uuid "c984adae-5495-4a3b-b0a6-3ee1775863dd")
 	(paper "A4")
-	(lib_symbols
+	(lib_symbols)
+	(wire
+		(pts
+			(xy 140.97 40.64)
+			(xy 157.48 40.64)
+		)
+		(uuid "a6a56b55-8e9d-401a-a416-f9fc8828f370")
+	)
+	(wire
+		(pts
+			(xy 140.97 43.18)
+			(xy 157.48 43.18)
+		)
+		(uuid "a9e5f713-b212-4191-aed3-217d6a1d0769")
+	)
+	(wire
+		(pts
+			(xy 140.97 45.72)
+			(xy 157.48 45.72)
+		)
+		(uuid "bcc40bdf-a89c-4b1f-a9bd-0c8b43dd2105")
+	)
+	(wire
+		(pts
+			(xy 140.97 48.26)
+			(xy 157.48 48.26)
+		)
+		(uuid "5aa72969-325e-42b9-ab32-cbd7f1f6c43d")
+	)
+	(wire
+		(pts
+			(xy 140.97 50.8)
+			(xy 157.48 50.8)
+		)
+		(uuid "39ae3d3e-e1df-433c-9373-43c59236ebe1")
+	)
+	(wire
+		(pts
+			(xy 140.97 53.34)
+			(xy 157.48 53.34)
+		)
+		(uuid "203b9284-b5f8-4599-a866-a8d9f03aceab")
+	)
+	(wire
+		(pts
+			(xy 140.97 55.88)
+			(xy 157.48 55.88)
+		)
+		(uuid "63d4853b-4485-4c36-9924-f62056dc79f7")
+	)
+	(wire
+		(pts
+			(xy 140.97 58.42)
+			(xy 157.48 58.42)
+		)
+		(uuid "22602550-377f-4831-b8c4-f508236eb51d")
+	)
+	(text "NeoPLC DI-8  |  Rev 0.1  |  2026-09-17"
+		(at 30.48 25.4 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "c5f02b64-5f15-4dc7-bf97-5f3cb37f030b")
+	)
+	(text "First node, platform bring-up. Sheet 1: Node Core (backplane, 5V-3V3, MCU, RS-485, SWD). Sheet 2: DI Field (8ch isolated)."
+		(at 30.48 30.48 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "73b35981-7f1b-439c-b369-1263b4f0ebb1")
+	)
+	(sheet
+		(at 30.48 38.1)
+		(size 110.49 90)
+		(fields_autoplaced)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0)
+		)
+		(uuid "3312b6a0-6f86-4881-8f5a-9465c6f0eae2")
+		(property "Sheetname" "Node Core"
+			(at 30.48 37.465 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "node_core.kicad_sch"
+			(at 30.48 128.73499999999999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "DI1" input
+			(at 140.97 40.64 0)
+			(uuid "1d37eb56-993b-493c-956d-e7c3e29c0bcc")
+		)
+		(pin "DI2" input
+			(at 140.97 43.18 0)
+			(uuid "c51a777d-2cca-4d45-afba-dde97d66b7c5")
+		)
+		(pin "DI3" input
+			(at 140.97 45.72 0)
+			(uuid "3b5cd0e4-ee4b-4b0c-8bf9-42d5fac2a226")
+		)
+		(pin "DI4" input
+			(at 140.97 48.26 0)
+			(uuid "dd188fcc-a5a4-456c-b13b-8155681f15da")
+		)
+		(pin "DI5" input
+			(at 140.97 50.8 0)
+			(uuid "60aac72e-ba5b-4bbf-a54e-0cb10ddbdccc")
+		)
+		(pin "DI6" input
+			(at 140.97 53.34 0)
+			(uuid "49f3b122-3c2b-4b35-8741-904da78f1d83")
+		)
+		(pin "DI7" input
+			(at 140.97 55.88 0)
+			(uuid "85831cae-3222-4198-81a3-60faaa9c04b8")
+		)
+		(pin "DI8" input
+			(at 140.97 58.42 0)
+			(uuid "ca540d5c-923e-438e-98cc-704ec8a89e44")
+		)
+		(instances
+			(project "NeoPLC"
+				(path "/c984adae-5495-4a3b-b0a6-3ee1775863dd"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 157.48 38.1)
+		(size 110 90)
+		(fields_autoplaced)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0)
+		)
+		(uuid "b28e006f-c239-47be-af48-3ef9e7dc3203")
+		(property "Sheetname" "DI Field"
+			(at 157.48 37.465 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "di_field.kicad_sch"
+			(at 157.48 128.73499999999999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "DI1" output
+			(at 157.48 40.64 180)
+			(uuid "19d8ca4e-be2b-4865-9516-5cfa4550565c")
+		)
+		(pin "DI2" output
+			(at 157.48 43.18 180)
+			(uuid "90cc41b9-0a06-49e3-8427-235c3ce9aa78")
+		)
+		(pin "DI3" output
+			(at 157.48 45.72 180)
+			(uuid "1a98a859-cae6-48d3-a99a-b73b02a288ae")
+		)
+		(pin "DI4" output
+			(at 157.48 48.26 180)
+			(uuid "2050c5a9-ae58-46c1-bb78-9ac318628811")
+		)
+		(pin "DI5" output
+			(at 157.48 50.8 180)
+			(uuid "bc15faac-d504-473e-8c13-d402a5af5052")
+		)
+		(pin "DI6" output
+			(at 157.48 53.34 180)
+			(uuid "25c488e2-b1d0-466c-abae-42d4e6e04be7")
+		)
+		(pin "DI7" output
+			(at 157.48 55.88 180)
+			(uuid "7b7d144b-59a0-44f5-89e5-ed25f5e89074")
+		)
+		(pin "DI8" output
+			(at 157.48 58.42 180)
+			(uuid "b12faa8e-5219-4630-be5d-ca714c2bdc6f")
+		)
+		(instances
+			(project "NeoPLC"
+				(path "/c984adae-5495-4a3b-b0a6-3ee1775863dd"
+					(page "3")
+				)
+			)
+		)
 	)
 )

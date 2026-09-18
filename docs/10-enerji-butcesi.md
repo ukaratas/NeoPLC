@@ -54,7 +54,9 @@ olarak tasarlanmıştı.** Bu doküman o çelişkiyi çözüyor.
 **10 Hz (100 ms) tüm ihtiyaçları karşılıyor.** 200 Hz, 20× gereksiz enerji
 harcaması demekti.
 
-### Karar: uyarlanabilir tarama hızı
+### Karar: uyarlanabilir tarama · D-40
+
+200 Hz yok. 20 / 10 / 1 Hz.
 
 | Durum | Tarama | Gerekçe |
 |-------|--------|---------|
@@ -67,7 +69,7 @@ harcaması demekti.
 
 ## 3. Wake-on-bus: node'ların uyuması
 
-### Karar
+### Karar: STOP + start-bit · D-41
 
 ```
 Node MCU'su STOP modunda uyur              (~2 µA)
@@ -103,8 +105,9 @@ hattı gerekir. Maliyeti hesaplayalım:
 Bekleme durumunda bile toplam bütçenin küçük bir kısmı. **Ek donanım hattı ve
 uyandırma gecikmesi karmaşıklığına değmiyor.**
 
-> **Parça seçim kriteri:** Transceiver seçiminde **alıcı boşta akımı** birincil
-> kriterdir. Bazı RS-485 transceiver'ları 2 mA çekiyor — bu 4× fark demek.
+> **Parça seçim kriteri · D-49:** Alıcı boşta **≤ 0.5 mA** birincil; **glitch-free
+> power-up/down** zorunlu (D-24). Shutdown / RE kapatma yok — node host'u her an
+> duymalı. 2 mA sınıfı parçalar elenir (8 slotta 4×). SKU şemada seçilir.
 
 ---
 
@@ -114,10 +117,10 @@ uyandırma gecikmesi karmaşıklığına değmiyor.**
 
 | Durum | Tetikleyici | Host | Node'lar | Hedef |
 |-------|-------------|--------|----------|-------|
-| **S0 Aktif** | Kullanıcı bağlı / otomasyon çalışıyor | WiFi açık, Ethernet açık, 20 Hz | Wake-on-bus | ~1.4 W |
-| **S1 Boşta** | N dakika etkileşim yok | WiFi modem-sleep, **Ethernet kapalı**, 10 Hz | Wake-on-bus | ~0.43 W |
-| **S2 Bekleme** | Park, aktivite yok | WiFi kapalı, 1 Hz | Wake-on-bus | ~60 mW |
-| **S3 Depo** | Kullanıcı komutu / uzun hareketsizlik | ESP32 deep sleep | **Tamamen kapalı** | ~1.3 mW |
+| **S0 Aktif** | Kullanıcı bağlı / otomasyon çalışıyor | WiFi açık, 20 Hz | Wake-on-bus | ~1.4 W |
+| **S1 Boşta** | N dakika etkileşim yok | WiFi kapalı, **BLE advertising** (D-67), 10 Hz | Wake-on-bus | ~0.43 W |
+| **S2 Bekleme** | Park, aktivite yok | WiFi kapalı, **BLE advertising**, 1 Hz | Wake-on-bus | ~60 mW |
+| **S3 Depo** | **Anahtar OFF** (D-44) | ESP32 deep sleep, **BLE kapalı** | **Tamamen kapalı** | ~1.3 mW |
 
 ### 4.1 S3 — mevcut kararların beklenmedik yakınsaması
 
@@ -248,16 +251,16 @@ Kazancın kaynakları:
 
 ## 7. Güç mimarisine etkisi
 
-### 7.1 İki dönüştürücülü yapı
+### 7.1 İki dönüştürücülü yapı · D-42
 
-Tek bir 3A buck ile S3'e inilemiyor — 3A için optimize edilmiş bir
-dönüştürücünün boştaki Iq'su ve hafif yük verimi kötü.
+Tek bir 2 A buck ile S3'e inilemiyor — 2 A için optimize edilmiş dönüştürücünün
+boşta Iq'su ve hafif yük verimi kötü (D-48).
 
 ```
 12–48V ─┬─→ Housekeeping buck  3.3V / 500 mA / Iq ≤ 25 µA  ── sürekli açık
         │      → ESP32-S3, PCA9555, backplane transceiver
         │
-        └─→ Ana buck  5V / 3A / EN pinli, senkron, PFM     ── S3'te kapalı
+        └─→ Ana buck  5V / 2.0 A / EN pinli, senkron, PFM   ── S3'te kapalı
                → slot load switch'leri → node'lar
                → izole RS-485 saha portu
 ```
@@ -267,19 +270,17 @@ dönüştürücünün boştaki Iq'su ve hafif yük verimi kötü.
 
 Ek maliyet: ~$0.80. Batarya ömrü karşısında tartışmasız.
 
-### 7.2 Dönüştürücü seçim kriterleri — değişti
+### 7.2 Dönüştürücü seçim kriterleri · D-48
 
-Enerji bütçesi, parça seçim önceliklerini tersine çeviriyor:
+Parça seçim sırası ters: zamanın %90'ı S1/S2, **50–200 mA**.
 
-| Eski öncelik | Yeni öncelik |
-|--------------|--------------|
-| Tam yükte (3A) tepe verim | **Hafif yükte (50–200 mA) verim — PFM / pulse-skipping zorunlu** |
-| Maliyet | **Boşta akım (Iq)** |
-| Boyut | Maliyet |
+| Eski | Kilit |
+|------|-------|
+| Tam yük tepe verim | **Hafif yük / PFM** |
+| Maliyet önce | **Iq** (boşta akım) |
+| Boyut | Sonra maliyet |
 
-**Gerekçe:** Sistem zamanının %90'ından fazlasını S1/S2'de, yani 50–200 mA
-çekerek geçiriyor. Sadece CCM çalışan bir buck bu bölgede %50 verimde olabilir;
-PFM destekleyen bir buck %85. **Tam yük verimi neredeyse hiç kullanılmıyor.**
+CCM-only buck bu bölgede ~%50; PFM ~%85. 2 A %94 neredeyse hiç kullanılmaz.
 
 ### 7.3 Güç kapısı gereksinimleri
 
@@ -322,9 +323,9 @@ Bu kararın tetiklediği zincir:
 ```
 Ethernet çıktı
    ├─→ 11.9 Wh/gün tasarruf        (bütçe 5.5 → 3.5 Wh/gün)
-   ├─→ 6 GPIO serbest              (batarya ölçümü, uyandırma, fan kontrolü)
+   ├─→ 6 GPIO serbest              (batarya ölçümü, uyandırma, sıcaklık)
    ├─→ 25 mm yerleşim kısıtı gitti
-   ├─→ Host tepe yükü düştü        (D-31: 2A → 1.5A)
+   ├─→ Host sürekli tavan 2.0 A kilit (D-31; büyük bobin + COM)
    └─→ 2 katman host uygulanabilir (D-05)
 ```
 
@@ -334,38 +335,41 @@ Ethernet çıktı
 
 Bu üçü endüstriyel varsayımda yoktu, batarya sisteminde zorunlu.
 
-### 9.1 Batarya izleme
+### 9.1 Batarya izleme + LVD · D-43
 
-Host, **giriş gerilimini (VIN)** ölçmeli.
+Host **VIN** ölçer (12–48 V, D-69). 2 direnç + ADC.
 
-```
-VIN (12–48 V) ──[ direnç böleni ]──→ ESP32 ADC
-```
+- Batarya raporu (Modbus / UI)
+- **LVD:** uyarı + yük atma — derin deşarj yasak
+- Brownout öngörüsü
 
-Maliyet: 2 direnç + 1 kapasitör. Sağladıkları:
+**S3'e otomatik inmez** (D-44: S3 yalnız anahtar OFF). LVD, anahtar ON iken
+yükleri keser / uyarı verir; depo modu değil.
 
-- Batarya durumu raporlama (Modbus + web UI)
-- **Düşük gerilim uyarısı ve yük atma** — bataryayı derin deşarjdan koruma
-- Brownout öngörüsü ([03 §1.4](03-guc-mimarisi.md#14-ele-alınması-gereken-saha-koşulları))
-- S2 → S3 geçişi için otomatik tetikleyici
+LVD isteğe bağlı değil — korunan varlık üründen pahalı.
 
-**Düşük gerilim kesme (LVD), bir batarya sisteminde isteğe bağlı değildir.**
-Derin deşarj bataryayı kalıcı olarak öldürür — korunan varlık, ürünün
-kendisinden pahalı.
+### 9.2 Güç anahtarı ve uyandırma · D-44
 
-### 9.2 Uyandırma kaynakları
+**Aç-kapa düğmesi var** (ön panel, latching). VIN kesici değil — housekeeping
+her zaman VIN görür.
 
-S3'ten çıkış için donanım tetikleyicileri gerekiyor:
+| Anahtar | VIN | Davranış |
+|---------|-----|----------|
+| **ON** | Var | Cihaz **açık**: S0 / S1 / S2. Boşta S3'e **inmez**. "Enerji varken hep açık" bu. |
+| **OFF** | Var | **S3** (~1 mW). Node'lar kesik. Şarj/şebeke gelirse uyanır. |
+| — | Yok | Ölü. VIN gelince: anahtar ON ise açılır; OFF ise S3'te kalır ta ki şarj veya ON. |
 
-| Kaynak | Uygulama |
-|--------|----------|
-| RTC periyodik | ESP32 dahili — saatte bir batarya/sıcaklık kontrolü |
-| Şebeke/şarj algılama | Dijital giriş — karavan prize takıldı |
-| Kontak/ateşleme | Dijital giriş — araç çalıştı |
-| Kapı / hareket | Dijital giriş |
-| Kullanıcı butonu | Host ön yüzünde |
+S3 uyandırma (2 RTC GPIO):
 
-En az **2 adet uyandırma girişi** host'ta ayrılmalı (ESP32 RTC GPIO'larından).
+| Pin | İş |
+|-----|-----|
+| 1 | Aç-kapa (ON kenarı) |
+| 2 | Şarj / şebeke algılama |
+
+Wi-Fi butonu **ayrı** (D-65) — güç anahtarı değil, 10 dk AP.
+**BLE advertising** S1/S2'de açık, **S3'te kapalı** (D-67). Depoyu yemez.
+
+Kontak/kapı host'a çekilmez; gerekirse DI-8 (sistem zaten ON).
 
 ### 9.3 Titreşim
 
@@ -374,28 +378,30 @@ bir mekanik gereksinim.
 
 | Risk | Önlem |
 |------|-------|
-| Kart kenarı konnektöründe fretting korozyonu | Node tutucu (mandal veya vida) — konnektör tek başına tutmamalı |
+| Kart kenarı konnektöründe fretting korozyonu | **Kapalı vida** (D-45) — 1U: 1, 2U: 2. Konnektör tek başına tutmaz |
+| 2U sola yaslanma / burulma | Sağ bakırsız yalancı dil (D-16) — arkada ikinci yatak; vidanın yerine geçmez |
 | Ağır bileşenlerin yorulması | Elektrolitik kapasitör, indüktör, magjack için ek mekanik destek veya düşük profilli parça tercihi |
 | Klemens gevşemesi | Push-in yaylı klemens tercih edilmeli ([09 §4](09-node-aileleri.md#4-saha-bağlantısı)) — vidalı klemens titreşimde gevşer |
 
-Bu, [04 §1](04-backplane-mekanik.md#1-mekanik-mimari-blade-mi-kutu-içinde-kutu-mu)'teki mekanik standardı etkiliyor: **node
-tutma mekanizması pinout kadar bağlayıcı bir standart.**
+Bu, [04 §3.3](04-backplane-mekanik.md#33-takma--çıkarma)'teki standart:
+**kapalı vida, pinout kadar bağlayıcı.** Hot-plug sök-tak; vida tutma.
 
 ---
 
-## 10. Firmware sorumlulukları
+## 10. Firmware sorumlulukları · D-50 (oturumda)
 
-Enerji bütçesi donanım kararı olduğu kadar firmware kararıdır.
+Enerji bütçesi donanım kararı olduğu kadar firmware kararıdır. Durum makinesi
+S0–S3 (D-39/D-44) ve glitch heal (D-77) **donanımda kilitli**; kod firmware
+oturumunda.
 
 | Gereksinim | Açıklama |
 |------------|----------|
 | Durum makinesi | S0–S3 geçişleri, zaman aşımları kullanıcı tarafından ayarlanabilir |
 | Ölçüm | Gerçek tüketim VIN akımından ölçülebilmeli (opsiyonel shunt) |
-| Raporlama | Modbus register'larında durum + tahmini batarya ömrü |
+| Raporlama | **Host API** (D-78) — durum + tahmini batarya ömrü |
 | Node uyku koordinasyonu | Host, tarama hızı değişimini node'lara bildirmeli |
-| Güvenli geçiş | S3'e geçmeden önce çıkışlar tanımlı duruma alınmalı |
+| Güvenli geçiş | S3'e bilinçli iniş. Latching aux ile durur; MOSFET/AO host imajına (D-77) |
+| Glitch heal · D-77 | ON iken kısa VIN/5 V kesisi: latching aux; DO/AO host'tan geri yazılır |
 
-> **Uyarı:** S3'te node'lar beslemesiz. Bu, **çıkışların durumunu kaybetmesi**
-> demek. Bir röle S3'te açık kalamaz. S3'e geçiş, tüm çıkışların güvenli
-> (kapalı) duruma alınabildiği durumlarda mümkün — bu, kullanıcının anlaması
-> gereken bir davranış ve web UI'da açıkça belirtilmeli.
+> **S3 ≠ glitch.** S3'te latching kontak **açık kalabilir** (mıknatıs). MOSFET
+> kapanır. ON'a dönüşte host kalıcı imajı yükler (D-77). Kör röle darbesi yok.

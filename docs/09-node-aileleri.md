@@ -1,4 +1,7 @@
-# 09 — Node Aileleri
+# 09 — Node tipleri
+
+Dil **node tipi**, "aile" değil. Katalog **D-72** ile kilitli. İlk PCB: **DI-8**
+(D-28).
 
 ---
 
@@ -58,9 +61,10 @@ bu, çekirdek maliyetinin neden bu kadar düşük kalabildiğinin ana sebebi.
 
 ## 2. İlk node seçimi
 
-### D-28 — Karar bekliyor
+### D-28 — Kabul edildi · 🟢
 
-**Öneri: Dijital giriş, 8 kanal, 1U.**
+**İlk node: DI-8** — dijital giriş, 8 kanal, 1U. Saha: **~5–30 V, opto izole**
+(D-76) — 12 V karavan anahtarı ve 24 V pano aynı direnç/opto.
 
 Gerekçe:
 
@@ -88,107 +92,161 @@ karmaşıklık, çekirdekteki sorunları maskeler.
 
 ## 3. Node MCU'su
 
-### ⚪ D-37 — Henüz ele alınmadı
+### D-37 — Kabul edildi · 🟢
 
-Bu karar için gereken girdi:
+**Tek SKU, tüm node tipleri: STM32G071 128 KB sınıfı** (aday: G071CB, LQFP48
+veya eşdeğeri — LCSC stok doğrulanınca bağlayıcı).
 
-| Girdi | Kaynak |
-|-------|--------|
-| Flash kapasitesi → bootloader yapısı | [07 §2](07-firmware-update.md#2-bootloader-yapısı) — 64 KB ise tek app, 128 KB+ ise çift bank yeniden değerlendirilir |
-| GPIO sayısı | Node tipine göre değişir; en yüksek kanal sayılı node belirleyici |
-| Donanımsal DE kontrolü olan USART | [05 §2](05-dahili-bus.md#2-yarım-dupleks-mi-tam-dupleks-mi) — turnaround gecikmesini yazılımdan çıkarmak için |
-| Fabrika UID | [05 §7.1](05-dahili-bus.md#71-node-descriptorı-identify-yanıtı) — descriptor'daki benzersiz kimlik |
-| Sıcaklık sınıfı | D-04'e bağlı |
-| LCSC stok ve fiyat | Konnect `integration` toolset'i ile doğrulanacak |
+| Gerekçe | |
+|---------|---|
+| STOP + USART start-bit wake | Enerji bütçesi D-41 |
+| Donanımsal DE | Yarım dupleks D-11 |
+| 128 KB | Tek app bootloader rahat; COM/AI da sığar. Çift bank D-25 yeniden açılabilir |
+| Tek toolchain | DI'dan COM'a aynı firmware omurgası |
 
-**Ön eğilim:** STM32G0 ailesi (G030/G031/G071) — düşük maliyet, donanımsal DE
-kontrollü USART, geniş LCSC stoğu, endüstriyel sıcaklık aralığı, tek toolchain
-ile tüm aile.
-
-Karar, D-28 (ilk node) netleştiğinde o node'un gereksinimleriyle birlikte
-verilecek.
+COM-1U Ethernet yığını sıkışırsa bu SKU büyütülür (G0B1); çekirdek pinout
+aynı pakette tutulur.
 
 ---
 
 ## 4. Saha bağlantısı
 
-### ⚪ D-38 — Henüz ele alınmadı
+### D-38 — Kabul edildi · 🟢
 
-**17.5 mm** ön yüz genişliğinde kaç kutup sığdığı, kanal sayısını doğrudan
-sınırlıyor. Bu yüzden klemens seçimi bir mekanik karar değil, **kanal sayısı
-kararıdır.**
+**Çıkarılabilir yaylı (pluggable) klemens.** Vidalı yok (K5). Adım **tek değil**
+— her SKU kendi kablo sınıfına göre.
 
-| Seçenek | Adım | 17.5 mm'de | Not |
-|---------|------|-----------|-----|
-| Push-in yaylı klemens | 3.5 mm | **5 kutup/sıra** | Alet gerektirmez, endüstriyel standart |
-| Vidalı klemens | 3.81 / 5.0 mm | 4 / 3 kutup/sıra | Yaygın, ucuz |
-| Çıkarılabilir (pluggable) | 3.5 / 3.81 mm | 5 / 4 kutup/sıra | Servis kolaylığı, daha pahalı |
+Karavanda DC'de **4 mm² ve 6 mm²** bol. 3.5 mm fiş bunları almaz. Sinyal
+modülü 3.5 mm kalır; güç modülü geniş adım alır.
 
-> ⚠️ **Titreşim (K5) vidalı klemensi eliyor.** Karavan hareketli bir araç;
-> vidalı klemens titreşim altında gevşer ve gevşeyen bir klemens yüksek akımda
-> ısınma ve yangın riskidir. **Push-in yaylı veya çıkarılabilir yaylı klemens
-> zorunlu.** ([10 §9.3](10-enerji-butcesi.md#93-titreşim))
+1U ön yüz **17.5 mm** = bir sıradaki kutup × adım:
 
-**Çözüldü:** Çıkış node'ları 4 kanal olarak kararlaştırıldı (D-52).
+| Sınıf | SKU | Kablo (tipik) | Adım | 1U kutup/sıra | 2U kutup/sıra |
+|-------|-----|---------------|------|---------------|---------------|
+| Sinyal | DI, AI, AO, COM | 0.5–1.5 mm² | **3.5 mm** | 5 | — |
+| 8 A | DO-M-8A-8 | **1.5–2.5 mm²** | **3.5 mm** | 5 | — |
+| 16 A | DC-L-16A-4 | 2.5–4 mm² | **5.08–6.35 mm** | 3 | 6 |
+| 32 A | DC-H-32A-2 | **6 mm²** | **7.5 mm** | 2 | 4 |
+| 64 A | DC-H-64A-2 | 6–16 mm² | **10–12 mm** | 1 | 2–3 |
+| AC 16 A | AC-L-16A-4 | 2.5–4 mm² | **7.5 mm** | — | ~4 |
+| AC 32 A | AC-L-32A-2 | 6 mm² | **10 mm** | — | 2–3 |
+
+Pluggable kazancı: node çekilince saha kablosu **fişte** kalır. Tel fişin
+içinde (yüksük / krimp); dışarıda çıplak iletken yok. AC fiş **parmak-güvenli
+(IP20)** — mated ve unmated.
+
+D-38 = kablo/fiş. D-64 = PCB 230 V adası (klipsli bariyer, tam kutu değil).
+
+**DO-M-8A-8: 2.5 mm² / 3.5 mm** (D-38). 8 A için 2.5 mm² yeterli; 4 mm² yalnız
+16 A+ güç node'larında. 8 OUT + 2 BAT+ = iki sıra × 5 kutup.
 
 ```
-4 çıkış + 1 ortak dönüş = 5 kutup
-5 × 3.5 mm push-in      = 17.5 mm     ✓ tam oturuyor
+3.5 mm × 5 = 17.5 mm     sinyal + 8 A DO
+5.08 mm × 3 = 15.2 mm    16 A / 4 mm²
+7.5 mm × 2 = 15.0 mm     32 A / 6 mm²
+10 mm × 1 = 10 mm        64 A, 1U'da tek kutup
 ```
-
-Tek sıra yeterli — iki sıraya gerek yok. Ayrıntı:
-[11 §5.3](11-cikis-node-topolojileri.md#53-klemens-yerleşimi-kontrolü)
 
 ---
 
-## 5. Node ailesi yol haritası
+## 5. Node katalogu · D-72
 
-| Faz | Aile | Form | Bağımlılık |
-|-----|------|------|------------|
-| **1** | Dijital giriş | 1U | Çekirdek doğrulaması — D-28 |
-| **1** | Dijital çıkış | 1U | Çekirdek dondurulduktan sonra |
-| **2** | Röle çıkış | 1U / 2U | Bobin darbe yönetiminin ilk doğrulaması |
-| **2** | Analog giriş | 1U / 2U | Çekirdek olgun olmalı; gürültü bölgeleme kritik |
-| **2** | Analog çıkış | 1U / 2U | **Lokal boost** — 0–10 V compliance (tek ray kararının bedeli) |
-| **2** | **Ethernet / haberleşme** | 1U | **Ethernet host'tan çıkarıldı** (D-47) — kablolu Ethernet isteyen bu node'u takar. W5500 + magjack, sadece takılıyken enerji harcar |
-| **3** | Diğer haberleşme (CAN, ek RS-485) | 1U / 2U | Ek protokol yığını — node'da daha güçlü MCU gerekebilir |
-| **3** | Özel fonksiyon | 1U / 2U | Sayaç, enkoder, PWM, sıcaklık (RTD/TC) |
+Form **en fazla 2U** (D-75). 4U yok. **Yükseklik sığmazsa 2U** (D-61), kanal
+aynı; 4U gerekecek kadar şişerse kanal düşer veya ikinci 2U.
+Her node **tek teknoloji** (D-52).
 
-### 5.1 Node tipi ID tahsisi
+| SKU | U | Kanal | Saha | Not |
+|-----|---|-------|------|-----|
+| **DI-8** | 1 | 8 | **5–30 V izole** (12/24 V aynı kart) | D-28 · D-76 |
+| **DO-M-8A-8** | 1 | 8 | High-side MOSFET **8 A/ch** | Standart DC çıkış. 8 A latching yok. PWM (dimmer / RGBW) firmware |
+| **AI-8** | 1 | 8 | Analog giriş | Port başı config · D-73 |
+| **AO-4** | 1 | 4 | 0–10 V çıkış | Ayrı kart, lokal boost. 8ch sürücü 1U'da kalabalık |
+| **DC-L-16A-4** | 1* | 4 | Latching 16 A DC | Aux kontak (D-53). *Yükseklik → 2U (D-61) |
+| **DC-H-32A-2** | 2 | 2 | Hibrit 32 A DC | Metal ön panel ısı (D-54) |
+| **DC-H-64A-2** | 2 | 2 | Hibrit 64 A DC | D-54. 48 V ark |
+| **AC-L-16A-4** | 2 | 4 | Latching 16 A AC | Aux (D-53). D-64. ZC sinüste (D-55) |
+| **AC-L-32A-2** | 2 | 2 | Latching 32 A AC | Aux (D-53). D-64 |
+| **COM-1U** | 1* | — | CAN izolesiz + Ethernet magjack | D-74. 2 katman (D-36). Sığmazsa 2U **veya** CAN/ETH ayrı 1U |
 
-Descriptor'daki `Node tipi ID` alanı için ([05 §7.1](05-dahili-bus.md#71-node-descriptorı-identify-yanıtı)):
+Yok: 1 A DO SKU, 8 A latching, ayrı PWM node, 4U gövde, AI+AO kombi.
+
+### 5.1 DO-M-8A-8 — standart çıkış
+
+1 A vs 8 A akıllı high-side fiyat farkı kanal başına küçüktür; tek SKU stok
+ve yazılımı böler. Saatlerce açık yük de MOSFET — charge pump kabul edildi.
+
+Yük akımı **saha bataryasından** geçer, backplane +5 V'tan değil.
+
+| Limit | Değer | Neden |
+|-------|--------|--------|
+| Kanal | 8 A | PROFET sınıfı |
+| Node eşzamanlı | **≤ 32 A** (sarı, şemada doğrulanır) | 8×8 A = 64 A iz/klemens/pasif ısıl 1U'da durmaz |
+| PWM | Evet | Lamba kısma, RGBW 4 kanalı kullanır |
+
+### 5.2 Analog · D-73
+
+**AI-8 ve AO-4 ayrı 1U.** AI sessiz referans; AO 5 V→12 V boost.
+
+AI-8 her kanal, firmware/config ile **bir** mod:
+
+| Mod | Kullanım |
+|-----|----------|
+| NTC | Kabin, su, buzdolabı |
+| 4–20 mA | Endüstriyel verici |
+| 0–20 mA | Aynı donanım, 4 mA offsüz |
+| 0–10 V | Gerilim verici / tank (bölenli) |
+
+Paylaşılan analog GND; iki sıra klemens. Pals/akış AI'da veya DI'da — ayrı
+SKU yok.
+
+AO-4: 0–10 V, kanal başı. Daha fazla AO = ikinci node.
+
+### 5.3 Güç ve AC — 1U / 2U
+
+| SKU | Neden bu kanal |
+|-----|----------------|
+| DC-L-16A-4 | 3.5–5 mm klemens, 4ch 1U hedef |
+| DC-H-32A-2 | 8.5 mm, 2U'da 2ch |
+| DC-H-64A-2 | 10–12 mm; 2ch 2U sıkı ama 4U yok |
+| AC-L-16A-4 | 7.5 mm, 2U'da 4 L+N sınıfı — 8ch 4U olurdu |
+| AC-L-32A-2 | 10 mm, 2ch |
+
+DC 32/64 A **hibrit** (latching + MOSFET ark kesici) · [11 §3](11-cikis-node-topolojileri.md#3-hibrit-anahtar--ikisini-birden-almak).
+
+### 5.4 Haberleşme · D-74
+
+**COM-1U:** CAN (ESS / Victron / BMS) **izolesiz** + Ethernet (W5500, magjack
+izolasyonu). Takılı değilse enerji sıfır. Host Ethernet'te kalmaz (D-47).
+CAN ortak şasi varsayar; saha RS-485 kadar düşman değil — 1U yer ETH'ye kalır.
+
+### 5.5 Tip ID
 
 ```
-0x01xx   Dijital giriş        0x0101 = 8ch 24V
-0x02xx   Dijital çıkış        0x0201 = 8ch MOSFET
-0x03xx   Analog giriş         0x0301 = 4ch 4-20mA · 0x0302 = 4ch 0-10V
-0x04xx   Analog çıkış
-0x05xx   Röle çıkış
-0x06xx   Haberleşme
-0x07xx   Özel fonksiyon
-0xFFxx   Rezerve / test
+0x0101  DI-8
+0x0201  DO-M-8A-8
+0x0301  AI-8          (mod bayrakları descriptor'da)
+0x0401  AO-4
+0x0501  DC-L-16A-4
+0x0502  DC-H-32A-2
+0x0503  DC-H-64A-2
+0x0581  AC-L-16A-4
+0x0582  AC-L-32A-2
+0x0601  COM-1U
+0xFFxx  test
 ```
-
-Üst bayt aile, alt bayt varyant. Host, tanımadığı bir varyantı gördüğünde
-aile davranışına göre genel muamele edebilir — yeni varyantlar host
-güncellemesi gerektirmeden çalışabilir.
 
 ---
 
-## 6. 1U → 2U türetme kuralı
-
-Bir node'un 2U versiyonu **yeni bir tasarım değil, genişletilmiş bir
-varyanttır**:
+## 6. 1U → 2U kuralı · D-75
 
 | Kalem | 1U | 2U |
 |-------|----|----|
-| Ortak çekirdek | Aynı | **Aynı** |
-| Backplane konnektörü | 1 adet (sol slot) | **1 adet (sol slot)** — [04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi) |
-| +5V bütçesi | 200 mA | 400 mA |
-| Ön yüz genişliği | 17.5 mm | 35 mm |
-| Kanal sayısı | Baz | Tipik 2× |
+| Ortak çekirdek | Aynı | Aynı |
+| Backplane konnektörü | 1 | 1 elektrik (sol) + bakırsız yalancı dil (sağ) · D-16 |
+| +5V tavan | 250 mA sürekli (D-29) | 500 mA |
+| Ön yüz | 17.5 mm | 35 mm |
+| PCB | 2 katman (D-36) | 2 katman |
 | Descriptor `form_factor` | 1U | 2U |
 
-2U yalnızca şunlar için kullanılmalı: daha fazla saha bağlantısı, daha fazla
-fiziksel alan gerektiren izolasyon/koruma, veya daha karmaşık fonksiyon.
-**Sadece "daha rahat yerleşim" için 2U kullanılmamalı** — slot maliyeti yüksek.
+**3U / 4U yok.** 1U'ya sığmayan **2U olur** (D-61) veya modül bölünür — 4 katman
+yok (D-36). 4U gerekecek kadar şişerse kanal kesilir veya ikinci 2U (D-75).

@@ -108,13 +108,13 @@ RS-485 aynı işi (kablolu, deterministik dış haberleşme) çok daha ucuza yap
 
 ### 2.1 Ne kaybediliyor, ne kaybedilmiyor
 
-**Modbus TCP kaybolmuyor** — WiFi üzerinden sunulmaya devam ediyor. ESP32-S3'ün
-radyosu zaten var ve S0 durumunda zaten açık.
+**Kuzeybound native = Host API (D-78).** Modbus TCP zorunlu değil; SCADA
+isterse host adapter olarak eklenebilir. ESP32-S3 radyosu S0'da zaten açık.
 
 | İhtiyaç | Çözüm |
 |---------|-------|
-| Kablolu, düşük enerjili, deterministik | **RS-485 / Modbus RTU** |
-| Kablosuz, yüksek bant genişliği, web UI | **WiFi / Modbus TCP** |
+| Kablolu, düşük enerjili, deterministik | **Saha RS-485 / Modbus RTU** (D-07) |
+| Kablosuz, model/API, web UI | **WiFi / Host API** (D-78) |
 | Kablolu Ethernet zorunluysa | **Haberleşme node'u olarak takılır** (§2.2) |
 
 ### 2.2 Ethernet bir node olarak
@@ -146,15 +146,14 @@ Bu, modüler mimarinin tam olarak çözmek için var olduğu problem.
 | | Değer |
 |---|---|
 | Radyo | ESP32-S3 dahili (802.11 b/g/n + BLE 5) |
-| Anten | **U.FL konnektör + harici anten** — ESP32-S3-WROOM-**1U** modül varyantı |
+| Anten | **U.FL → kasa dışı anten** (pigtail / SMA) · 🟢 D-03 · modül `-1U` |
 | **Varsayılan durum** | **KAPALI** — talep üzerine açılır · D-65 |
 
-**PCB anten neden elenmiş:** NeoPLC metal veya metalize kutu içinde, karavanda
-kapalı bir hacme monte edilecek. PCB anten bu ortamda çalışmaz. ESP32 modül
-varyantı seçimi (`-1` PCB anten vs `-1U` U.FL) geri dönülemez bir kart
-kararıdır — baştan doğru seçilmeli.
+**Standart:** metal/metalize kasa + karavan gövdesi. PCB anten (`-1`) ölür.
+U.FL host blade'de; kablo kasadaki SMA'ya. RP-SMA doğrudan PCB'ye yok —
+blade çıkarılınca kablo kalır.
 
-Kullanım: konfigürasyon web UI'ı, OTA, Modbus TCP erişimi.
+Kullanım: konfigürasyon web UI'ı, OTA, **Host API** (D-78).
 
 ### 3.1 WiFi neden varsayılan kapalı
 
@@ -179,21 +178,21 @@ yani **WiFi'dan pahalıdır.** Enerjiyi WiFi'dan kısıp ekrana harcamak net kay
 ### 3.2 Uyandırma mekanizması
 
 ```
-Varsayılan              :  WiFi radyosu kapalı
-Kullanıcı butona basar  →  AP 10 dakika açık  →  otomatik kapanır
+Varsayılan (S1/S2)      :  WiFi kapalı, BLE advertising açık (~1–3 mW) · D-67
+Telefon yaklaşır        →  WiFi AP açılır (süre konfigüre)
+Kullanıcı butona basar  →  aynı AP, 10 dk (D-65 — yedek)
+S3 (anahtar OFF)        :  BLE kapalı — depo bütçesi
 ```
 
 Süre ve davranış konfigüre edilebilir olmalı — "sürekli açık" seçeneği de
 sunulmalı; enerji bedelini kullanıcı görerek seçsin.
 
 Buton ön panelde, host'un RTC GPIO'suna bağlı — S2/S3'ten de uyandırabilmeli
-([10 §9.2](10-enerji-butcesi.md#92-uyandırma-kaynakları)).
+([10 §9.2](10-enerji-butcesi.md#92-uyandırma-kaynakları)). BLE S3'ü **uyandırmaz**;
+S3 yalnız anahtar ON veya şarj/şebeke (D-44).
 
-**Değerlendirilecek alternatif · D-67:** BLE ile butonsuz uyandırma. ESP32-S3
-light sleep'te 1 s aralıkla BLE advertising ~1–3 mW çekiyor — S1 bütçesindeki
-etkisi ihmal edilebilir. Kullanıcı telefonla yaklaşınca cihaz kendiliğinden
-WiFi'ı açabilir. Butona basmadan çalışan bir UX, neredeyse bedava.
-Uygulanabilirliği firmware aşamasında doğrulanacak.
+**BLE v1 · D-67.** Ekstra anten yok — WiFi ile aynı U.FL (D-03). Kod firmware
+oturumunda; radyo ve anten donanımda hazır.
 
 ---
 
@@ -202,18 +201,15 @@ Uygulanabilirliği firmware aşamasında doğrulanacak.
 | | Değer |
 |---|---|
 | Topoloji | 2 tel yarım dupleks |
-| İzolasyon | **İzole** — transceiver + izole DC-DC · 🟡 D-07 |
+| İzolasyon | **İzole** — transceiver + izole DC-DC · 🟢 D-07 |
 | Klemens | A / B / GND |
 | Sonlandırma | DIP ile seçilebilir 120Ω |
 | Bias | Fail-safe bias direnç çifti |
 | Protokol | Modbus RTU, host/node yazılımdan seçilir |
 
-**İzolasyon gerekçesi:** Ek maliyet ~$2–4. Buna karşılık izolasyonsuz RS-485,
-saha ground loop'larında endüstriyel kurulumların en yaygın arıza kaynağıdır.
-Endüstriyel güvenilirlik iddiasının en görünür sınandığı nokta burası.
-
-Maliyet baskısı olursa çıkarılabilir bir kalem — ama bilinçli olarak
-çıkarılmalı, unutularak değil.
+**İzolasyon zorunlu · D-07.** Karavan da olsa saha loop ve invertör/ESS
+kaçağı host'u yakar. İzolesiz PLC yok. ~$2–4 + 200 mW; S1/S2'de izole
+besleme güç kapılı.
 
 > ⚠️ Bu port, dahili backplane bus'ı ile **karıştırılmamalıdır**. İkisi de
 > RS-485 fiziksel katmanı kullanır ama tamamen ayrı hatlardır, ayrı
@@ -232,15 +228,16 @@ ESP32-S3-WROOM-1U-N16R8: octal PSRAM GPIO 33–37'yi tüketir, kullanılabilir
 | Backplane bus (TX, RX, DE) | 3 |
 | I²C slot expander (SDA, SCL) + INT# | 3 |
 | VIN gerilim ölçümü (ADC) | 1 |
-| Uyandırma girişleri (RTC GPIO) | 2 |
-| Fan PWM + tacho | 2 |
+| Host sıcaklık (ADC) | 1 |
+| Uyandırma: aç-kapa + şarj (RTC GPIO) | 2 |
 | Durum LED'leri | 4 |
-| Buton / config DIP | 2 |
-| **Ara toplam** | **20** |
-| **Yedek** | **~10** |
+| Wi-Fi buton / config DIP | 2 |
+| **Ara toplam** | **19** |
+| **Yedek** | **~11** |
 
-Ethernet'in düşmesiyle serbest kalan 6 GPIO, karavan bağlamının getirdiği yeni
-gereksinimleri (batarya ölçümü, uyandırma, fan kontrolü) fazlasıyla karşılıyor.
+Ethernet'in düşmesiyle serbest kalan GPIO, karavan gereksinimlerini (batarya
+ölçümü, uyandırma, sıcaklık) karşılıyor. Fan PWM/tacho yok — pasif soğutma
+(D-57).
 
 Bütçenin rahat olmasının tek sebebi, **slot başına ayrık hatların MCU'ya
 çekilmemesidir.** Naif tasarım 32 GPIO isterdi; [06 §3](06-slot-yonetimi.md#3-host-tarafı-io-genişletme)'teki
@@ -251,31 +248,33 @@ UART2 = backplane bus.
 
 ---
 
-## 6. Modbus register haritası
+## 6. Bilgi modeli ve host API
 
-Dış SCADA'nın düz ve öngörülebilir bir adres uzayı görmesi entegratör deneyimi
-için kritik. · 🟡 D-27
+### Karar: JSON şema + host API proxy · 🟢 D-78
+
+Native sözleşme **düz Modbus ızgarası değil.** Host ve node aynı **JSON
+modeller** üzerinden konuşur: tip güvenli, versiyonlu, akıllı req/res.
+Şema ayrıntısı firmware oturumunda kilitlenir — burada katmanlar kilit.
 
 ```
-0x0000 – 0x00FF    Sistem
-                     0x0000  Firmware versiyonu
-                     0x0002  Slot doluluk haritası (bit N = slot N dolu)
-                     0x0003  Slot hata haritası
-                     0x0004  Sistem durum bayrakları
-                     0x0010  Tarama süresi (µs)
-                     0x0012  Hata sayaçları (CRC, timeout)
-                     0x0020  Güç bütçesi: tahsis / kullanım
-
-0x1000 + N×0x100   Slot N proses imajı   (N = 0..7)
-     +0x00 .. 0x3F   Girişler                      (read)
-     +0x40 .. 0x7F   Çıkışlar                      (read/write)
-     +0x80 .. 0xBF   Durum / diagnostik            (read)
-     +0xC0 .. 0xFF   Node descriptor              (read)
+İstemci  ──JSON / HTTP (veya eşdeğeri)──►  Host API
+                                              │  proxy + aggregate
+                                              │  model ↔ kompakt payload
+Node     ◄── D-30 çerçeve (FUNC+PAYLOAD) ─────┘
 ```
 
-Slot başına sabit 0x100'lük blok, node tipi ne olursa olsun adres hesabını
-sabit tutuyor: `slot_taban = 0x1000 + slot_no × 0x100`. Entegratör tek formülle
-çalışıyor.
+| Katman | Ne kilitli | Ne firmware'de |
+|--------|------------|----------------|
+| **Model** | JSON Schema, req/res, node tipi = bir model ailesi | Alanlar, versiyon, hata kodları |
+| **Host API** | Dış dünya host'a konuşur; host node'lara **proxy** | REST / WS / auth / OpenAPI |
+| **Tel (backplane)** | D-30 ikili, max 70 byte, polling (D-33) | Payload codec (CBOR vb.) |
+| **Modbus** | Native değil. SCADA gerekirse host **adapter** üretir | Register projeksiyonu |
+
+**Telde ham JSON yok.** 64 byte payload + STOP node + 20 Hz tarama buna sığmaz.
+Model JSON; bus kompakt. 2U = **tek** model örneği (sol elektrik, D-16).
+
+~~D-27~~ (0x1000 + N×0x100 ızgara) **kilitlenmedi** — entegratör adresi değil,
+host API kaynağıdır.
 
 ---
 
@@ -331,7 +330,7 @@ değerlendirilecek.
 ### 7.4 Kazançlar
 
 - Host da node gibi **servis edilebilir ve değiştirilebilir**
-- Aynı kızak, ön panel ve mandal tooling'i — tek mekanik tasarım
+- Aynı kızak, ön panel ve kapalı vida tooling'i — tek mekanik tasarım
 - Host kendi hava kanalını alıyor ([04 §6](04-backplane-mekanik.md#6-hava-akışı-ve-termal))
 - Şasi 65 mm daralıyor
 

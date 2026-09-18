@@ -14,9 +14,7 @@ kayıt altına alır ve mevcut mimari kararlarla çakışmalarını işaretler.
 
 Draft **Host / Node** kullanıyor; mimari dokümanlar **Host / Node**.
 
-> **🟡 D-56 — Terminoloji birleştirilmeli.** Draft senin kendi ürün dilin
-> olduğu için Host/Node'a geçmeyi öneriyorum. Onaylarsan tüm dokümanlarda
-> toplu değiştiririm.
+> **🟢 D-56 — Host / Node kilitli.** Tüm dokümanlarda uygulandı.
 
 ### 1.2 Host ölçüleri
 
@@ -68,14 +66,14 @@ Mate kademesi: **Uzun pin = GND · Orta pin = Power · Kısa pin = Signal** (3 k
 |---|------|---------------|----------------|---------------|
 | 1 | Slot adımı | **17.50 mm** | 22.50 mm | **Draft kazanıyor** — §3.1 |
 | 2 | Dahili haberleşme | **I²C** (SDA/SCL/INT) | RS-485 diferansiyel | **Mimari kazanıyor** — §3.2 |
-| 3 | Besleme girişi | 24V DC | 12–48V | **Brief kazanıyor** (sonraki karar) |
+| 3 | Besleme girişi | 24V DC | **12–48V · D-69** | **Mimari / ESS** — 48 V yeni ESS, 12 V leisure |
 | 4 | Backplane rail | 24V + 5V + 3.3V | **Sadece 5V** | **Mimari kazandı** — tek ray, D-08 |
 | 5 | Slot adresi | 3 bit (ID0–2) | **Adres pini yok** | **İkisi de elendi** — host adres atıyor, D-17 |
 | 6 | SYNC hattı | Yok | **Broadcast çerçeve** | **Draft haklıydı** — pin gerekmiyor, D-21 |
 | 7 | Node derinliği | 110 mm | 90 mm (varsayım) | **Draft kazanıyor** — gerçek ölçü |
 | 8 | Node yüksekliği | 80 mm | 100 mm (varsayım) | **Draft kazanıyor** — gerçek ölçü |
-| 9 | Mekanik kilit | **Var** | D-45'te sonradan eklendi | **Draft kazanıyor** — zaten çözülmüş |
-| 10 | Soğutma | **Fan** | Doğal konveksiyon | **Draft kazanıyor** — §3.5, benim hatam |
+| 9 | Mekanik kilit | Mandal | **Kapalı vida · D-45** | **Mimari** — hot-plug durur, fretting için vida |
+| 10 | Soğutma | **Fan** | **Pasif · D-57** | **Mimari kazandı** — fan yok; Al kızak ısı yolu |
 | 11 | Terminoloji | Host / Node | Host / Node | Draft — D-56 |
 
 ---
@@ -170,55 +168,21 @@ ileride iki host'un zincirlenmesi.
 **Pinout geri dönülemez olduğu için 4. bit şimdi alınmalı**
 ([06 §1](06-slot-yonetimi.md#1-slot-adresleme)).
 
-### 3.5 Soğutma: fan — ve benim termal hatam
+### 3.5 Soğutma: pasif — fan elendi · D-57
 
-**Draft'ın arka panelinde fan var. Haklı, ve ben yanılmışım.**
+Draft'ın arka panelinde fan vardı. Paketlenmiş 1U'da yalnız yan yüzeye
+güvenen doğal konveksiyon hesabı gerçekten yetmiyor (ΔT ~41 °C @ 1.5 W).
+**Ama cevap fan değil.** Fan gürültü, toz, arıza ve enerji; karavan cihazında
+sürekli sorun.
 
-[11 §6.1](11-cikis-node-topolojileri.md#61-termal-sınır-kanal-sayısını-belirleyen-şey)'deki
-termal hesabım, node'un **serbest havada tek başına** durduğunu varsayıyordu.
-Gerçekte 8 node yan yana paketlenmiş — **yan yüzeyler komşu node'a bakıyor,
-havaya değil.**
+Isı **Al kızak + şasi iletimi** ile çıkar. Konveksiyon bacası yardımcı,
+birincil yol değil. Yüksek akımlı node sığmazsa 2U / daha az kanal / metal
+ön panel (D-54) — fan geri gelmez.
 
-```
-YANLIŞ (serbest hava, 17.5 × 80 × 110):
-   Yüzey = 2(80×110) + 2(17.5×110) + 2(17.5×80)  =  0.0243 m²
-   1.5 W için ΔT ≈ 8.8 °C                            ✓ rahat
+Ayrıntı: [04 §6](04-backplane-mekanik.md#6-hava-akışı-ve-termal).
 
-DOĞRU (pakette, sadece ön panel + üst/alt kenar serbest):
-   Etkin yüzey ≈ (17.5×80) + 2(17.5×110)          =  0.0053 m²
-   1.5 W için ΔT ≈ 41 °C   →  60 °C ortamda 101 °C    ✗
-```
-
-**5× fark.** Doğal konveksiyon paketlenmiş blade mimarisinde yeterli değil —
-draft'ın fan kararı doğru.
-
-#### Fan'ın enerji bütçesine etkisi — yeni çakışma
-
-```
-40 mm fan tipik tüketim        0.5 – 1.5 W
-Sürekli çalışırsa (24 h)       12 – 36 Wh/gün
-Tüm sistemin bütçesi           5.5 Wh/gün    ([10 §6.1](10-enerji-butcesi.md#61-gerçekçi-kullanım-günü))
-```
-
-**Fan tek başına sistemin 2–6 katı tüketebilir.** Bu, K4 ile doğrudan çatışıyor.
-
-**🟡 D-57 — Fan termostatik kontrollü olmalı.**
-
-```
-Fan çalışma koşulu:  iç sıcaklık > eşik  VE  yük mevcut
-S1 / S2 / S3'te     :  fan kapalı
-```
-
-Bu doğal bir uyum sağlıyor: ısı yalnızca **çıkışlar yük sürerken** oluşuyor
-([11 §6](11-cikis-node-topolojileri.md#6-iletim-kaybı-ve-termal)). Latching
-röle ve MOSFET'in tutma gücü sıfıra yakın olduğu için, yük yokken ısı da yok,
-fan da gerekmiyor.
-
-Gereksinimler:
-- Host'ta sıcaklık sensörü (en az 1, tercihen backplane ortası)
-- Fan PWM kontrolü (ESP32 GPIO)
-- Fan arıza tespiti (tacho girişi) — fan durursa yükler kısıtlanmalı
-- **Fan host üzerinde, VIN'den beslenmeli** — backplane +5V rayından değil
+Eski fan enerji çatışması (0.5–1.5 W = sistemin katları) bu kararla kapanır:
+bütçede fan kalemi yok.
 
 ### 3.6 Mekanik paradigma: kutu-içinde-kutu → gerçek blade
 
@@ -238,11 +202,10 @@ Dört gerekçe — ayrıntı [04 §1](04-backplane-mekanik.md#1-mekanik-mimari-b
 | 3 | **Titreşim (K5)** — kızak PCB'yi 110 mm boyunca iki kenarından destekliyor; kutu içinde 4 vidayla tutulan PCB'nin rezonans frekansı çok daha düşük |
 | 4 | **Hizalama** — kart kenarı konnektörünün ihtiyacı olan giriş açısı ve yükseklik garantisini kızak veriyor |
 
-Draft'ın **kilit mandalı, kızak rayı ve önden tak-kilitle** yaklaşımı aynen
-korunuyor — sadece node'un etrafındaki kutu kalkıyor.
+Draft'ın **kızak rayı ve önden tak** yaklaşımı duruyor; kilit **vida (D-45)**,
+mandal değil. Node etrafındaki kutu kalkıyor.
 
-**Fan ihtiyacı da düşüyor:** blade'de ısı doğrudan havaya geçtiği için gereken
-debi 1.6 CFM'e iniyor (40 mm fanın %30 devri, ~0.2 W).
+**Fan yok · D-57.** Blade ısıyı Al kızağa verir; debi hesabı ürün kararı değil.
 [04 §6.2](04-backplane-mekanik.md#62-gereken-hava-debisi-hesap)
 
 ---
@@ -254,7 +217,7 @@ Bunlar tartışmasız — draft zaten doğru çözmüş:
 | Kalem | Not |
 |-------|-----|
 | **3 kademeli pin stagger** | GND uzun → Power orta → Signal kısa. [04 §5.1](04-backplane-mekanik.md#51-mate-sırası) ile birebir uyumlu. Draft'ta PRESENT/DETECT için 4. kademe yok — eklenmesi öneriliyor |
-| **Mekanik kilit mandalı** | K5 (titreşim) için zorunlu, draft'ta zaten var |
+| **Kapalı vida (D-45)** | K5. Draft mandaldı; ürün vida — hot-plug sök-tak |
 | **Kızak rayı + yan kılavuz** | Önden tak-kilitle-kullan; servis gereksinimini karşılıyor |
 | **DETECT / RST hatları** | Mimarideki PRESENT# / MOD_RST# ile birebir örtüşüyor. Draft'taki FAULT ve BST hatları ise sonradan elendi (D-20, D-19) — draft bu ikisinde fazla pin öngörmüş |
 | **Node ölçüleri** | 17.5 / 35 × 80 × 110 mm — varsayım yerine gerçek ölçü |
@@ -269,7 +232,7 @@ Bunlar tartışmasız — draft zaten doğru çözmüş:
 | [04](04-backplane-mekanik.md) | ✅ **Baştan yazıldı** — blade mimarisi, 17.5 mm, kızak sistemi, hava akışı |
 | [09](09-node-aileleri.md) | Klemens/kanal sayısı 17.5 mm'ye göre; iki sıra klemens |
 | [11](11-cikis-node-topolojileri.md) | **Termal hesap düzeltilmeli** (§3.5); kanal sayıları revize |
-| [10](10-enerji-butcesi.md) | Fan enerji kalemi eklenmeli (D-57) |
+| [10](10-enerji-butcesi.md) | Fan kalemi yok (D-57 pasif) |
 | [03](03-guc-mimarisi.md) | ✅ Fan beslemesi VIN'den; **3.3V rail dağıtılmıyor, pin de rezerve edilmiyor** (D-59) |
 | Tümü | Terminoloji Host/Node (D-56 onayına bağlı) |
 

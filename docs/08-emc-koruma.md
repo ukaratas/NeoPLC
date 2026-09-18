@@ -113,11 +113,13 @@ maliyeti yok, ileride B gerekirse yeniden tasarım olmaktan çıkarıyor.
 
 ## 5. Katman sayısı kararı
 
-### 5.1 Node'lar: 2 katman
+### 5.1 Node'lar: 2 katman · D-36
 
-Tereddütsüz. Düşük hızlı, düşük güçlü, basit kartlar. Kısıt K3 tam olarak burada
-karşılanıyor — **ve node'lar sekiz kez üretileceği için tasarrufun asıl etkili
-olduğu yer de burası.**
+Tüm node, **istisnasız 2 katman.** 4 katman yok. Sığmazsa **2U** (D-61, max
+form D-75) veya **modül bölünür** (ör. CAN | Ethernet iki 1U) — katman artmaz.
+
+Sekiz kez üretilir; tasarruf burada. COM magjack: W5500 ≤ 25 mm (lumped
+100BASE-TX) 2 katmanda yeter; yetmezse COM 2U veya iki SKU, 4 katman değil.
 
 ### 5.2 Host: Ethernet hesabı (tarihsel)
 
@@ -160,18 +162,18 @@ sonra ikisi zayıfladı:
 
 | # | Gerekçe | İlk durum | Şimdiki durum |
 |---|---------|-----------|---------------|
-| 1 | **Termal** | 15W → 2 katmanda 140°C junction ✗ | **1.5A/7.5W → 100°C, 25°C marj** ✓ |
+| 1 | **Termal** | 15W → 2 katmanda 140°C junction ✗ | **2.0 A / 10 W → ~114 °C, 11 °C marj** ✓ |
 | 2 | **EMC** | Sertifikasyon riski | **Sertifikasyon yok** (D-06) — düştü |
 | 3 | **Ethernet** | 25 mm yerleşim kısıtı | **Ethernet host'tan çıkarıldı** (D-47) — düştü |
 
 **Üç gerekçe de ortadan kalktı.** Termal hesap güncel değerlerle:
 
 ```
-Ana buck 1.5A / 7.5W  ·  verim ~%87  →  kayıp ≈ 1.0 W
+Ana buck 2.0 A / 10 W  ·  verim ~%86  →  kayıp ≈ 1.36 W
 
 2 katman, geniş döküm  θ_ja ≈ 40 °C/W
-    ΔT = 40 °C   →  junction ≈ 100 °C @ 60 °C ortam
-    125 °C sınırına  25 °C marj                        ✓
+    ΔT = 54 °C   →  junction ≈ 114 °C @ 60 °C ortam
+    125 °C sınırına  11 °C marj                       ✓
 
 4 katman + termal via  θ_ja ≈ 25 °C/W
     ΔT = 25 °C   →  junction ≈  85 °C                  ✓✓
@@ -186,8 +188,8 @@ Brief'in kuralı: *"Yüksek yoğunluk, sinyal bütünlüğü veya EMC gereksinim
 nedeniyle zorunlu olmadıkça 4 katmana geçilmemelidir."*
 
 **Artık zorlayan bir gerekçe kalmadı.** Üçü de bağımsız kararlarla çözüldü:
-sertifikasyon hedefi kalktı (D-06), Ethernet host'tan çıktı (D-47), güç bütçesi
-düştü (D-31). **2 katman uygulanıyor.**
+sertifikasyon hedefi kalktı (D-06), Ethernet host'tan çıktı (D-47), buck
+**2.0 A / 10 W** (D-31) 2 katmanda durur. 3 A / 15 W yakardı.
 
 > İlginç olan, bu sonucun katman tartışmasından değil **enerji bütçesi
 > çalışmasından** gelmesi. Tüketimi düşürmek için yapılan her şey aynı zamanda
@@ -197,7 +199,7 @@ düştü (D-31). **2 katman uygulanıyor.**
 
 | Koşul | Eşik |
 |-------|------|
-| Ana buck tasarım noktası | > 2 A olursa termal marj 11 °C'ye iner |
+| Ana buck tasarım noktası | **> 2.0 A sürekli** → 2 katman yeniden |
 | Ethernet host'a geri eklenirse | 25 mm yerleşim kısıtı geri gelir |
 | EMC sertifikasyonu hedeflenirse | Kesintisiz ground plane ihtiyacı doğar |
 | Ortam sıcaklığı > 60 °C | Marj tükenir |

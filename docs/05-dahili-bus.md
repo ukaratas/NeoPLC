@@ -1,7 +1,7 @@
 # 05 — Dahili Bus
 
-Host ile node'lar arasındaki haberleşme. Hedef: **düşük sınıf MCU'da rahat
-çalışan, kolay debug edilen, uzun vadede sürdürülebilir** bir bus.
+Host ile node'lar arasındaki haberleşme. **Kapalı sözleşme** — üçüncü taraf
+kart basıp takmaz. Katman, hız, çerçeve predefined; saha sürprizi yok.
 
 ---
 
@@ -13,7 +13,7 @@ kilitlenmemeli.
 ### 1.1 TTL UART neden yetmiyor
 
 Ortam: 8U backplane, 9 düğüm (host + 8 node), her node'da kendi anahtarlamalı
-regülatörü, hot-plug ihtimali, endüstriyel EMI.
+regülatörü, **hot-plug (D-24)**, endüstriyel EMI.
 
 | Sorun | Açıklama |
 |-------|----------|
@@ -28,7 +28,7 @@ regülatörü, hot-plug ihtimali, endüstriyel EMI.
 |---------|--------|
 | **±7V common-mode reddi** | Slotlar arası ground bounce'a **tamamen bağışık**. Asıl kazanç bu — §1.1'in belirleyici sorununu doğrudan çözüyor. |
 | Multi-drop için tasarlanmış | 32+ düğüm, fail-safe bias ile tanımlı idle durumu |
-| Hot-plug toleranslı varyantlar | "Glitch-free power-up/down" transceiver'lar standart |
+| Hot-plug toleranslı varyantlar | **Zorunlu (D-24 / D-49)** — "glitch-free power-up/down" |
 | Slew-rate sınırlı varyantlar | EMI belirgin şekilde düşüyor |
 
 ### 1.3 Maliyet ve güç itirazının gerçek büyüklüğü
@@ -37,7 +37,7 @@ Brief "düşük güç tüketimli" diyor. İtirazı sayıyla test edelim:
 
 ```
 Transceiver birim fiyatı (LCSC sınıfı)  ≈  $0.15 – 0.35
-Alıcı sürekli açık tüketimi              ≈  0.5 mA @ 3.3V  =  1.65 mW
+Alıcı sürekli açık tüketimi              ≤  0.5 mA @ 3.3V  =  1.65 mW   (D-49)
 8 node toplam                           ≈  13 mW
 ```
 
@@ -46,10 +46,9 @@ Karşılaştırma: tek bir Cortex-M0+ MCU 64MHz'de ~10 mA @3.3V = **33 mW.**
 **Sonuç: 8 transceiver'ın toplam tüketimi, tek bir node MCU'sunun yarısı kadar.
 Düşük güç argümanı TTL lehine çalışmıyor.**
 
-> Not: Transceiver'ın shutdown moduna alınması düşünülemez — node'un host'u
-> her an duyabilmesi gerekiyor. Alıcı sürekli açık kalmalı.
+> Not · D-49: Shutdown yok. Alıcı sürekli açık, Iq ≤ 0.5 mA, glitch-free.
 
-### Karar: RS-485 diferansiyel
+### Karar: RS-485 diferansiyel · 🟢 D-10
 
 Yazılım protokolü UART kadar basit kalıyor ([§6](#6-çerçeve-formatı)); sadece
 fiziksel taşıma katmanı sağlamlaştırılıyor. Brief'in istediği ayrım tam olarak
@@ -65,9 +64,8 @@ Dürüstlük gereği değerlendirildi:
 | Donanımsal ACK ve hata sayaçları | Klasik CAN'de 8 byte çerçeve sınırı |
 | Polling'siz event-driven bildirim | Protokol ağırlığı — "UART kadar basit" hedefiyle çelişiyor |
 
-**Karar: RS-485.** CAN, ileride çok-host veya gerçek event-driven ihtiyacı
-doğarsa yükseltme yolu olarak korunuyor — **backplane'deki A/B çifti CAN'e de
-uygun, sadece transceiver değişir.** Pinout bu yüzden geleceğe dayanıklı.
+**Karar: RS-485 · D-10.** CAN yükseltme v1'de yok — kapalı sözleşme, A/B çifti
+RS-485. Transceiver değişimi spekülasyon, pinout gerekçesi değil.
 
 Ayrıca event-driven ihtiyacı pratikte zayıf: node kendi gerçek zamanlı
 korumasını yapıyor, host'un öğrenmesi 100 ms gecikebilir — CAN'in bu
@@ -88,12 +86,10 @@ avantajının bu uygulamada karşılığı yok.
 200 mm'lik bir bus için turnaround gerçek bir problem değil: hem ESP32 hem STM32
 USART'ları **donanımsal DE kontrolü** sunuyor, yazılım gecikmesi devre dışı.
 
-### Karar: yarım dupleks 2 tel
+### Karar: yarım dupleks 2 tel · 🟢 D-11
 
-**Ancak pinout'ta tam dupleks için 2 pin rezerve ediliyor**
-([04 §5](04-backplane-mekanik.md#5-pinout), pin 15–16). Pinout geri dönülemez
-olduğu için bu rezervasyon şimdi yapılmalı — maliyeti sıfır, atlanmasının
-maliyeti tüm node ailesi.
+12 pinli pinout'ta tam dupleks yeri yok (D-32). RSVD pinler başka iş için.
+Turnaround: ESP32 ve STM32 donanımsal DE.
 
 ---
 
@@ -111,7 +107,7 @@ Lumped devre kriteri                 :  t_prop < t_r / 6
                                         1.33 ns  <<  33 – 67 ns   ✓ 25–50× marj
 ```
 
-### Karar: yansıma sonlandırması yok
+### Karar: yansıma sonlandırması yok, fail-safe bias var · 🟢 D-13
 
 Hat elektriksel olarak **toplu (lumped) devre** — yansıma diye bir olgu yok.
 
@@ -167,23 +163,16 @@ Bir node işlemi (EXCHANGE):
 > kadar az uyanık kalıyor.** 500 kbaud'da bir işlem 600 µs; 115200'de 2.6 ms.
 > 10 Hz taramada bu %0.6 vs %2.6 duty cycle demek — **4× enerji farkı.**
 
-### Karar: 500 kbaud
+### Karar: **500 kbaud, v1 sabit** · 🟢 D-12
 
-**Hız için değil, denge için seçildi.** 115200 baud bile 20 ms tarama ile
-yeterdi. 500k'nın seçilme sebebi:
-
-- Slew-rate sınırlı transceiver'larla uyumlu (EMI düşük kalıyor)
-- Tarama marjı, ESP32'nin WiFi kaynaklı jitter'ı için tampon oluşturuyor
-  ([02 §1](02-host-mimarisi.md#13-bugün-geçerli-gerekçeler-d-01))
-- Firmware güncellemesinde blok transferi makul sürede bitiyor
-
-Baud hızı konfigüre edilebilir olacak — saha koşullarına göre düşürülebilmeli.
+Hız için değil, uyanık kalma süresi için. Laboratuvar/EMI'de düşürülebilir;
+saha ürünü 500 k. Konfigüre menü yok — kapalı sözleşme.
 
 ---
 
 ## 5. Trafik modeli
 
-### Karar: katı host-node + donanım event hattı
+### Karar: katı host-node polling · 🟢 D-33
 
 | Kural | Sonuç |
 |-------|-------|
@@ -207,7 +196,7 @@ ortadan kalktı. Tam gerekçe:
 
 ## 6. Çerçeve formatı
 
-### Karar
+### Karar: SYNC+ADDR+FUNC+LEN+PAYLOAD+CRC16, max 70 byte · 🟢 D-30
 
 ```
 ┌────────┬──────┬──────┬─────┬─────────────────┬────────┐
@@ -222,9 +211,12 @@ ortadan kalktı. Tam gerekçe:
 | SYNC | 0x55 — alternating bit paterni, senkronizasyon ve baud doğrulama için ideal |
 | ADDR | bit7 = yön (0 = host isteği, 1 = node yanıtı) · bit6..0 = adres |
 | | 0x00 = broadcast · **0x7E = adressiz node** (enumerasyon) · 0x7F = rezerve |
-| FUNC | İşlem kodu (§7) |
+| FUNC | İşlem kodu (§7) — JSON modelin kompakt karşılığı (D-78) |
 | LEN | Payload uzunluğu |
 | CRC16 | CRC-16/MODBUS — kanıtlanmış, tablosuz da hesaplanabilir |
+
+Payload **JSON metni değil** (D-78): host modeli JSON tutar, tele D-30 sığdırır.
+Codec firmware'de.
 
 ### 6.1 Neden Modbus RTU'nun sessizlik çerçevelemesi kullanılmıyor
 
@@ -345,9 +337,8 @@ kodu** — SYNC pini pinout'tan kaldırıldı
 | **Latching röle** | **Node'un kendi işlemi sırasında** | Bobin darbeleri eşzamanlı olmamalı — host'un sıralı taraması doğal olarak ~600 µs arayla dağıtıyor |
 | Girişler (tüm tipler) | Broadcast SYNC | Örnekleme skew'i ortadan kalkıyor |
 
-Röleleri SYNC'e bağlamak, 8 node'un bobinini aynı anda ateşleyip rayda 560 mA
-sıçrama yaratırdı. Sıralı uygulama ile rafta aynı anda **tek bobin** enerjili
-oluyor. Ayrıntı: [03 §5.4](03-guc-mimarisi.md#54-karar-sıralama-mimaride-kapasitör-kenarda)
+Röleleri SYNC'e bağlamak 8 × 800 mA'i üst üste bindirirdi. Sıralı uygulamada
+rafta **tek bobin**. Ayrıntı: [03 §5](03-guc-mimarisi.md#5-anlık-akım--röle-darbeleri)
 
 ### 9.2 Neden hâlâ değerli
 

@@ -139,71 +139,61 @@ Bu bir tercih değil, fiziksel zorunluluk:
 | **Klemens** | Farklı akım sınıfı, farklı adım (7.5 / 10 mm), yanlış bağlantıyı önlemek için farklı renk ve kodlama |
 | **Arıza modu** | Şebeke tarafı arızası SELV tarafına geçmemeli |
 
-**AC node'ları 2U.** Karavanda AC zaten yalnızca şebeke bağlıyken veya inverter
-çalışırken var — kanal sayısı ihtiyacı DC'ye göre çok daha az.
+**AC node'ları 2U.** Şebeke PCB adası klipsli bariyer (D-64); kablo IP20 fiş
+(D-38). Tam kutu yok.
+
+### 4.1 Sıfır geçişi (zero-cross) · D-55
+
+**Sıfır geçişi:** 230 V sinüs 0 V'tan geçerken röleyi çekmek. O anda akım ≈ 0,
+kontak kıvılcımı küçük, ömür uzun.
+
+Karavan AC çoğu zaman **inverter** (kare / MSW) — düzgün sıfır yok; yanlış
+anda kesmek daha kötü.
+
+**Kural:** sinüs (şebeke / iyi inverter) → sıfırda kes. İnverter / bozuk dalga
+algılanırsa **rastgele + RC snubber.** Snubber her zaman var. Opto, 230 V
+adasında (D-64).
 
 ---
 
-## 5. Önerilen node ailesi
+## 5. Katalog (çıkış) · D-72
+
+Ayrıntı ve analog/COM: [09 §5](09-node-aileleri.md#5-node-katalogu).
+
+**Tek teknoloji / node.** MOSFET DO **8 × 8 A, 1U** — 8 A latching yok.
+PWM aynı MOSFET. Güç/AC **1U veya 2U, 4U yok.**
 
 ### 5.1 DC çıkış
 
-**Tasarım kuralı: her node tek teknoloji, 4 kanal.** Karışık node yok — daha
-basit, daha modüler, stok ve üretim yönetimi kolay · D-52.
+| SKU | Form | Kanal | Akım | Teknoloji |
+|-----|------|-------|------|-----------|
+| **DO-M-8A-8** | 1U | **8** | 8 A (eşzamanlı tavan ~32 A) | High-side MOSFET + PWM |
+| **DC-L-16A-4** | 1U* | 4 | 16 A | Latching |
+| **DC-H-32A-2** | 2U | 2 | 32 A | Hibrit |
+| **DC-H-64A-2** | 2U | 2 | 64 A | Hibrit — 48 V ark |
 
-| Node | Form | Kanal | Akım | Teknoloji | Hedef yük |
-|-------|------|-------|------|-----------|-----------|
-| **DO-DC-8A-L** | 1U | **4** | 8 A | **Latching röle** | Buzdolabı, ısıtıcı, sabit aydınlatma — **saatlerce açık kalanlar** |
-| **DO-DC-8A-M** | 1U | **4** | 8 A | **MOSFET** (akıllı high-side) | Dimmer'lı aydınlatma, fan hızı, pompa soft-start — **PWM gerekenler** |
-| **DO-DC-32A-H** | 2U | 2 | 32 A | **Hibrit** | Inverter beslemesi, su ısıtıcı, klima |
-| **DO-DC-64A-H** | 2U | 1 | 64 A | **Hibrit / kontaktör** | Ana batarya kesici, vinç, şarj hattı |
-
-**Ayrım kuralı:** Yük PWM/kısma gerektiriyorsa MOSFET, gerektirmiyorsa latching.
-Bu, senin "8A / 32A / 64A MOSFET" önerinden farkım: **8A sınıfının çoğunluğu
-latching olmalı**, çünkü karavanda bu sınıftaki yükler saatlerce açık kalıyor ve
-tam da §1'deki 0.3 W'lık charge pump maliyetinin biriktiği yer burası.
+\* 1U hedef; röle >14.4 mm → 2U, kanal 4 (D-61).
 
 ### 5.2 AC çıkış
 
-| Node | Form | Kanal | Akım | Teknoloji | Not |
-|-------|------|-------|------|-----------|-----|
-| **DO-AC-16A-L** | 2U | **3** | 16 A | Latching röle | 16 A = standart şebeke girişi sınıfı |
-| **DO-AC-32A-L** | 2U | 2 | 32 A | Latching röle | Yüksek güç / ana AC hat |
+AC **yalnız 2U** (D-51). 8 × 16 A tek gövdede 4U olurdu → **4 kanal.**
 
-AC'de latching tartışmasız doğru: sıfır tutma gücü **ve** AC'de ark kesme zaten
-kolay (sıfır geçişi var).
+| SKU | Form | Kanal | Akım |
+|-----|------|-------|------|
+| **AC-L-16A-4** | 2U | 4 | 16 A latching |
+| **AC-L-32A-2** | 2U | 2 | 32 A latching |
 
-### 5.3 Klemens yerleşimi kontrolü
+### 5.3 Klemens · D-38
 
-Slot adımı 17.5 mm ([12 §3.1](12-mekanik-referans-rev01.md#31-slot-adımı-175-mm-kabul-edilmeli))
-→ 1U ön panel 17.5 mm, 2U ön panel **35 mm**.
+Pluggable yaylı. Adım kablo sınıfına göre — hepsi 3.5 mm değil.
 
 ```
-1U — DC 8A, 4 kanal
-    3.5 mm push-in  →  17.5 / 3.5 = 5 kutup
-    4 çıkış + 1 ortak dönüş = 5 kutup            ✓ tam oturuyor
-
-2U — DC 32A, 2 kanal
-    2 × (IN + OUT) = 4 kutup, 8.5 mm adım = 34 mm  ✓
-
-2U — DC 64A, 1 kanal
-    IN + OUT = 2 kutup, 12 mm adım = 24 mm         ✓
-
-2U — AC 16A, 3 kanal
-    3 × L + N = 4 kutup, 7.5 mm adım = 30 mm       ✓
-
-2U — AC 32A, 2 kanal
-    2 × L + N = 3 kutup, 10 mm adım = 30 mm        ✓
+Sinyal + 8 A DO  3.5 mm     5 kutup / 17.5 mm   (2.5 mm²; 4 mm² yok)
+16 A             5.08–6.35 mm
+32 A             7.5 mm, 6 mm²
+64 A             10–12 mm
+AC               7.5 / 10 mm
 ```
-
-> **4 kanal / 1U tam oturuyor** — 3.5 mm push-in klemensle 5 kutup tam 17.5 mm
-> ediyor. Slot adımının 17.5 mm'ye inmesi kanal sayısını 8'den 4'e düşürdü, ama
-> "her node tek teknoloji" kararıyla birlikte bu aslında daha temiz bir yapı:
-> **her node tek işi yapıyor.**
-
-> **AC'de kanal sayısı düştü.** 2U = 35 mm (45 değil), bu yüzden 16 A'de 4 değil
-> **3 kanal** sığıyor. Şebeke klemensleri tek sıra olmalı — iki sıra yüksek akım
-> için güvenli değil.
 
 ---
 
@@ -250,35 +240,33 @@ Doğal konveksiyon katsayısı ≈ 7 W/m²K:
 
 | Node | Kayıp | ΔT (paket) | İç sıcaklık @60°C |
 |-------|-------|------------|-------------------|
-| DO-DC-8A-L, 8 kanal | 1.5 W | 41 °C | **101 °C** ✗ |
+| DO-M-8A-8, 3 kanal 8 A (eşzamanlı) | ~1.5 W | 41 °C* | *yalnız hava; Al kızak şart |
 | DO-DC-32A-H, 2 kanal | 4.1 W | 110 °C | **170 °C** ✗✗ |
 
-**Sonuç: paketlenmiş blade mimarisinde doğal konveksiyon yetmiyor.**
+**Sonuç: paketlenmiş 1U'da yalnız havaya bakan yüzey yetmez.** Fan yok
+(D-57). Isı Al kızak/şasi ve (yüksek akımda) metal ön panel üzerinden çıkar.
+ΔT bu yola sığmayan node spec'te 2U olur veya kanal düşer — fan geri gelmez.
 
-### 6.2 Zorlamalı soğutma zorunlu
+### 6.2 Pasif soğutma — fan yok · D-57
 
-Çalışma draftının arka panelinde fan bulunması bu yüzden doğru bir karardı
-([12 §3.5](12-mekanik-referans-rev01.md#35-soğutma-fan-ve-benim-termal-hatam)).
+Zorlamalı hava ürün kararı değil. Termal, node dissipasyon tavanının ve
+şasi iletiminin işi.
 
-Fan ile kanal başına hava akışı sağlandığında etkin ısı transferi katsayısı
-20–40 W/m²K'ya çıkıyor — yukarıdaki ΔT değerleri 3–6 kat düşüyor.
+**Doğal uyum:** Latching ve MOSFET tutma gücü sıfıra yakın; yük yokken ısı yok.
+Yük varken ısı Al yola gitmek zorunda.
 
-**Ama fan enerji bütçesiyle çatışıyor** (0.5–1.5 W, sistemin 2–6 katı).
-Çözüm: termostatik kontrol · 🟡 D-57 —
-[12 §3.5](12-mekanik-referans-rev01.md#fanın-enerji-bütçesine-etkisi-yeni-çakışma).
+### 6.3 Isı yolu · D-54
 
-**Doğal uyum:** Isı yalnızca çıkışlar yük sürerken oluşuyor. Latching ve MOSFET
-tutma gücü sıfıra yakın olduğundan, yük yokken ısı da yok, fan da gerekmiyor.
-Fan sadece gerçekten gerektiğinde çalışıyor.
+**32 A / 64 A:** Al kızak (birincil) **+ metal ön panel** yayıcı. PCB bakır
+yetmez. 8 A MOSFET'te panel metal şart değil (kızak yeter).
 
-### 6.3 Ek termal önlemler
-
-| Önlem | Etki |
-|-------|------|
-| Alüminyum ray/kılavuz ısı yolu olarak kullanılması | Node'un ısısını host gövdesine aktarır — draft'taki hibrit yapı buna uygun |
-| Eşzamanlılık derecelendirmesi | "2 kanal 32 A, ancak aynı anda tek kanal tam yük" |
-| Güç node'larının fan akışına yakın slotlara yerleştirilmesi | Host firmware'i slot tipini bildiği için kullanıcıya öneri verebilir |
-| Node içi sıcaklık sensörü | Aşırı ısınmada kanalı kendisi kapatır — descriptor yetenek bayrağı |
+| Önlem | Rol |
+|-------|-----|
+| Al kızak → şasi | Birincil iletim (D-57, D-62) |
+| **Metal ön panel** | 32/64 A yayıcı · D-54 |
+| Eşzamanlılık derecesi | Spec'te yazılır |
+| Node NTC | Aşırı ısınmada kanal kesilir |
+| Kör kapak | Baca (D-63) |
 
 > Bu hesaplar kaba tahmindir; gerçek kutu geometrisi ve hava akışıyla CFD veya
 > prototip ölçümü ile doğrulanmalıdır.
@@ -300,49 +288,34 @@ dizi. Node MCU'sunda GPIO yakmıyor, maliyeti düşük.
 ### 7.2 Darbe yönetimi — kritik tasarım notu
 
 ```
-Bobin gücü ≈ 300 mW, darbe 10–30 ms → **5 V tarafından ~70 mA**
+Büyük latching (32/64 A) 1–3 W, 10–30 ms
+12/24 V bobin + boost %80 → **5 V tarafı ≤ 800 mA** (D-68)
 
-Bobin gerilimi serbest: 5 V bobin doğrudan sürülür, 12/24 V bobin gerekiyorsa
-node üzerinde küçük bir boost ya da gerilim katlayıcı ile üretilir (~$0.20–0.30).
-Bobin **gücü** sabit olduğu için 5 V tarafı akımı neredeyse değişmiyor
-([03 §5.1](03-guc-mimarisi.md#51-bobin-başına-5-v-tarafı-akımı)).
-
-4 kanal AYNI ANDA anahtarlanırsa:
-    4 × 70 mA  =  280 mA anlık
-    Slot +5V limiti       =  150 mA   ([03 §4](03-guc-mimarisi.md#4-güç-bütçesi))
+5 V bobin zorunlu değil. 4 kanal AYNI ANDA:
+    4 × 800 mA  =  3.2 A  →  3 A buck limiti aşılır
 ```
 
-Slot limitinin (150 mA) çok üstünde. Aynı anda ateşleme rail'de dip yaratır ve komşu slotları
-etkileyebilir.
+**Kural: röle darbeleri sıralanır; rafta aynı anda tek bobin.** ~2 ms node
+içi; tarama node'lar arası (~600 µs). SYNC ile röle yok. İlk PCB'de ölçüm:
+SKU 800 mA @5 V'u aşarsa ray büyümez.
 
-**Kural: röle darbeleri sıralanmalı (staggered), asla eşzamanlı ateşlenmemeli.**
-Node firmware'inin sorumluluğu. 2 ms arayla → 4 kanal 8 ms'de tamamlanır, tepe
-akım **70 mA**'de kalır.
+### 7.3 Durum geri okuma · D-53
 
-Bu bir optimizasyon değil **yapısal gereklilik**: eşzamanlı ateşlemeyi bulk
-kapasitörle karşılamak 66 mF gerektiriyor, yani mümkün değil
-([03 §5.3](03-guc-mimarisi.md#53-neden-bulk-kapasitör-bu-işi-çözemiyor)).
+**Tüm latching SKU: yardımcı kontak.** Gerilim ölçümü yok — yüksüz yanıltır;
+AC'de 230 V MCU'ya gelmez.
 
-**Node'lar arası sıralama:** Röle durum değişiklikleri broadcast SYNC ile değil,
-node'un kendi işlemi sırasında uygulanır — host'un sıralı tarama düzeni
-node'ları doğal olarak ~600 µs arayla dağıtıyor. Böylece rafta aynı anda tek
-bobin enerjilenmiş oluyor.
+Açılışta kör darbe yok. Aux okunur, yazılım kontağa uydurulur.
 
-Node üzerinde ~100 µF lokal kapasitör, bobin akımının **kenarını** (di/dt)
-karşılar — darbenin tamamını değil, onu ray besliyor.
+### 7.3.1 Glitch heal · D-77
 
-### 7.3 Durum geri okuma
+Anlık VIN/5 V git-gellerinde sistem **iyileşir**, kör kesmez.
 
-Latching röle **durumunu kaybetmez, ama yazılım kaybedebilir** — node reset
-olduğunda röle hâlâ eski konumunda.
+| Çıkış | Glitch (anahtar ON) | S3 (anahtar OFF) |
+|-------|---------------------|------------------|
+| **Latching** | Mıknatıs tutar. Aux gerçek. Host yazılımı aux'a hizalanır | Kontak durur. Kör reset yok |
+| **MOSFET DO / AO** | Charge pump ölür → çıkış düşer. Host **kalıcı proses imajı** yazar; ray dönünce geri yükler | İsteyerek kapalı. ON'da host imajı yükler |
 
-**Zorunlu: kontak durumu geri okunabilmeli.** Yardımcı kontak veya çıkış
-geriliminin ölçülmesi ile. Aksi halde node açılışta rölenin durumunu bilemez ve
-kör bir "reset" darbesi atmak zorunda kalır — bu da sessiz bir yük kesintisi
-demek.
-
-Bu, descriptor'daki **yetenek bayrakları**na girmeli
-([05 §7.1](05-dahili-bus.md#71-node-descriptorı-identify-yanıtı)).
+S3 ≠ glitch. Depo bilinçli; glitch heal ON iken.
 
 ### 7.4 Titreşim (K5)
 
@@ -354,10 +327,9 @@ Karavan yol titreşimi           ≈  < 5 g
 Tipik latching röle fonksiyonel şok değeri  ≈  10–20 g
 ```
 
-> **Parça seçim kriteri sadeleşti.** Tek ray kararı bobin gerilimini serbest
-> bıraktığı için latching röle aramasında **tek kısıt yükseklik** (≤ 12 mm,
-> D-61) ve şok değeri. Bobin gerilimi artık bir filtre değil — arama alanı
-> belirgin şekilde genişledi.
+> **Parça seçim:** bobin 5 V serbest (tek ray). Yükseklik 1U'da 14.4 mm'ye
+> sığmazsa node **2U** (D-61) — alçak profil avı zorunlu değil. Şok değeri
+> ayrıca doğrulanır.
 
 Marj yeterli görünüyor **ama parça seçiminde şok değeri açıkça doğrulanacak** —
 bu, gözden kaçarsa sahada "kendiliğinden kapanan lamba" olarak geri döner.
@@ -391,6 +363,6 @@ mimarisinin parçası** yapıyor.
 | ID | Soru |
 |----|------|
 | ~~D-52~~ | ✅ **Karara bağlandı:** ayrı node'lar, her node 4 kanal ve tek teknoloji ([§5.1](#51-dc-çıkış)) |
-| D-53 | Kontak durumu geri okuma yöntemi: yardımcı kontak mı, çıkış gerilimi ölçümü mü? İkincisi daha ucuz ama yük bağlı değilse yanıltıcı. |
-| D-54 | 32 A / 64 A node'larda ısı yolu: alüminyum ön panel, kutu gövdesi, yoksa sadece PCB bakırı mı? |
-| D-55 | AC node'larında sıfır geçişinde anahtarlama (zero-cross) uygulanacak mı? Kontak ömrünü uzatır, ek zamanlama devresi ister. |
+| D-53 | ✅ **Yardımcı kontak**, tüm latching (gerilim ölçümü yok) |
+| D-54 | ✅ **Al kızak + metal ön panel** (32/64 A) |
+| D-55 | ✅ Sinüste sıfır geçişi; inverter'de rastgele + snubber |

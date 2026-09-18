@@ -9,8 +9,8 @@ platformudur.
 birincil tasarım kısıtı yapıyor.
 
 Bu klasör, donanım tasarımı başlamadan önce netleştirilmesi gereken **platform
-standartlarını** tutar. Buradaki kararlar tek bir kartı değil, tüm node ailesinin
-gelecekteki tüm üyelerini bağlar.
+standartlarını** tutar. Buradaki kararlar tek bir kartı değil, tüm node
+tiplerinin gelecekteki tüm üyelerini bağlar.
 
 ---
 
@@ -21,7 +21,7 @@ gelecekteki tüm üyelerini bağlar.
 | # | Doküman | Kapsam | Durum |
 |---|---------|--------|-------|
 | 00 | [Karar Kütüğü](00-karar-kutugu.md) | Tüm açık/kapalı kararların tek listesi | 🟡 Onay bekliyor |
-| 01 | [Sistem Genel Bakış](01-sistem-genel-bakis.md) | Kapsam, kısıtlar, blok diyagram, node aileleri | 🟡 Taslak |
+| 01 | [Sistem Genel Bakış](01-sistem-genel-bakis.md) | Kapsam, kısıtlar, blok diyagram, node tipleri | 🟡 Taslak |
 | 02 | [Host Mimarisi](02-host-mimarisi.md) | MCU seçimi, RS-485 / Wi-Fi, Modbus, GPIO bütçesi, host blade formu | 🟡 Taslak |
 | 03 | [Güç Mimarisi](03-guc-mimarisi.md) | 12–48V ön kat, rail topolojisi, güç bütçesi, termal | 🟡 Taslak |
 | 04 | [Backplane ve Mekanik](04-backplane-mekanik.md) | Blade mimarisi, şasi + kızak, 17.5 mm slot, **12 pin konnektör**, hava akışı | 🟡 Taslak |
@@ -29,7 +29,7 @@ gelecekteki tüm üyelerini bağlar.
 | 06 | [Slot Yönetimi](06-slot-yonetimi.md) | Adresleme, discovery, presence/fault/reset, güç zorlaması | 🟡 Taslak |
 | 07 | [Firmware Update](07-firmware-update.md) | Bootloader, güncelleme akışı, kurtarma | 🟡 Taslak |
 | 08 | [EMC ve Koruma](08-emc-koruma.md) | ESD/EFT/surge, katman sayısı kararı | 🟡 Taslak |
-| 09 | [Node Aileleri](09-node-aileleri.md) | İlk node ailesi tanımları ve türetme kuralları | 🟡 Taslak |
+| 09 | [Node tipleri](09-node-aileleri.md) | Katalog D-72 · çekirdek + DI-8 | 🟢 Katalog |
 | **10** | **[Enerji Bütçesi](10-enerji-butcesi.md)** | **Güç durumları, tüketim bütçesi, batarya ömrü — birincil kısıt** | 🟡 Taslak |
 | 11 | [Çıkış Node'u Topolojileri](11-cikis-node-topolojileri.md) | MOSFET / latching röle / hibrit, DC-AC ayrımı, termal | 🟡 Taslak |
 | 12 | [Mekanik Referans Rev 0.1](12-mekanik-referans-rev01.md) | Çalışma draftı + mimari çakışma tablosu | 📌 Referans |
@@ -65,12 +65,14 @@ gelecekteki tüm üyelerini bağlar.
 
 | Kısıt | Değer |
 |-------|-------|
-| Giriş gerilimi | 12–48V DC |
+| Giriş gerilimi | **12–48V DC** · D-69 (12 V leisure + 48 V ESS, tek SKU) |
 | Node kapasitesi | 8U (1U = 17.5 mm, 2U = 35 mm) + 2U host slotu |
-| Mekanik | Blade şasi + kızak · host dahil her kart blade · toplam ~185 mm |
-| Dış haberleşme | RS-485 (Modbus RTU) + Wi-Fi talep üzerine (Modbus TCP) · Ethernet opsiyonel node |
-| Dahili haberleşme | Hafif özel protokol, UART mantığında |
-| PCB tercihi | 2 katman — host ve node'lar |
+| Mekanik | Blade şasi + kızak · proto **3D+Al kızak** · seri **Al ekstrüzyon** (D-62, D-70) · kör kapak (D-63) |
+| Soğutma | **Pasif** (D-57) — fan yok; Al kızak ısı yolu |
+| Slot | **v1 hot-plug** (D-24) — canlı tak-çıkar; sonradan rewrite yok |
+| Dış haberleşme | Saha RS-485 (Modbus RTU) + Wi-Fi talep üzerine **Host API** (D-78) · Ethernet opsiyonel node |
+| Dahili haberleşme | **RS-485 2 tel, 500 kbaud, özel çerçeve** (D-10..13, D-30, D-33) — kapalı |
+| PCB tercihi | **2 katman** — host (D-05) ve tüm node (D-36). 4 katman yok |
 | Tedarik ekosistemi | JLCPCB / LCSC birinci tercih |
 | Hedef ortam sıcaklığı | 60 °C |
 | EMC hedefi | Seviye A (ESD + EFT), sertifikasyon yok |

@@ -15,7 +15,7 @@ render oluyor, versiyonlanabiliyor, metin tabanlı olduğu için diff'i okunabil
 | 02 | [Blade şasi üstten kesit](02-blade-kizak-kesit.svg) | Kızak rayları, backplane, takma yönü, oluk detayı | [04 §1](../04-backplane-mekanik.md), [04 §3](../04-backplane-mekanik.md) |
 | 03 | [1U node anatomisi](03-node-1u-anatomi.svg) | Çıplak PCB + ön panel, bileşen yerleşimi, yükseklik bütçesi | [04 §2](../04-backplane-mekanik.md) |
 | 04 | [Kart kenarı stagger](04-kartkenari-stagger.svg) | 26 pin, 4 kademeli mate sırası, pin dizilimi | [04 §5](../04-backplane-mekanik.md) |
-| 05 | [Hava akışı](05-hava-akisi.svg) | Blade kanalları, fan, debi hesabı | [04 §6](../04-backplane-mekanik.md) |
+| 05 | [Hava akışı](05-hava-akisi.svg) | Blade kanalları, pasif baca, Al kızak ısı yolu | [04 §6](../04-backplane-mekanik.md) |
 
 ---
 
@@ -31,7 +31,7 @@ Tüm görsellerde tutarlı:
 | 🟪 Mor `#4a3f5c` | 2U AC node (şebeke) |
 | 🟫 Kahve `#5c4033` | 2U güç node'u (yüksek akım) |
 | 🟧 Turuncu `#bf5b25` | Dikkat / hareket / sıcak hava |
-| 🔵 Açık mavi `#4a7fb5` | Soğuk hava / fan |
+| 🔵 Açık mavi `#4a7fb5` | Soğuk hava / baca |
 | ⬜ Bej `#d8d3c8` | Kızak rayı / mekanik |
 
 ## Düzenleme

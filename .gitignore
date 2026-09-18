@@ -20,3 +20,10 @@ _autosave-*
 # Editör
 *.swp
 *~
+
+# Yerel geçmiş ve Konnect önizleme/DRC (yeniden üretilir)
+.history/
+.konnect/
+
+# Makineye özel MCP soketi / binary yolu
+.cursor/mcp.json

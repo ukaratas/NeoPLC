@@ -10,7 +10,7 @@
 | Node üzerinde SWD header | Cihazı açmak gerekir. Saha servisi için kabul edilemez. |
 | Node başına USB | Maliyet ve pin israfı — K1'i ihlal ediyor |
 
-### Karar: bus üzerinden merkezi güncelleme
+### Taslak (firmware oturumu · D-35): bus üzerinden merkezi güncelleme
 
 ESP32-S3'ün 16MB flash'ı bu modeli mümkün kılıyor
 ([02 §1](02-host-mimarisi.md#13-bugün-geçerli-gerekçeler-d-01)) — node
@@ -33,7 +33,7 @@ açılmaz, hiçbir kablo sökülmez.
 Tek app:    [BL 16K][App 46K][meta 2K]        → app 46 KB
 ```
 
-### Karar: tek app + CRC + bootloader penceresi
+### Taslak (firmware oturumu · D-25): tek app + CRC + bootloader penceresi
 
 **Çift bank'in tek gerçek kazancı:** "güncelleme sırasında güç kesilirse eski
 sürüme dön."
@@ -182,7 +182,7 @@ senaryo.
 
 ## 5. Host OTA
 
-### Karar: ESP32 çift partisyon + rollback
+### Taslak (firmware oturumu · D-26): ESP32 çift partisyon + rollback
 
 Node'da çift bank'i eledik ama host'ta kullanıyoruz — çelişki değil:
 

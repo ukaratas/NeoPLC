@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" width="720" height="440" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
   <rect width="720" height="440" fill="#faf9f7"/>
 
-  <text x="30" y="30" font-size="16" font-weight="700" fill="#26241f">Hava Akışı — Blade Kanalları</text>
-  <text x="30" y="47" font-size="11" fill="#8a857c">Üstten görünüm · ön panelden emiş · blade'ler arası kanal · arkadan fan ile atış</text>
+  <text x="30" y="30" font-size="16" font-weight="700" fill="#26241f">Hava Akışı — Pasif baca</text>
+  <text x="30" y="47" font-size="11" fill="#8a857c">Üstten görünüm · ön panelden giriş · blade kanalları · arkadan ızgara · fan yok</text>
 
   <defs>
     <marker id="c2" markerWidth="8" markerHeight="8" refX="5.5" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#4a7fb5"/></marker>
@@ -51,18 +51,24 @@
     <path d="M438 106 v160" marker-end="url(#c2)"/>
   </g>
 
-  <!-- arka plenum -->
-  <rect x="156" y="278" width="378" height="36" rx="3" fill="#f7ece3" stroke="#bf5b25" stroke-width="1" stroke-dasharray="4 3"/>
-  <text x="240" y="300" font-size="8.5" fill="#bf5b25">arka plenum — sıcak hava toplanıyor</text>
-
-  <!-- fan -->
-  <circle cx="470" cy="296" r="22" fill="#fff" stroke="#bf5b25" stroke-width="2"/>
-  <path d="M470 278 a18 18 0 0 1 15.6 9 M470 314 a18 18 0 0 1 -15.6 -9 M485.6 305 a18 18 0 0 1 -31.2 0" fill="none" stroke="#bf5b25" stroke-width="1.7"/>
-
-  <!-- atis oku -->
-  <path d="M496 296 h58" stroke="#bf5b25" stroke-width="2.4" fill="none" marker-end="url(#w2)"/>
-  <text x="570" y="292" font-size="9.5" font-weight="700" fill="#bf5b25">atış</text>
-  <text x="570" y="305" font-size="8" fill="#8a857c">FAN 40 mm</text>
+  <!-- arka plenum + ızgara (fan yok) -->
+  <rect x="156" y="278" width="378" height="36" rx="3" fill="#eef4fa" stroke="#4a7fb5" stroke-width="1"/>
+  <text x="240" y="300" font-size="8.5" fill="#2a5a8a">arka ızgara — baca çıkışı, fan yok</text>
+  <g stroke="#4a7fb5" stroke-width="1.2">
+    <line x1="430" y1="286" x2="430" y2="306"/>
+    <line x1="438" y1="286" x2="438" y2="306"/>
+    <line x1="446" y1="286" x2="446" y2="306"/>
+    <line x1="454" y1="286" x2="454" y2="306"/>
+    <line x1="462" y1="286" x2="462" y2="306"/>
+    <line x1="470" y1="286" x2="470" y2="306"/>
+    <line x1="478" y1="286" x2="478" y2="306"/>
+    <line x1="486" y1="286" x2="486" y2="306"/>
+    <line x1="494" y1="286" x2="494" y2="306"/>
+    <line x1="502" y1="286" x2="502" y2="306"/>
+  </g>
+  <path d="M520 296 h50" stroke="#4a7fb5" stroke-width="2" fill="none" marker-end="url(#c2)"/>
+  <text x="578" y="292" font-size="9.5" font-weight="700" fill="#2a5a8a">baca</text>
+  <text x="578" y="305" font-size="8" fill="#8a857c">D-57 pasif</text>
 
   <text x="345" y="338" font-size="9" fill="#8a857c" text-anchor="middle">ARKA</text>
 
@@ -79,12 +85,12 @@
 
   <!-- hesap kutulari -->
   <rect x="30" y="374" width="330" height="52" rx="4" fill="#eef4fa" stroke="#4a7fb5"/>
-  <text x="44" y="392" font-size="9.5" font-weight="700" fill="#2a5a8a">Gereken debi</text>
-  <text x="44" y="408" font-size="8.8" fill="#5c574e">CFM ≈ 1.76 × 13.5 W / 15 °C = <tspan font-weight="700" fill="#2a5a8a">1.6 CFM</tspan></text>
-  <text x="44" y="420" font-size="8" fill="#8a857c">40 mm fan tam hızda 5–10 CFM verir</text>
+  <text x="44" y="392" font-size="9.5" font-weight="700" fill="#2a5a8a">Birincil ısı yolu</text>
+  <text x="44" y="408" font-size="8.8" fill="#5c574e">PCB kenarı → <tspan font-weight="700" fill="#2a5a8a">Al kızak</tspan> → şasi</text>
+  <text x="44" y="420" font-size="8" fill="#8a857c">3D proto’da da kızak alüminyum (D-70)</text>
 
-  <rect x="372" y="374" width="318" height="52" rx="4" fill="#fff8ec" stroke="#bf5b25"/>
-  <text x="386" y="392" font-size="9.5" font-weight="700" fill="#bf5b25">Fan enerji maliyeti</text>
-  <text x="386" y="408" font-size="8.8" fill="#5c574e">%30 devir → 2–3 CFM → <tspan font-weight="700" fill="#bf5b25">~0.2 W</tspan> · yük yokken kapalı</text>
-  <text x="386" y="420" font-size="8" fill="#8a857c">günde 4 saat = 0.8 Wh — sistem bütçesinin %23'ü</text>
+  <rect x="372" y="374" width="318" height="52" rx="4" fill="#eef6ee" stroke="#2d6a4f"/>
+  <text x="386" y="392" font-size="9.5" font-weight="700" fill="#2d6a4f">Fan yok</text>
+  <text x="386" y="408" font-size="8.8" fill="#5c574e">Sığmayan dissipasyon → 2U veya daha az kanal</text>
+  <text x="386" y="420" font-size="8" fill="#8a857c">Enerji bütçesinde fan kalemi sıfır</text>
 </svg>

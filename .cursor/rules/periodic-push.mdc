@@ -1,0 +1,30 @@
+---
+description: Birkaç saatte bir, stabil anda commit + push
+alwaysApply: true
+---
+
+# Periyodik origin yedeklemesi
+
+Bu repo GitHub `origin` üzerindedir (`https://github.com/ukaratas/NeoPLC.git`). Kullanıcı her seferinde söylemese de, **birkaç saatlik** çalışma periyotlarında **stabil bir an** yakalanınca commit edip `git push` yap.
+
+## Stabil an
+
+Aşağıdakiler birlikte sağlanınca push et:
+
+- KiCAD açıksa önce Konnect `save_project` (`.kicad_*` dosyalarını asla metinle kaydetme)
+- Ortada yarım, bozulmuş veya kaydedilmemiş PCB/şema işlemi yok
+- Kısa, doğru bir commit mesajı yazılabiliyor (neden; Türkçe, mevcut log stiline uygun)
+
+Şunlarda **bekle**: Konnect IPC kopuk, `save_project` başarısız, DRC/routing ortasında silinmiş bakır, veya kullanıcı “commit etme / push etme” demiş.
+
+## Ne girer, ne girmez
+
+Dahil et: `docs/`, şema/PCB, `lib/`, `fp-lib-table`, `sym-lib-table`, `.cursor/rules/`.
+
+Dahil etme: `.history/`, `.konnect/`, `.cursor/mcp.json`, sırlar, üretim çıktıları (`gerber/`, `fab/`, `bom/` — gitignore).
+
+## Git
+
+- Kullanıcı “commit etme” demediyse bu kural commit + push yetkisidir.
+- `main`/`master` force-push yok. Hook fail olursa amend yok; yeni commit.
+- Push `origin` HEAD; başarısızsa dur ve söyle.

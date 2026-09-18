@@ -38,8 +38,8 @@ Bu nedenle bu dokümantasyonun asıl konusu kartlar değil, **sözleşmedir.**
 
 Host, **kendine ayrılmış sabit 2U host slotunda** duran bir blade'dir ve
 **8U kullanıcı node kapasitesinden tüketmez.** Ürün fiziksel olarak
-**2U host + 8U node** şeklindedir. Node'ları barındıran, besleyen, yöneten ve
-dış dünya ile haberleştiren ana platformdur.
+**2U host + 8U node** şeklindedir. **İlk kasa bu tam zarftır** (D-70) —
+ara slot sayılı form yok; prototip 3D baskı ile aynı zarfta basılır.
 
 Sorumlulukları:
 
@@ -47,8 +47,8 @@ Sorumlulukları:
 - 8U node kapasitesinin beslenmesi, güç bütçesi zorlaması, arıza izolasyonu
 - Node discovery, konfigürasyon, sağlık takibi
 - Dahili bus yöneticiliği (deterministik tarama)
-- Dış haberleşme: **RS-485 / Modbus RTU** (ana kablolu kanal) ·
-  **Wi-Fi** (varsayılan kapalı; talep üzerine web UI, OTA, Modbus TCP)
+- Dış haberleşme: **RS-485 / Modbus RTU** (saha) ·
+  **Wi-Fi** (varsayılan kapalı; talep üzerine web UI, OTA, **Host API** · D-78)
 - Node firmware dağıtımı
 - Web tabanlı konfigürasyon arayüzü
 
@@ -70,7 +70,7 @@ kısıta hizmet ettiği sorulmalı.
 | # | Kısıt | Türettiği kararlar |
 |---|-------|--------------------|
 | **K1** | 8U node kapasitesi × düşük maliyetli node | Node elektroniği ucuz ve az pinli olmalı. Karmaşıklık host'a yığılır — orada bir kez ödenir, node'da sekiz kez. |
-| **K2** | 12–48V geniş giriş | 48V nominal → transient sonrası ~90V. Ön kat gerilim sınıfını bu belirliyor, dolayısıyla parça maliyetini ve tedarik edilebilirliğini. |
+| **K2** | **12–48V host girişi** · D-69 | **12 V leisure ve 48 V ESS aynı host SKU.** 48 V nominal → transient sonrası ~90 V. Ön kat gerilim sınıfını bu belirliyor. Ara 8–32 V kesiti yok. |
 | **K3** | 2 katman tercihi | Kontrollü empedans pratikte elenir. Bu kısıt MCU seçimini ve yüksek hızlı arayüzlerin tasarıma girip girmeyeceğini belirledi. *(Seçim döneminde Ethernet kontrolcüsü tercihini de bu kısıt şekillendirmişti; Ethernet sonradan host'tan çıkarıldı — D-47.)* |
 | **K4** | **Batarya beslemesi — enerji bütçesi** | **Boşta tüketim ürünün yaşayabilirliğini belirliyor.** Sürekli çalışan her bileşen sorgulanır; uyku durumları donanım gereksinimidir, optimizasyon değil. → [10](10-enerji-butcesi.md) |
 | **K5** | Hareketli araç | Titreşim: konnektör tutma, ağır bileşen desteği, klemens tipi. Endüstriyel DIN pano varsayımında yoktu. |
@@ -85,19 +85,23 @@ bütçesinde yerini hak ettiğini kanıtlamalıdır.
 > **K4, K1 ile çatıştığında K4 kazanır.** Node'da bir uyku devresi için ek
 > maliyet, batarya ömrü karşılığında kabul edilebilir.
 
-## 4. Node aileleri (hedef)
+## 4. Node tipleri · D-72
 
-| Aile | Form | Öncelik |
-|------|------|---------|
-| Dijital giriş | 1U | Faz 1 |
-| Dijital çıkış | 1U | Faz 1 |
-| Röle çıkış | 1U / 2U | Faz 2 |
-| Analog giriş | 1U / 2U | Faz 2 |
-| Analog çıkış | 1U / 2U | Faz 2 |
-| Haberleşme | 1U / 2U | Faz 3 |
-| Özel fonksiyon | 1U / 2U | Faz 3 |
+Katalog: [09 §5](09-node-aileleri.md#5-node-katalogu). Dil **node tipi**.
+Form en fazla **2U** (D-75).
 
-Ayrıntı: [09 — Node Aileleri](09-node-aileleri.md)
+| SKU | U | Özet |
+|-----|---|------|
+| DI-8 | 1 | 8 giriş, **5–30 V izole** — ilk PCB (D-28, D-76) |
+| DO-M-8A-8 | 1 | 8 × 8 A MOSFET, PWM var; 8 A röle yok |
+| AI-8 | 1 | NTC / 4–20 / 0–20 mA / 0–10 V, port config |
+| AO-4 | 1 | 0–10 V, ayrı node |
+| DC-L-16A-4 | 1* | Latching 16 A |
+| DC-H-32A-2 | 2 | Hibrit 32 A |
+| DC-H-64A-2 | 2 | Hibrit 64 A, 48 V ESS |
+| AC-L-16A-4 | 2 | AC 16 A ×4 (8ch 4U olmasın) |
+| AC-L-32A-2 | 2 | AC 32 A ×2 |
+| COM-1U | 1 | CAN + Ethernet |
 
 ## 5. Standardize edilmesi zorunlu kalemler
 
@@ -108,14 +112,14 @@ yeniden tasarlanır. Bu yüzden ilk şema çizilmeden önce kilitlenmeleri gerek
 |-------|---------|----------------------|
 | Mekanik slot yapısı, 1U/2U | [04 §2](04-backplane-mekanik.md#2-slot-ve-node-ölçüleri) | Kutu, backplane ve tüm node PCB'leri bağlı |
 | Backplane pinout | [04 §5](04-backplane-mekanik.md#5-pinout) | Üretilmiş her node uyumsuz hale gelir |
-| Konnektör ve mate sırası | [04 §4](04-backplane-mekanik.md#4-konnektör-seçimi) | Hot-plug yeteneği sonradan eklenemez |
+| Konnektör ve mate sırası | [04 §4](04-backplane-mekanik.md#4-konnektör-seçimi) | **v1 canlı tak-çıkar (D-24)** — sonradan eklenemez |
 | Güç dağıtımı ve rail tanımı | [03 §2](03-guc-mimarisi.md#2-rail-topolojisi) | Node regülatör tasarımı bağlı |
 | Dahili protokol ve fiziksel katman | [05 §1](05-dahili-bus.md#1-fiziksel-katman-kararı) | Sahadaki node'ların firmware'i bağlı |
 | Slot adresleme | [06 §1](06-slot-yonetimi.md#1-slot-adresleme) | Saha servis prosedürü bağlı |
 | Discovery ve descriptor formatı | [06 §8](06-slot-yonetimi.md#8-discovery-akışı) | Geriye uyumluluk için versiyon alanı şart |
 | Bootloader protokolü | [07](07-firmware-update.md) | Sahadaki node'lar güncellenemez hale gelir |
 | Node uyku/uyanma sözleşmesi | [10 §3](10-enerji-butcesi.md#3-wake-on-bus-nodeların-uyuması) | Host ile node'un uyku beklentisi uyuşmazsa cevapsız kalır |
-| Node tutma mekanizması | [10 §9.3](10-enerji-butcesi.md#93-titreşim) | Mekanik standart — sonradan eklenemez |
+| Node tutma mekanizması | [04 §3.3](04-backplane-mekanik.md#33-takma--çıkarma) | **Kapalı vida (D-45)** — sonradan eklenemez |
 
 **Uygulanan koruma:** Descriptor'ın ilk baytı **protokol versiyonudur**. Host,
 tanımadığı bir versiyonu gördüğünde node'u devre dışı bırakır ama rafı düşürmez.

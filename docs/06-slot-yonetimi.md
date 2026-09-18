@@ -77,7 +77,7 @@ yiyordu.
 
 ## 3. Host tarafı I/O genişletme
 
-### Karar: üç katmanlı çözüm — 32 sinyal → 4 GPIO
+### Karar: tek PCA9555, INT# ile canlı presence · D-18
 
 #### Katman 1 — PRESENT# ve MOD_RST# → tek PCA9555
 
@@ -169,7 +169,7 @@ Açılışlar nadir; 30 ms bedel pratikte görünmez.
 
 ## 6. Reset varsayılan durumu
 
-### Karar: node'da 10k pull-**down** → varsayılan reset'te
+### Karar: node'da 10k pull-**down** → varsayılan reset'te · D-22
 
 ```
 MOD_RST#  ──10k──  GND        (node üzerinde)
@@ -222,7 +222,7 @@ oldu. Ek donanım gerekmedi.
 
 ## 7. Slot başına akım koruması
 
-### Karar: akım sınırlı load switch (+5V_SYS üzerinde)
+### Karar: akım sınırlı load switch (+5V_SYS üzerinde) · D-23
 
 Maliyet: ~$0.20 × 8 = **$1.60** host başına.
 
@@ -235,6 +235,9 @@ Maliyet: ~$0.20 × 8 = **$1.60** host başına.
 | **Arıza tespiti** | Aşırı akım durumu host'a bildiriliyor |
 | **S3 depo modu** | Node'ları **tamamen** beslemeden keser — µA değil, sıfır ([10 §4.1](10-enerji-butcesi.md#41-s3-mevcut-kararların-beklenmedik-yakınsaması)) |
 
+Trip eşiği **≥ 1.5 A** — 250 mA sürekli + 800 mA bobin darbesini kısa sanmasın.
+Kısa hâlâ kesilir; darbe geçsin.
+
 **Ucuz alternatif:** slot başına polyfuse (~$0.05). Ama yavaş, soft-start
 vermiyor ve arıza bildirimi yok. $1.15 fark için üç işlevi birden kaybetmek
 mantıklı değil.
@@ -246,7 +249,7 @@ hot-plug maliyetini de karşılıyor — load switch zaten gerekliydi.
 
 ## 8. Discovery akışı
 
-### Karar
+### Karar: açılış ve canlı takma aynı akış · D-34
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -261,7 +264,7 @@ hot-plug maliyetini de karşılıyor — load switch zaten gerekliydi.
 │      · CRC                                                  │
 │      · Protokol versiyonu tanınıyor mu?                     │
 │      · Güç bütçesi yeterli mi?                              │
-│      · 2U ise N+1 boş mu?                                   │
+│      · 2U ise N+1 PRESENT# yüksek mi? (yalancı dil elektrik yok) │
 ├─────────────────────────────────────────────────────────────┤
 │ 4. WRITE_CONFIG  →  kanal konfigürasyonu                    │
 ├─────────────────────────────────────────────────────────────┤
@@ -276,10 +279,10 @@ hot-plug maliyetini de karşılıyor — load switch zaten gerekliydi.
 | CRC hatası | 3 kez tekrar, sonra "hatalı node" işaretle |
 | Bilinmeyen protokol versiyonu | Node devre dışı, **raf çalışmaya devam eder** |
 | Güç bütçesi aşımı | Reset bırakılmaz, Modbus'ta bildirilir |
-| 2U ama N+1 dolu | Konfigürasyon hatası olarak bildirilir |
+| 2U ama N+1'de PRESENT# | 1U çakışma — yalancı dil bakırsız, N+1 yüksek kalmalı (D-16) |
 
-**Hiçbir başarısızlık durumu rafı düşürmüyor.** Tek bir arızalı veya uyumsuz
-node, çalışan sistemi etkilemiyor — bir platform ürünü için temel gereksinim.
+**v1 canlı tak-çıkar · D-24.** Aynı akış açılışta ve PRESENT# kenarında.
+Sonradan ayrı "hotplug firmware" yok.
 
 ### 8.2 Node'un kaybolması
 

@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+
+  (lib (name "NeoPLC") (type "KiCad") (uri "${KIPRJMOD}/lib/NeoPLC.kicad_sym") (options "") (descr "")))

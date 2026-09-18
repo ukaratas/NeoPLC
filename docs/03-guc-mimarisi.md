@@ -17,29 +17,43 @@ Downstream parçaların görebileceği en yüksek gerilim
 Bu zincir, ön kattaki her parçanın gerilim sınıfını belirliyor. Ve burada
 maliyeti belirleyen bir çatal var.
 
-### 1.2 Kritik çatal: 100V mı 60V mı?
+### 1.2 Kritik çatal: 100 V mu, kesip 60 V mu?
 
 | Yaklaşım | Sonuç |
 |----------|-------|
-| **(a)** Tüm ön kat 100V sınıfı | 100V/3A senkron buck gerekir → LCSC'de seçenek az, fiyat yüksek |
-| **(b)** Seri koruma FET'i + gate zener clamp (~55V'ta kesiyor) | Downstream **60V sınıfı** yeterli → ucuz ve bol seçenek |
+| **(a)** Tüm ön kat 100 V | Buck 100 V/3 A — LCSC az, pahalı. OV'de FET açmaz, her parça 100 V |
+| **(b)** High-side kesme + TVS | OV'de FET **açar (keser)** → downstream **60 V**. TVS enerjiyi yutar |
 
-### Karar: (b)
+### Karar: (b) koruma kontrolcüsü + high-side N-FET · 🟢 D-09
 
-Tek bir seri FET üç işi birden yapıyor:
+Karavan/tekne: **şasi negatif, high-side anahtar.** GND dönüşüne FET yok —
+şasi sürekliliği güvenlik.
 
-1. **Ters polarite koruması** — yanlış bağlantıda iletmiyor
-2. **Aşırı gerilim kesme** — gate zener clamp'i ~55V üstünü geçirmiyor
-3. **Inrush kontrolü** — gate RC'si ile yumuşak başlatma
+**VIN galvanik izole değil.** İzolasyon saha portunda (D-07). Bataryayı
+izole DC-DC ile kesmek backplane'i şasiden koparır; kaçak ve SELV referansı
+bozulur. Güvenlik = high-side kesme + sağlam GND, izolasyon değil.
 
-TVS transient enerjisini yutarken FET downstream'i koruyor. Sonuç: ana
-dönüştürücü 60V sınıfında kalıyor — maliyet ve tedarik açısından belirleyici
-fark.
+A (P-FET + gate zener) ile B aynı iş: high-side, GND bütün, 60 V sonrası.
+B daha **stabil ve güvenli**:
+
+| | P-FET + zener | Kontrolcü + N-FET |
+|--|----------------|-------------------|
+| Ters polarite | Ayrık, SOA el kitabı | Otomotiv kontrolcüsü, karakterize |
+| OV | Zener hilesi, gate ±20 V | UV/OV pini, FET'i kapatır |
+| Inrush | Gate RC | Kontrollü |
+| Isı @ ~1 A (12 V) | 100 V P-FET R_DS yüksek | 60–80 V N-FET bol, düşük R_DS |
+| Bedel | FET pahalı | Kontrolcü ~+$1, FET ucuz |
+
+**Topoloji:** ideal-diyot / koruma kontrolcüsü (LM7480 / LTC4368 sınıfı, aday)
++ high-side N-FET. Ters + OV için parçanın gerektirdiği **back-to-back** FET.
+SKU şemada LCSC.
+
+TVS hâlâ var — kontrolcü keser, TVS darbeyi yer.
 
 ### 1.3 Zincir
 
 ```
-Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → Ters polarite + OV FET
+Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → kontrolcü + high-side N-FET
         → Bulk kapasitör → Ana buck
 ```
 
@@ -48,20 +62,17 @@ Klemens → Sigorta (2.5A yavaş) → CM choke → TVS 58V → Ters polarite + O
 | Sigorta | Kalıcı arıza izolasyonu | 2.5A yavaş atan, 125V DC kesme |
 | CM choke | İletilen emisyon + EFT | Ferrit CM choke, ≥ 1mH, 3A |
 | TVS | Transient enerji yutma | SMBJ58A / SMCJ58A (daha yüksek enerji) |
-| FET | Ters polarite + OV + inrush | P-kanal ≥ 100V **veya** ideal-diyot kontrolcü + N-kanal |
-| Bulk | Giriş rippled ve transient tampon | ≥ 63V elektrolitik / polimer |
+| FET | Ters polarite + OV + inrush | **Koruma kontrolcüsü + high-side N-FET** (D-09). GND'de FET yok |
+| Bulk | Giriş ripple ve transient tampon | ≥ 63V elektrolitik / polimer |
 
-> **Açık nokta:** P-kanal 100V FET'ler LCSC'de düşük R_DSon'da pahalılaşıyor.
-> Alternatif topolojiler (GND dönüşünde N-kanal — ucuz ama GND sürekliliğini
-> bozar; ideal-diyot kontrolcü + N-kanal — temiz ama +$1) şema aşamasında stok
-> doğrulamasıyla birlikte kesinleştirilecek.
+GND-side N-FET elendi. P-FET+zener elendi — aynı işlev, daha az karakterize.
 
 ### 1.4 Ele alınması gereken saha koşulları
 
 | Koşul | Önlem | Doküman |
 |-------|-------|---------|
-| Ters polarite | Seri FET (§1.2) | bu doküman |
-| Aşırı gerilim | Gate zener clamp (§1.2) | bu doküman |
+| Ters polarite | High-side N-FET, kontrolcü (D-09) | bu doküman |
+| Aşırı gerilim | Kontrolcü OV kesme + TVS | bu doküman |
 | Surge / transient | TVS + CM choke, tam uyum için kademeli ön kat | [08](08-emc-koruma.md) |
 | ESD | TVS + klemens yerleşimi | [08](08-emc-koruma.md) |
 | Kısa devre | Sigorta (sistem) + slot load switch (node) | [06 §7](06-slot-yonetimi.md#7-slot-başına-akım-koruması) |
@@ -108,9 +119,8 @@ yükseltme **node üzerinde** yapılır — 5V→12V küçük bir boost ya da ka
 gerilim katlayıcı, ~$0.20–0.30. Bu, tek ray kararını **koşulsuz** hale
 getiriyor: parça tedariği kararı geri açamaz.
 
-> Not: Bobin **gücü** gerilimden bağımsız (~300 mW). 12 V bobin + boost, 5 V
-> bobinle aynı 5 V-tarafı akımı çekiyor (%85 verimle ~%18 fazla). Yani
-> yükseltme yapmanın enerji bedeli de yok denecek kadar az.
+> Not: Bobin **gücü** gerilimden bağımsız. 12/24 V + boost, 5 V tarafta
+> P/η. İri 32/64 A bobin 1–3 W → 5 V'ta yüzlerce mA darbe (D-68 tavan 800 mA).
 
 ---
 
@@ -120,36 +130,30 @@ getiriyor: parça tedariği kararı geri açamaz.
 |-----------|-------|
 | Giriş | 12–48V (ön kat sonrası ≤ 55V) |
 | Çıkış | 5V |
-| Tasarım akımı | **1.5A (7.5W)** · 🟡 D-31 — *3A → 2A → 1.5A, iki düzeltmeyle* |
+| Tasarım akımı | **2.0 A sürekli (10 W)** · 🟢 D-31 |
 | Topoloji | **Senkron** buck |
-| Akım limiti | **≥ 2.5 A** — röle darbesi yedeği (§5) |
+| Akım limiti | **≥ 3.0 A** — büyük röle darbesi (§5) |
 | Gerilim sınıfı | 60V |
 | Anahtarlama frekansı | 300–500 kHz (verim / boyut dengesi) |
 
-### Neden 3A değil 2A
+### Neden 2.0 A — ne 1.5 A ne 3 A
 
-İlk tahsis (3A), slot başına 200 mA'in **sürekli** çekileceği varsayımına
-dayanıyordu. [Wake-on-bus](10-enerji-butcesi.md#3-wake-on-bus-nodeların-uyuması)
-ile bu varsayım geçersiz:
+1.5 A, Ethernet host'tan çıkınca kesilmişti. Az: 16–64 A latching + **12/24 V
+bobin + boost** anlık 5 V akımını büyütür; COM Ethernet 1U'da 150 mA'yi zorlar.
+
+3 A / 15 W, 60 °C'de 2 katmanı yakar (§6). **2.0 A net sayı** — sürekli tavan;
+darbe 3 A limitte, sıralı (D-68). İlk PCB'de bobin darbesi ölçülür; SKU 800 mA
+@5 V'u aşarsa ray büyümez, o node 2U veya daha yavaş sıra.
 
 ```
-Node lojiği, uyanık            ≈  10 mA @3.3V  ≈  12 mA @5V
-Duty cycle (10 Hz)              =  %0.6
-Gerçekçi ortalama               ≈  1 mA @5V
-Gerçekçi tepe (analog node)    ≈  40 mA @5V
-
-8 slot tepe    =  320 mA
-Host tepe      ≈  290 mA @5V   (W5500 çıktıktan sonra)
-               ─────────
-Toplam tepe    ≈  610 mA     →  1.5A tasarım noktası %145 headroom bırakıyor
+Buck sürekli          2.0 A     host + node (D-31)
+  Host rezerv         0.4 A     Wi-Fi tepe
+  Node havuzu         1.6 A     descriptor toplamı (D-29)
+1U tavan              250 mA
+2U tavan              500 mA
+Buck akım limiti      3.0 A     20–50 ms darbe
+Tek bobin tepe        ≤ 800 mA  @5 V — 16–64 A, 5/12/24 V + boost
 ```
-
-**İkinci düşüş Ethernet'ten geldi:** W5500'ün 150 mA @3.3V'u (≈110 mA @5V)
-host'un tepe yükünden çıktı ([02 §2](02-host-mimarisi.md#2-ethernet-hosttan-çıkarıldı)).
-
-150 mA/slot **tavanı** korunuyor (bir node geçici olarak çekebilmeli), ama
-toplam ≤ 1.2 A descriptor güç beyanı ile zorlanıyor
-([06 §6](06-slot-yonetimi.md#6-reset-varsayılan-durumu)).
 
 ### Senkron neden zorunlu
 
@@ -172,17 +176,14 @@ P_altFET = I² × R_DSon × (1 − D)
 **~0.8W tasarruf.** §5'teki termal analiz göz önüne alındığında bu fark
 belirleyici.
 
-### 3.1 Hafif yük verimi — asıl kriter
+### 3.1 Hafif yük verimi · D-48
 
 **Sistem zamanının %90'ından fazlasını 50–200 mA çekerek geçiriyor**
-([10 §5](10-enerji-butcesi.md#5-güç-durumu-bütçeleri)). Sadece CCM çalışan bir
-buck bu bölgede %50 verimde olabilir; PFM / pulse-skipping destekleyen bir buck
-%85.
+([10 §5](10-enerji-butcesi.md#5-güç-durumu-bütçeleri)). CCM-only ~%50; PFM ~%85.
 
-**Tam yük verimi neredeyse hiç kullanılmıyor.** Seçim kriteri sıralaması
-tersine döndü — ayrıntı [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri-değişti).
+**Tam yük verimi neredeyse hiç kullanılmıyor.** Ayrıntı [10 §7.2](10-enerji-butcesi.md#72-dönüştürücü-seçim-kriterleri--d-48).
 
-### 3.2 İki dönüştürücülü yapı
+### 3.2 İki dönüştürücülü yapı · D-42
 
 Ana buck tek başına yeterli değil: S3 depo modunda 25 µA mertebesinde Iq
 gerekiyor ve 2A için optimize edilmiş bir dönüştürücü bunu veremiyor.
@@ -212,23 +213,26 @@ bulk eklenecek.
 |------------|-------|----------|
 | Dijital giriş (8 kanal) | 30 mA | 80 mA |
 | Dijital çıkış (8 kanal) | 50 mA | 120 mA |
-| Analog giriş (4 kanal, 16-bit) | 60 mA | 150 mA |
-| Röle çıkış (5 V latching bobin, darbeli) | 15 mA | 40 mA tepe |
+| Analog giriş (8 kanal) | 60 mA | 200 mA |
+| COM Ethernet | 120 mA | 250 mA |
+| Röle lojiği (sürekli) | 20 mA | 80 mA |
+| Röle bobini (anlık, sıralı) | — | **≤ 800 mA @5 V** · §5 |
+
+Sürekli tavan ENABLE / descriptor. Bobin darbesi bu tavanın **üstünde** —
+D-68 sıralar, buck 3 A limit yer.
 
 ### Tahsis · D-29
 
-| Slot | +5V |
-|------|-----|
-| **1U** | **150 mA (0.75 W)** |
-| **2U** | **300 mA (1.5 W)** |
+| | +5V sürekli |
+|--|-------------|
+| **1U** | **250 mA (1.25 W)** |
+| **2U** | **500 mA (2.5 W)** |
+| **Node havuzu** | **≤ 1.6 A** (descriptor toplamı — 8×250 sığmaz, host 0.4 A) |
+| Aşan node | 2U (D-61 ile aynı taşma) |
 
-Röle bobini darbesi (~160 mA tepe, 20 ms) bu limiti kısa süre aşabilir — node
-üzerinde lokal tampon kapasitör zorunlu
-([11 §7.2](11-cikis-node-topolojileri.md#72-darbe-yönetimi-kritik-tasarım-notu)).
-
-2U node tek konnektörden ([04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi))
-400mA çekiyor. 2 adet +5V kart kenarı kontağı üzerinden 400mA — 2.54mm
-kontak akım kapasitesinin çok altında, sorun yok.
+2U elektrik yalnız sol konnektörden ([04 §7](04-backplane-mekanik.md#7-2u-node-stratejisi)
+· D-16). 500 mA sürekli + 800 mA darbe, 2 × +5V gold finger (1–3 A/kontak)
+içinde.
 
 ### 4.2 Host kartı
 
@@ -246,27 +250,22 @@ kontak akım kapasitesinin çok altında, sorun yok.
 ### 4.3 Sistem toplamı
 
 ```
-8 slot × 0.75 W (1U tavanı, D-29)  =   6.0 W
-Host (Wi-Fi TX tepesi)             =   1.6 W
+Node havuzu tavanı (D-29)          =   1.6 A  =  8.0 W
+Host Wi-Fi tepesi                  =   0.4 A  =  2.0 W
                                       ───────
-+5V yükü (teorik en kötü durum)    =   7.6 W   →  5V @ 1.52 A
++5V sürekli tavan                  =   2.0 A  = 10 W   · D-31
+Akım limiti (röle darbe)           =   3.0 A            (§5)
 
-Tasarım noktası (sürekli, D-31)    =  5V @ 1.5 A (7.5 W)
-Akım limiti (röle darbe yedeği)    =  ≥ 2.5 A            (§5)
+Giriş @ %87, 10 W çıkış            =  11.5 W
+    @ 12 V  →  0.96 A     ← boyutlandırma
+    @ 24 V  →  0.48 A
+    @ 48 V  →  0.24 A
 
-Giriş gücü @ %87 verim             =   8.7 W
-    @ 12 V  →  0.73 A     ← en yüksek giriş akımı, boyutlandırma buradan
-    @ 24 V  →  0.36 A
-    @ 48 V  →  0.18 A
-
-Giriş sigortası                    =  2.5 A yavaş atan  (§1.3'te sabit)
+Giriş sigortası                    =  2.5 A yavaş  (§1.3) — 12 V'ta pay bol
 ```
 
-**Not:** Teorik en kötü durum (1.52 A) tasarım noktasının hemen üstünde; bu
-kısa süreli örtüşme ≥2.5 A akım limitiyle karşılanıyor. Gerçekte node toplamı
-descriptor ile **1.2 A'e** sınırlandığı için sürekli yük ~1.5 A'i aşamıyor
-([§4.4](#44-güç-bütçesi-zorlaması)). Tipik çalışma noktası çok daha düşük:
-S1/S2'de 0.1–0.2 A ([10 §5](10-enerji-butcesi.md#5-güç-durumu-bütçeleri)).
+Tipik S1/S2: 0.1–0.2 A ([10 §5](10-enerji-butcesi.md#5-güç-durumu-bütçeleri)).
+2 A ENABLE en kötü durum, boşta tüketim değil.
 
 ### 4.4 Güç bütçesi zorlaması
 
@@ -286,77 +285,66 @@ Tek ray kararının doğrudan sonucu, bu yüzden ayrı hesaplanıyor. · D-68
 
 ### 5.1 Bobin başına 5 V tarafı akımı
 
-```
-Tipik latching röle bobini (8 A kontak)   ≈  300 mW, 10–30 ms darbe
-
-5 V bobin doğrudan        :  300 mW / 5 V          =  60 mA
-12 V bobin + lokal boost  :  300 mW / 0.85 / 5 V   =  71 mA
-
-Tasarım değeri: 70 mA / bobin
-```
-
-Bobin gerilimi 5 V-tarafı akımını neredeyse değiştirmiyor — **güç sabit.**
-
-### 5.2 Rafın tepe akımı — üç senaryo
+Bobin **gücü** gerilimden bağımsız; 12/24 V + boost 5 V akımını ≈1/η kadar
+artırır. Asıl sıçrama **büyük kontak**: 8 A ~0.3 W değil, 32/64 A 1–3 W.
 
 ```
-Temel yük (8 node lojik + host)                     ≈  390 mA
+P_bobin 1.5 W, 12/24 V, boost %80
+I_5V = 1.5 / 0.80 / 5  ≈  375 mA
 
-A) Node içi sıralı, node'lar arası da sıralı
-   (host normal tarama sırası ile uyguluyor)
-   Aynı anda 1 bobin                 70 mA   →  toplam  ~460 mA   ✓
-
-B) Node içi sıralı, tüm node'lar aynı anda tetiklenmiş
-   (broadcast SYNC ile)
-   Aynı anda 8 bobin                560 mA   →  toplam  ~950 mA   ✓
-
-C) Hiç sıralama yok — 32 bobin birlikte
-   Aynı anda 32 bobin              2240 mA   →  toplam  ~2.6 A    ⚠
+P_bobin 3.0 W (iri güç rölesi)
+I_5V                   ≈  750 mA
 ```
 
-### 5.3 Neden bulk kapasitör bu işi çözemiyor
+**Tavan: 800 mA @5 V / bobin.** İlk PCB'de ölçülür. Aşan SKU rayı büyütmez.
+
+5 V bobin bulunmak zorunda değil — 12/24 V + lokal boost serbest (D-08, D-61).
+
+### 5.2 Rafın tepe akımı
 
 ```
-C senaryosunda buck'ın karşılayamadığı fark  ≈ 1.1 A
-Darbe süresi                                 ≈ 15 ms
-İzin verilen düşüm (5 V → 4.75 V)            = 250 mV
+Temel (node havuzu + host, sürekli)              ≤  2.0 A
 
-C = I × t / ΔV = 1.1 × 0.015 / 0.25 = 66 000 µF
+A) Rafta aynı anda 1 bobin (yürürlük)
+   +800 mA  →  tepe ≤ 2.8 A     3 A limit içinde ✓
+
+B) 8 node SYNC ile aynı anda
+   8 × 800 mA                    →  kırılır ✗
+
+C) Bir 4ch node eşzamanlı
+   4 × 800 mA                    →  kırılır ✗
 ```
 
-**66 mF gerçekçi değil.** Yani sıralama (staggering) bir optimizasyon değil,
-**yapısal gereklilik.**
+### 5.3 Neden bulk bu işi çözemiyor
+
+C'yi kapasitörle yutmak hâlâ onlarca mF. Sıralama yapısal (D-68).
 
 ### 5.4 Karar: sıralama mimaride, kapasitör kenarda
 
 | Katman | Kural |
 |--------|-------|
-| **Node içi** | 4 kanal asla eşzamanlı ateşlenmez — ~2 ms arayla sıralanır ([11 §7.2](11-cikis-node-topolojileri.md#72-darbe-yönetimi-kritik-tasarım-notu)) |
-| **Node'lar arası** | **Röle durum değişiklikleri broadcast SYNC ile değil, node'un kendi işlemi sırasında uygulanır** — host'un sıralı tarama düzeni doğal olarak ~600 µs arayla dağıtıyor ([05 §9](05-dahili-bus.md#9-sync-donanım-pini-değil-broadcast-çerçeve)) |
-| **Donanım yedeği** | Buck akım limiti ≥ 2.5 A — sıralama bir şekilde ihlal edilse bile ray çökmesin, parça zarar görmesin |
-| **Node lokal kapasitörü** | Bobin akımının **kenarını** (di/dt) karşılar, darbenin tamamını değil — ~100 µF yeterli |
-| **Host bulk** | Buck çıkışında yeterli bulk; ani yük basamağında düşümü sınırlar |
+| **Node içi** | Kanallar eşzamanlı ateşlenmez (~2 ms) |
+| **Node'lar arası** | Röle SYNC'te değil, tarama sırasında — rafta **tek bobin** |
+| **Donanım yedeği** | Buck limiti **≥ 3.0 A** |
+| **Load switch** | Trip **≥ 1.5 A** — 250+800 mA darbeyi kısa sanmasın (D-23) |
+| **Node bulk** | Kenar (di/dt), ~100 µF; darbenin tamamı değil |
+| **Host bulk** | 5 V çıkış düşümünü sınırlar |
 
-Senaryo A yürürlükte olduğunda tepe akım **460 mA** — 1.5 A tasarım noktasının
-çok altında.
-
-### 5.5 Descriptor'a eklenen alan
-
-Host'un kaleyi tutabilmesi için node **tepe darbe akımını** da beyan etmeli:
+### 5.5 Descriptor
 
 | Alan | Byte | Not |
 |------|------|-----|
-| Beyan edilen sürekli tüketim | 2 | mA @5V — mevcut |
-| **Beyan edilen tepe darbe akımı** | **2** | **mA @5V — yeni** |
-
-Böylece host, toplu bir işlem (örneğin "tüm çıkışları kapat") isteğini
-**raf bütçesine göre zamanlayabiliyor** — kaç node'u aynı anda tetikleyeceğine
-karar verebiliyor.
+| Sürekli tüketim | 2 | mA @5V — ENABLE tavanı |
+| **Tepe darbe** | **2** | mA @5V — host sıralamayı buna göre zamanlar |
 
 ## 6. Termal analiz
 
 **Ortam sıcaklığı: 60 °C** · 🟢 D-04 — karavan, kapalı mekân, güneş altında
-50 °C rahat görülür. Zorlamalı hava akımı yok, sadece doğal konveksiyon.
+50 °C rahat görülür. **Pasif soğutma · D-57** — fan yok. Host buck için doğal
+konveksiyon + bakır döküm; node ısısı Al kızağa
+([04 §6](04-backplane-mekanik.md#6-hava-akışı-ve-termal)).
+
+**Host girişi 12–48 V · D-69** — 12 V leisure ve 48 V ESS aynı ön kat.
 
 ### 6.1 Ana buck kaybı — iki senaryo
 
@@ -385,6 +373,5 @@ oraya nadiren gidilir.
 değil, bir marj tercihi — ayrıntı ve karar
 [08 §5](08-emc-koruma.md#5-katman-sayısı-kararı).
 
-> **Not:** D-31'in 3A'dan 2A'ya düşmesi bu tabloyu değiştirdi. 3A/15W'ta
-> 2 katman 60 °C'de sınır aşıyordu (140 °C junction). Enerji bütçesi çalışması
-> termal problemi de çözdü — aynı kök nedenden.
+> **Not:** 3 A / 15 W hâlâ 2 katmanı 60 °C'de yakar. 2.0 A kilit (D-31) o
+> sınırı aşmaz; 1.5 A'e kesmek gerekmedi — büyük bobin için 2 A zaten doğru.

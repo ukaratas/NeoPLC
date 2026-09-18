@@ -53,9 +53,12 @@ iki tolerans zinciri üst üste biniyor.
 | Sorun | Çözüm |
 |-------|-------|
 | Servis sırasında çıplak PCB'ye temas (ESD) | Ön panel tutamak görevi görüyor; node'lar ESD poşetinde sevk edilir; ön panelde "PCB'ye dokunmayın" işareti |
-| **AC node'larında şebeke teması** | Şebeke bölümünün üzerine **klipsli plastik kapak** — tam kutu değil, sadece bariyer. Ucuz, termal avantajı kaybetmiyor |
+| **AC node şebeke** | **Kablo:** IP20 pluggable (D-38). **PCB:** 230 V adasına klipsli bariyer — tam kutu değil · 🟢 D-64 |
 | Toz / nem | Şasi sorumluluğu — ön panel dizisi kapalı yüzey oluşturur, boş slotlara kör kapak |
 | Klemens kuvvetleri PCB'ye biniyor | Ön panel PCB'ye köşebent + 2 vida ile rijit bağlanır; kuvvet panelden şasiye aktarılır |
+
+**D-64 · 🟢** AC kablo IP20 fişte (D-38). Node içi: yalnız 230 V adasına
+**klipsli plastik bariyer** (röle pimi, iz). Tam kutu yok — blade termali durur.
 
 ---
 
@@ -78,8 +81,8 @@ Host slotu (2U) =              35 mm     ← node kapasitesi tüketmez
 Toplam slot alanı            = 175 mm    (+ duvarlar ≈ 185 mm)
 ```
 
-**Host da bir blade** — node'larla aynı kızak, ön panel ve mandal sistemini
-kullanır, kendi özel slotunda durur. Gerekçe ve alan hesabı:
+**Host da bir blade** — node'larla aynı kızak, ön panel ve kapalı vida
+sistemini kullanır, kendi özel slotunda durur. Gerekçe ve alan hesabı:
 [02 §7](02-host-mimarisi.md#7-hostun-mekanik-formu) · D-66
 
 > ⚠️ **Host konnektörü node konnektöründen farklıdır** (slot başına
@@ -92,25 +95,23 @@ göre cihazı **40 mm daraltıyor**; karavanda hacim pahalı.
 
 ![1U node anatomisi](img/03-node-1u-anatomi.svg)
 
-### 2.1 Bileşen yüksekliği bütçesi — kritik kısıt
-
-Blade'de muhafaza duvarı olmadığı için 17.5 mm'nin tamamı kullanılabilir, ama
-komşu blade'e çarpmamak gerekiyor:
+### 2.1 Bileşen yüksekliği · D-61
 
 ```
 Slot adımı                  17.5 mm
 PCB kalınlığı              − 1.6 mm
 Komşuya emniyet açıklığı   − 1.5 mm
                             ───────
-Bileşen yüksekliği bütçesi   14.4 mm   (tek yüzde)
+1U bileşen tavanı            14.4 mm   (tek yüzde)
 ```
 
-> ⚠️ **Bu, latching röle seçimini doğrudan kısıtlıyor.** Tipik güç röleleri
-> 15–25 mm yüksekliğinde. **1U node'larda ≤ 12 mm alçak profilli latching röle
-> zorunlu.** Parça seçiminde doğrulanacak; uygun röle bulunamazsa 8 A latching
-> node'u 2U'ya çıkmak zorunda kalır · D-61
->
-> MOSFET node'larında böyle bir sorun yok — alçak profilli.
+**Kural: 1U dene; sığmazsa 2U.** Kanal kesilmez, egzotik alçak profil dayatılmaz.
+2U baskı değil — yer var (D-75 tavanı 2U). 4U yok.
+
+DC-L-16A-4 hedef 1U; latching >14.4 mm (pratikte ≤12 mm gövde payı) → aynı 4
+kanal 2U. COM magjack, host izole DC-DC: aynı kural.
+
+MOSFET DO zaten alçak. Bobin gerilimi kısıt değil (5 V latching standart).
 
 ---
 
@@ -141,36 +142,43 @@ kalıplı/ekstrüzyon ray.** Sonuç:
 
 Prototipte 3D baskı, seri üretimde enjeksiyon kalıp veya alüminyum ekstrüzyon.
 
-### 3.2 Şasi malzemesi
+**İlk kasa tam zarftır · D-70:** 8U node alanı + sabit 2U host yuvası.
+2–3 slotluk ara gövde yok — ikinci kalıp/baskı maliyeti tam zarftan pahalı.
+Aynı 3D model hem prototip hem hedef üründür.
+
+### 3.2 Şasi malzemesi · D-62
 
 | Aşama | Yapı |
 |-------|------|
-| Prototip | 3D baskı gövde + alüminyum kızak rayı (draft'taki hibrit yaklaşım) |
-| Seri üretim | **Alüminyum ekstrüzyon gövde** + sac ön/arka panel |
+| Prototip | **3D baskı gövde + Al kızak** (D-70 tam zarf) |
+| Seri | **Alüminyum ekstrüzyon gövde** + sac ön/arka panel |
 
-Alüminyum ekstrüzyonun karavan için üç kazancı: titreşimde rijitlik, EMI
-ekranlama, ve **ısı yolu** — kızak rayı alüminyumsa node'un ısısını gövdeye
-aktarıyor.
+Al ekstrüzyon: titreşim (K5), EMI, **ısı yolu** — kızak ısıyı gövdeye verir.
+Seride 3D yok.
 
-### 3.3 Takma / çıkarma
+### 3.3 Takma / çıkarma · 🟢 D-45
 
 ```
 Kart kenarı sürtünme kuvveti  ≈  12 pin × ~0.5 N  ≈  6 N
 ```
 
-Parmakla takılabilir seviyede. Çıkarma için ön panelde **kol veya çekme
-tırnağı** gerekiyor — draft'taki kilit mandalı mekanizması bu işi görüyor
-([12 §4](12-mekanik-referans-rev01.md#4-draftın-doğrudan-benimsenen-kalemleri)).
+Parmakla oturur. Tutma: ön panelde **kapalı (captive) vida** — 1U'da 1, 2U'da
+2. Karavanda düşmeyen vida; mandal yok.
 
-Ön panel ayrıca **titreşim tutucusu** (K5): kızak PCB'yi kenarlarından tutuyor,
-ön panel mandalı öne-arkaya hareketi engelliyor.
+**Hot-plug (D-24) durur.** Vida elektrik değil: sök → çek → tak → sık. PRESENT#,
+load switch, discovery aynı. Fretting'e mandaldan daha iyi (K5).
 
-### 3.4 Boş slotlar
+Kızak kenarları tutar; vida öne-arkaya yürümeyi keser. Yalancı dil (D-16) sağ
+arkayı yatar — vidanın yerine geçmez.
 
-Boş slotlara **kör kapak** takılmalı:
-- Hava akışının kısa devre yapmasını engeller (§6)
-- Toz girişini azaltır
-- Ön yüz bütünlüğü
+### 3.4 Boş slotlar · D-63
+
+Boş slotlara **kör kapak zorunlu** (pasif baca, D-57):
+- Hava kısa devre olmasın
+- Toz
+- Ön yüz
+
+Opsiyonel değil. Kapak da kapalı vida (D-45) ile.
 
 ---
 
@@ -211,7 +219,7 @@ Bu bir PCB süreç kararı, tasarımı etkilemiyor.
 |---|--------|-----|------|----------|
 | 1 | **GND** | — | **1** | Referans, en uzun finger |
 | 2 | **GND** | — | **1** | Redundans — titreşimde tek kontak kesintisi node'u düşürmemeli (K5) |
-| 3 | **+5V** | → node | 2 | Tek besleme rayı, slot başına 150 mA |
+| 3 | **+5V** | → node | 2 | Tek ray. 1U 250 mA sürekli (D-29); darbe ≤800 mA |
 | 4 | **+5V** | → node | 2 | Redundans |
 | 5 | **BUS_A** | çift yön | 3 | RS-485 non-inverting |
 | 6 | **BUS_B** | çift yön | 3 | RS-485 inverting |
@@ -258,9 +266,9 @@ konnektörün uzun olmasına gerek yok.
 #### GND ×4 → ×2
 
 ```
-1U node maksimum tüketimi   150 mA
-Röle bobini darbesi (tepe)  ~160 mA
-Tek 2.54 mm gold finger kontağı   1–3 A
+1U sürekli tavan            250 mA
+Bobin darbesi (tepe)        ≤ 800 mA @5 V
+Tek 2.54 mm gold finger     1–3 A
 ```
 
 Akım açısından **tek pin bile fazlasıyla yeterli.** İkinci pin akım için değil,
@@ -288,12 +296,13 @@ Gerilim düşümü kontrolü:
 
 ```
 En uzak slota backplane izi ≈ 150 mm, 0.5 mm genişlik 1oz  ≈ 150 mΩ
-150 mA'de düşüm = 22 mV        → ihmal edilebilir
-8 node toplam 1.2 A, host yakınında geniş döküm → sorun yok
+250 mA sürekli düşüm = 38 mV
+800 mA darbe düşüm   = 120 mV     → kabul
+Node havuzu 1.6 A, host yakınında geniş döküm
 ```
 
-> ⚠️ **Bağımlı doğrulama:** Seçilecek latching rölenin **5 V bobin varyantı**
-> olmalı (D-61 ile birlikte kontrol edilecek). Yoksa bu karar yeniden açılır.
+> **Bobin gerilimi serbest.** 5 V doğrudan veya 12/24 V + lokal boost. 5 V
+> varyantı aranmak zorunda değil — 5 V tarafı akım tavanı 800 mA (D-29/D-68).
 
 #### ADDR0–3 → kaldırıldı, host adres atıyor
 
@@ -395,71 +404,52 @@ Konnektör maliyeti de düşüyor: 12 pinli kart kenarı soketi ~$0.30, 26 pinli
 
 ## 6. Hava akışı ve termal
 
-Blade mimarisinin asıl kazandığı yer.
+Blade mimarisinin asıl kazandığı yer. **Soğutma pasif · D-57** — üründe fan yok.
 
 ![Hava akışı](img/05-hava-akisi.svg)
 
-### 6.1 Akış düzeni
+### 6.1 Akış düzeni — baca
 
 ```
-   ön panel                                      arka
-   (emiş)                                      (fan, üfleme)
+   ön panel                                      arka / üst
+   (giriş)                                       (çıkış)
       │                                             │
       ▼                                             ▼
    ┌──┬─────────────────────────────────────────┬───┐
-   │  │  ░░ blade ░░  ← 15 mm hava kanalı →     │ ⊙ │  fan
+   │  │  ░░ blade ░░  ← 15 mm kanal →           │   │  ızgara
    │  │  ░░ blade ░░                            │   │
-   │  │  ░░ blade ░░                            │   │
+   │  │  ░░ blade ░░     Al kızak = ısı yolu    │   │
    └──┴─────────────────────────────────────────┴───┘
 ```
 
-Her blade çifti arasında ~15 mm'lik kanal (17.5 mm adım − 1.6 mm PCB − bileşen
-yüksekliği). Fan arkadan çekiyor, hava ön panel deliklerinden giriyor ve tüm
-blade'lerin yüzeyini yalayarak geçiyor.
+Her blade çifti arasında ~15 mm kanal (17.5 mm adım − 1.6 mm PCB − bileşen
+yüksekliği). Hava ön panel deliklerinden girer, blade yüzeyini yalar, arkadan
+veya üstten çıkar — **baca**, fan değil.
 
-**Boş slotlara kör kapak zorunlu** (§3.4) — aksi halde hava en az dirençli
-yoldan, yani boş slottan geçer ve dolu slotları soğutmaz.
+**Asıl ısı yolu konveksiyon değil iletimdir:** Al kızak rayı PCB kenarına
+dayanır, ısıyı şasiye taşır. Seri üretimde Al ekstrüzyon gövde (D-62) bu
+yolu büyütür. 3D baskı prototipte de **kızak alüminyum kalır** (D-70).
 
-### 6.2 Gereken hava debisi — hesap
+**Boş slotlara kör kapak zorunlu** (§3.4) — baca kısa devre olmasın.
 
-```
-En kötü durum ısı yükü:
-    8 node × ~1.5 W   =  12.0 W
-    Host              =   1.5 W
-                         ───────
-                         13.5 W
+### 6.2 Neden fan yok
 
-CFM ≈ 1.76 × P(W) / ΔT(°C)
-    = 1.76 × 13.5 / 15 °C
-    = 1.6 CFM
-```
+Fan gürültü, toz, arıza tek noktası ve enerji. Karavan cihazında sürekli
+sorun. Bu yüzden soğutma **tasarım kısıtı**, ek donanım değil.
 
-**Sadece 1.6 CFM gerekiyor.** Bir 40 mm fan tam hızda 5–10 CFM veriyor — yani
-fan **çok düşük devirde** çalışabilir.
+Paketlenmiş 1U'da yalnız havaya bakan yüzey yetmez
+([11 §6](11-cikis-node-topolojileri.md#6-iletim-kaybı-ve-termal)). Cevap fan
+değil:
 
-### 6.3 Fan enerji maliyeti — düzeltilmiş
+| Yol | Rol |
+|-----|-----|
+| Al kızak + şasi | İletim — birincil |
+| Ön panel metal | Yüksek akımlı node'da ısı yayıcı (D-54) |
+| Baca + kör kapak | Zayıf konveksiyon, toz |
+| Node dissipasyon tavanı | Spec'e yazılır; sığmayan node 2U olur veya kanal sayısı düşer |
 
-[12 §3.5](12-mekanik-referans-rev01.md#35-soğutma-fan-ve-benim-termal-hatam)'te
-fanı 0.5–1.5 W ile bütçelemiştim. Gerçek ihtiyaca göre boyutlandırınca:
-
-| Çalışma | Debi | Tüketim |
-|---------|------|---------|
-| %100 (acil / arıza) | 5–10 CFM | ~1.0 W |
-| **%30 (normal yük)** | **2–3 CFM** | **~0.2 W** |
-| Kapalı (yük yok) | 0 | 0 |
-
-```
-Fan, günde 4 saat %30'da çalışırsa:
-    0.2 W × 4 h  =  0.8 Wh/gün
-
-Sistem bütçesi     =  3.5 Wh/gün   ([10 §6.1](10-enerji-butcesi.md#61-gerçekçi-kullanım-günü))
-Fan payı           =  %23
-```
-
-Kabul edilebilir — ve blade mimarisi sayesinde bu kadar düşük. Kutu-içinde-kutu
-olsaydı plastik bariyeri aşmak için çok daha yüksek debi gerekirdi.
-
-Termostatik kontrol gereksinimleri: D-57.
+**Sonuç:** yüksek akımlı node'un termali, node spec işinin parçası. Fan geri
+gelmez; sığmazsa node değişir.
 
 ---
 
@@ -467,30 +457,48 @@ Termostatik kontrol gereksinimleri: D-57.
 
 | Seçenek | Değerlendirme |
 |---------|---------------|
-| **(a) Sadece sol slotun konnektörüne oturur** | Tek konnektör hizalaması. Discovery'de "2U" bildirir, host N+1'i kapalı işaretler |
-| (b) Her iki konnektöre de oturur | 2× pin ve güç, ama iki konnektörün toleranslı hizalanması gerekir |
+| **(a) Sol = elektrik, sağ = yalancı dil** | Tek presence, tek RST#, tek load switch. Sağ konnektör yalnız mekanik |
+| (b) Her iki konnektöre de elektriksel oturur | 2× güç; canlı takmada yarım mate + iki PRESENT# |
 
-### Karar: (a) · D-16
+### Karar: (a) + bakırsız sağ dil · 🟢 D-16
 
-Blade mimarisinde 2U node, **2 slot genişliğinde tek bir PCB** — üst ve alt
-kızakta iki oluğu birden kaplıyor (veya orta duvar çıkarılabilir yapılıyor).
+2U = **tek PCB, 35 mm**, iki kızak oluğu. Elektrik yalnız **sol** gold finger
+(12 pin). Sağda aynı zarfta **yalancı dil** — sağ slot konnektörüne oturur,
+yalnız mekanik destek (K5 titreşim, 2U'nun sola yaslanması).
 
-Güç yeterliliği: 2U node'un 300 mA'i 2 adet +5V kontağından geçiyor,
-2.54 mm kart kenarı kapasitesinin çok altında.
+```
+        slot N (sol)              slot N+1 (sağ)
+     ┌──────────────┐          ┌──────────────┐
+     │ 12 pin ENIG  │          │ bakırsız FR4 │
+     │ GND…PRESENT# │          │   yalancı    │
+     └──────┬───────┘          └──────┬───────┘
+            │ elektriksel             │ mekanik, net yok
+```
+
+**Neden bakırsız:** sağ konnektör canlı (+5V, bus, RST#, PRESENT#). Dil üzerinde
+bakır — hele döküm — pinleri kısa devre eder. PRESENT# pad'i olsa host N+1'de
+sahte 1U görür. Dil: PCB kalınlığı (1.6 mm), pah, bakır/soldermask yok; yaylar
+FR4'e basar.
+
+İsteğe bağlı: dil **biraz daha uzun** lead-in — önce mekanik oturur, sonra sol
+elektrik. PRESENT# yine en kısa, sol tarafta.
+
+Güç: 2U tavanı 300 mA, sol konnektörün 2 × +5V kontağından. Kontak kapasitesinin
+çok altında. Çift elektrik gerekmez.
 
 ### 7.1 Adresleme tutarlılığı
 
 ```
 Slot 3–4'e takılı bir 2U node:
-  · Sadece slot 3'ün konnektörüne oturur
-  · Host slot 3'ün RST#'ini bırakınca uyanır, adresini host'tan alır
-  · Descriptor'da form_factor = 2U bildirir
-  · Host slot 4'ü "2U tarafından kapatıldı" olarak işaretler
-  · Slot 4'ün PRESENT# hattı yüksek kalır (konnektörü boş) — tutarlı
+  · Elektrik yalnız slot 3
+  · Slot 4'te yalancı dil — PRESENT# yüksek kalır (bakır yok)
+  · Host slot 3 RST#'ini bırakınca uyanır, adres = 3
+  · Descriptor form_factor = 2U
+  · Host slot 4'ü "2U kapalı" işaretler
 ```
 
-Host atamalı adresleme 2U durumunu kendiliğinden çözüyor: node hangi slotta
-olduğunu bilmiyor, host biliyor.
+Host atamalı adresleme 2U'yu kendiliğinden çözüyor. Yalancı dil ön vidanın
+(D-45) yerine geçmez — arkada ikinci yatak.
 
 ---
 
@@ -505,26 +513,27 @@ olduğunu bilmiyor, host biliyor.
 | Protokol desteği | **$0** | Timeout tabanlı; kaybolan node = timeout, yeni node = PCA9555 INT# |
 | **Toplam ek** | **~$0.35 / node** | |
 
-### Karar: donanımı hot-plug yetenekli tasarla, v1'de garanti verme · D-24
+### Karar: v1 hot-plug **desteklenir** · 🟢 D-24
 
-**Asimetrik risk:**
+Canlı tak-çıkar birinci sınıf. "v2'de ekleriz" yok — pinout, load switch,
+PRESENT# INT, discovery ve bütçe kontrolü şimdi. Sonradan 1U dolmaz / enerji
+yetmez / yazılım baştan yazılmaz.
 
-| | Şimdi yaparsak | Sonra yapmak istersek |
-|---|---|---|
-| Maliyet | ~$0.35/node | **Tüm node ailesi + backplane yeniden tasarım** |
-| Sebep | — | Konnektör pin sıralaması ve pinout geri dönülemez |
+Donanım bedeli zaten S3 ve arıza izolasyonu (~$0.35/node). Ek iddia: host
+firmware INSERT/REMOVE'u tarama döngüsünde işler; ENABLE öncesi güç bütçesi.
 
-### 8.1 v1'de yapılacaklar
+### 8.1 v1'de zorunlu
 
-- [x] Staggered finger tasarımı
-- [x] Slot load switch (soft-start dahil)
-- [x] Node soft-start
-- [x] Hot-plug toleranslı transceiver seçimi
-- [x] PRESENT# tabanlı protokol toleransı
+- Staggered finger (PRESENT# en kısa)
+- Slot load switch + node soft-start
+- Glitch-free RS-485 transceiver
+- PCA9555 INT# → canlı discovery (D-18, D-34)
+- RST# varsayılan pull-down (D-22)
 
-### 8.2 v1.1'e bırakılanlar
+### 8.2 Doğrulama (iddiayı düşürmez, testi erteler)
 
-- [ ] Canlı takma/çıkarma testi (en az 50 çevrim)
-- [ ] Takma anında komşu slotların rail dip ölçümü
-- [ ] Bus bütünlüğü testi (takma sırasında devam eden trafik)
-- [ ] Dokümantasyonda hot-swap iddiası
+- ≥50 tak-çıkar çevrimi
+- Komşu rail dip
+- Takma sırasında bus trafiği
+
+Sonradan eklemenin bedeli tüm pinout + node ailesi — o yüzden iddia v1'de.
