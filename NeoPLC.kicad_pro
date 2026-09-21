@@ -282,6 +282,14 @@
         "tuning_profile": "",
         "via_diameter": 0.8,
         "via_drill": 0.4
+      },
+      {
+        "clearance": 0.15,
+        "name": "Field",
+        "priority": -1,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.3
       }
     ],
     "meta": {
@@ -301,6 +309,74 @@
       {
         "netclass": "Power",
         "pattern": "GND"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI1_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI2_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI3_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI4_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI5_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI6_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI7_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/DI8_IN"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "/DI Field/FIELD_COM"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R4-Pad2)"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R5-Pad2)"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R6-Pad2)"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R7-Pad2)"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R8-Pad2)"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R9-Pad2)"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R10-Pad2)"
+      },
+      {
+        "netclass": "Field",
+        "pattern": "Net-(R11-Pad2)"
       }
     ]
   },

@@ -1,0 +1,35 @@
+(version 1)
+
+# NeoPLC — özel tasarım kuralları
+#
+# Bu dosya KiCAD'in Board Setup > Custom Rules alanını besler.
+# Board setup'taki sert alt sınırları GEVŞETEMEZ, yalnızca sıkılaştırabilir.
+
+# ---------------------------------------------------------------------------
+# saha_mantik_izolasyon
+#
+# DI-8 saha girişi opto izoledir (D-28 / D-76): TLP291-4 üzerinden 5-30 V saha
+# tarafı ile 3V3 mantık tarafı galvanik olarak ayrıdır. KiCAD varsayılan olarak
+# bu iki alan arasında yalnızca Default netclass clearance'ını (0.15 mm)
+# zorlar - yani bariyeri koruyan hiçbir kural yoktur ve routing bariyeri
+# farkında olmadan aşındırabilir. 08-emc-koruma.md'deki EFT hedefi için
+# 0.15 mm'lik bir aralık anlamsızdır.
+#
+# Bu kural saha tarafını 'Field' netclass'i ile seçer ve mantık tarafına karşı
+# 4.0 mm zorlar.
+#
+# 4.0 mm nereden geliyor: kartta bugün ölçülen en dar saha<->mantik aralığı
+# 4.900 mm ve tam olarak opto paketinin kendisinde (U4/U5 pin 1 <-> pin 16,
+# SOIC-16 gövdesi boyunca). Yani bariyeri sınırlayan şey routing değil, paket.
+# 4.0 mm mevcut layout'ta sıfır ihlal verir, paketin altında ~0.9 mm pay
+# bırakır ve bakırın paketten daha kötü bir aralığa inmesini engeller.
+#
+# DİKKAT: Kural netclass üyeliğine bağlıdır. Yeni bir saha neti eklenirse
+# NeoPLC.kicad_pro içindeki 'Field' netclass'ine de eklenmelidir, yoksa bu
+# kural o neti sessizce korumaz. Bugün Field'de olanlar:
+#   /DI Field/DI1_IN .. DI8_IN, /DI Field/FIELD_COM,
+#   Net-(R4-Pad2) .. Net-(R11-Pad2)   (seri direnc -> opto anot)
+# ---------------------------------------------------------------------------
+(rule "saha_mantik_izolasyon"
+	(constraint clearance (min 4.0mm))
+	(condition "A.NetClass == 'Field' && B.NetClass != 'Field'"))
