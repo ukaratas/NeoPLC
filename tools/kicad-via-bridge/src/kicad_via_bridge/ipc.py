@@ -208,7 +208,8 @@ def delete_via(uuid: str, expected_net: str | None = None) -> dict[str, Any]:
             leftover = _with_busy_retry(lambda: board.get_items_by_id(kiid))
         except ApiError as exc:
             # KiCad 10 treats a missing ID as an API error, not an empty list.
-            if "none of the requested ids" in str(exc).lower():
+            blob = f"{exc} {getattr(exc, 'raw_message', '')}".lower()
+            if "none of the requested ids" in blob:
                 leftover = []
             else:
                 raise
