@@ -27,3 +27,8 @@ _autosave-*
 
 # Makineye özel MCP soketi / binary yolu
 .cursor/mcp.json
+
+# Yerel via-bridge sanal ortamı
+tools/kicad-via-bridge/.venv/
+__pycache__/
+*.pyc

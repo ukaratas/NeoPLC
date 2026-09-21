@@ -1,0 +1,16 @@
+[project]
+name = "kicad-via-bridge"
+version = "0.1.0"
+description = "Tiny KiCad IPC MCP: list_vias and delete_via only."
+requires-python = ">=3.12"
+dependencies = [
+    "kicad-python>=0.7,<0.9",
+    "mcp>=1.2,<2",
+]
+
+[project.scripts]
+kicad-via-bridge = "kicad_via_bridge.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

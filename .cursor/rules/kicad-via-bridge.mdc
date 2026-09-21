@@ -1,0 +1,13 @@
+---
+description: Via silme Konnect'te yok; kicad-via-bridge kullan. Kullanıcıya via sildirme.
+alwaysApply: true
+---
+
+# KiCad via escape hatch
+
+Konnect `add_via` yapar, `delete_via` / `query_vias` yoktur. Via listelemek veya silmek için **kicad-via-bridge** (`list_vias`, `delete_via`).
+
+- Kullanıcıya “E’ye bas, Delete” deme. UUID doğrula; `expected_net` ver; via değilse tool reddeder.
+- Yerleştirme, iz, zone, DRC, kayıt Konnect’te kalır. `delete_via` kaydetmez; batch bitince Konnect `save_project`.
+- Generic item silme yok. `.kicad_pcb` metinle kesilmez.
+- pcbnew `AS_BUSY` ise Esc, tekrar dene. İkinci tam PCB MCP takma.
