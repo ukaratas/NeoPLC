@@ -173,7 +173,14 @@ def delete_via(uuid: str, expected_net: str | None = None) -> dict[str, Any]:
         if match is None:
             kiid = KIID()
             kiid.value = uuid.strip()
-            found = _with_busy_retry(lambda: board.get_items_by_id(kiid))
+            try:
+                found = _with_busy_retry(lambda: board.get_items_by_id(kiid))
+            except ApiError as exc:
+                # An unknown ID is an API error in KiCad 10, not an empty list;
+                # that just means nothing on the board carries this UUID.
+                if "none of the requested ids" not in str(exc).lower():
+                    raise
+                found = []
             if found:
                 kind = type(found[0]).__name__
                 raise ValueError(
@@ -208,7 +215,10 @@ def delete_via(uuid: str, expected_net: str | None = None) -> dict[str, Any]:
             leftover = _with_busy_retry(lambda: board.get_items_by_id(kiid))
         except ApiError as exc:
             # KiCad 10 treats a missing ID as an API error, not an empty list.
-            blob = f"{exc} {getattr(exc, 'raw_message', '')}".lower()
+            # Only str(exc) is safe to read here: kipy's ApiError.raw_message is
+            # `return self.raw_message`, so touching it recurses until
+            # RecursionError and a successful delete looks like a failure.
+            blob = str(exc).lower()
             if "none of the requested ids" in blob:
                 leftover = []
             else:
