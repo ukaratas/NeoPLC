@@ -13435,6 +13435,14 @@
 		(uuid "0ed9e91d-d90f-480a-8c28-5f1c3f1913ef")
 	)
 	(via
+		(at 25.75 35.2)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net "/DI Field/DI4")
+		(uuid "16a6135c-efe6-417c-96fb-b690f3caf5f0")
+	)
+	(via
 		(at 20.5 68)
 		(size 0.6)
 		(drill 0.3)
@@ -13449,14 +13457,6 @@
 		(layers "F.Cu" "B.Cu")
 		(net "/DI Field/DI4")
 		(uuid "2441baec-bc83-4e14-b5ae-1bf2a33f5d95")
-	)
-	(via
-		(at 25.75 35.2)
-		(size 0.6)
-		(drill 0.3)
-		(layers "F.Cu" "B.Cu")
-		(net "/DI Field/DI4")
-		(uuid "255a57cc-d660-4311-9f97-79cb2e0cb9ce")
 	)
 	(via
 		(at 19.2 62.3)
